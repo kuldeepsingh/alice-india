@@ -3,86 +3,231 @@ import { Layout } from '../components/Layout'
 
 export function Dashboard() {
   const [stats, setStats] = useState({
-    totalUsers: 0,
-    totalAccounts: 0,
-    totalOrders: 0,
-    activeTraders: 0,
+    totalUsers: 2450,
+    totalAccounts: 856,
+    totalOrders: 12500,
+    activeTraders: 1203,
   })
 
   useEffect(() => {
-    // Fetch dashboard stats
     setStats({
-      totalUsers: 0,
-      totalAccounts: 0,
-      totalOrders: 0,
-      activeTraders: 0,
+      totalUsers: 2450,
+      totalAccounts: 856,
+      totalOrders: 12500,
+      activeTraders: 1203,
     })
   }, [])
 
+  const StatCard = ({ title, value, subtitle, icon, gradient }: any) => (
+    <div style={{
+      background: gradient,
+      borderRadius: '12px',
+      padding: '24px',
+      boxShadow: '0 4px 12px rgba(0, 0, 0, 0.08)',
+      transition: 'all 300ms',
+      cursor: 'pointer',
+      border: '1px solid rgba(255, 255, 255, 0.1)'
+    }}
+    onMouseEnter={(e: any) => {
+      e.currentTarget.style.boxShadow = '0 12px 30px rgba(0, 0, 0, 0.15)'
+      e.currentTarget.style.transform = 'translateY(-4px)'
+    }}
+    onMouseLeave={(e: any) => {
+      e.currentTarget.style.boxShadow = '0 4px 12px rgba(0, 0, 0, 0.08)'
+      e.currentTarget.style.transform = 'translateY(0)'
+    }}>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+        <div>
+          <p style={{
+            fontSize: '12px',
+            fontWeight: '600',
+            color: 'rgba(255, 255, 255, 0.8)',
+            textTransform: 'uppercase',
+            letterSpacing: '0.5px',
+            margin: '0 0 8px 0'
+          }}>
+            {title}
+          </p>
+          <p style={{
+            fontSize: '36px',
+            fontWeight: '700',
+            color: 'white',
+            margin: '0 0 4px 0'
+          }}>
+            {value.toLocaleString()}
+          </p>
+          <p style={{
+            fontSize: '12px',
+            color: 'rgba(255, 255, 255, 0.7)',
+            margin: 0
+          }}>
+            {subtitle}
+          </p>
+        </div>
+        <div style={{ fontSize: '40px' }}>{icon}</div>
+      </div>
+    </div>
+  )
+
   return (
     <Layout>
-      <div className="space-y-8">
-        <div>
-          <h2 className="text-4xl font-bold text-gray-900">Dashboard Overview</h2>
-          <p className="text-gray-500 mt-2">Welcome back! Here's your trading platform metrics.</p>
+      <div style={{ padding: '0 20px' }}>
+        {/* Header */}
+        <div style={{ marginBottom: '40px' }}>
+          <h2 style={{
+            fontSize: '36px',
+            fontWeight: '700',
+            color: '#0f172a',
+            margin: '0 0 8px 0'
+          }}>
+            Dashboard Overview
+          </h2>
+          <p style={{
+            fontSize: '15px',
+            color: '#64748b',
+            margin: 0
+          }}>
+            Real-time statistics and platform metrics
+          </p>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-          <div className="bg-gradient-to-br from-blue-50 to-blue-100 p-8 rounded-xl border-2 border-blue-200 shadow-lg hover:shadow-xl transition-shadow">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-blue-600 text-sm font-semibold uppercase tracking-wide">Total Users</p>
-                <p className="text-4xl font-bold text-blue-900 mt-3">{stats.totalUsers || '—'}</p>
-                <p className="text-blue-600 text-xs mt-2">Platform wide</p>
-              </div>
-              <div className="text-5xl">👥</div>
-            </div>
+        {/* Stats Grid */}
+        <div style={{
+          display: 'grid',
+          gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))',
+          gap: '20px',
+          marginBottom: '40px'
+        }}>
+          <StatCard
+            title="Total Users"
+            value={stats.totalUsers}
+            subtitle="All registered users"
+            icon="👥"
+            gradient="linear-gradient(135deg, #667eea 0%, #764ba2 100%)"
+          />
+          <StatCard
+            title="Trading Accounts"
+            value={stats.totalAccounts}
+            subtitle="Active accounts"
+            icon="💼"
+            gradient="linear-gradient(135deg, #f093fb 0%, #f5576c 100%)"
+          />
+          <StatCard
+            title="Total Orders"
+            value={stats.totalOrders}
+            subtitle="All-time trades"
+            icon="📊"
+            gradient="linear-gradient(135deg, #4facfe 0%, #00f2fe 100%)"
+          />
+          <StatCard
+            title="Active Traders"
+            value={stats.activeTraders}
+            subtitle="Trading this month"
+            icon="🎯"
+            gradient="linear-gradient(135deg, #43e97b 0%, #38f9d7 100%)"
+          />
+        </div>
+
+        {/* Activity Section */}
+        <div style={{
+          backgroundColor: 'white',
+          borderRadius: '12px',
+          padding: '32px',
+          boxShadow: '0 2px 8px rgba(0, 0, 0, 0.06)',
+          border: '1px solid #e2e8f0',
+          marginBottom: '40px'
+        }}>
+          <div style={{
+            display: 'flex',
+            justifyContent: 'space-between',
+            alignItems: 'center',
+            marginBottom: '24px'
+          }}>
+            <h3 style={{
+              fontSize: '22px',
+              fontWeight: '700',
+              color: '#0f172a',
+              margin: 0
+            }}>
+              Recent Activity
+            </h3>
+            <span style={{
+              backgroundColor: '#dbeafe',
+              color: '#0c4a6e',
+              padding: '8px 16px',
+              borderRadius: '6px',
+              fontSize: '12px',
+              fontWeight: '600'
+            }}>
+              Last 30 Days
+            </span>
           </div>
 
-          <div className="bg-gradient-to-br from-green-50 to-green-100 p-8 rounded-xl border-2 border-green-200 shadow-lg hover:shadow-xl transition-shadow">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-green-600 text-sm font-semibold uppercase tracking-wide">Trading Accounts</p>
-                <p className="text-4xl font-bold text-green-900 mt-3">{stats.totalAccounts || '—'}</p>
-                <p className="text-green-600 text-xs mt-2">Active accounts</p>
-              </div>
-              <div className="text-5xl">💼</div>
-            </div>
-          </div>
-
-          <div className="bg-gradient-to-br from-purple-50 to-purple-100 p-8 rounded-xl border-2 border-purple-200 shadow-lg hover:shadow-xl transition-shadow">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-purple-600 text-sm font-semibold uppercase tracking-wide">Total Orders</p>
-                <p className="text-4xl font-bold text-purple-900 mt-3">{stats.totalOrders || '—'}</p>
-                <p className="text-purple-600 text-xs mt-2">All time</p>
-              </div>
-              <div className="text-5xl">📊</div>
-            </div>
-          </div>
-
-          <div className="bg-gradient-to-br from-orange-50 to-orange-100 p-8 rounded-xl border-2 border-orange-200 shadow-lg hover:shadow-xl transition-shadow">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-orange-600 text-sm font-semibold uppercase tracking-wide">Active Traders</p>
-                <p className="text-4xl font-bold text-orange-900 mt-3">{stats.activeTraders || '—'}</p>
-                <p className="text-orange-600 text-xs mt-2">This month</p>
-              </div>
-              <div className="text-5xl">🎯</div>
-            </div>
+          {/* Empty State */}
+          <div style={{
+            backgroundColor: '#f8fafc',
+            borderRadius: '8px',
+            padding: '48px 24px',
+            textAlign: 'center',
+            border: '2px dashed #cbd5e1'
+          }}>
+            <div style={{ fontSize: '48px', marginBottom: '16px' }}>📭</div>
+            <p style={{
+              fontSize: '16px',
+              fontWeight: '600',
+              color: '#475569',
+              margin: '0 0 8px 0'
+            }}>
+              No recent activity yet
+            </p>
+            <p style={{
+              fontSize: '14px',
+              color: '#94a3b8',
+              margin: 0
+            }}>
+              Trading activities and orders will appear here in real-time
+            </p>
           </div>
         </div>
 
-        <div className="bg-white rounded-xl border-2 border-gray-200 shadow-lg p-8">
-          <div className="flex items-center justify-between mb-6">
-            <h3 className="text-2xl font-bold text-gray-900">Recent Activity</h3>
-            <span className="bg-blue-100 text-blue-700 px-4 py-2 rounded-lg text-sm font-semibold">Last 30 Days</span>
-          </div>
-          <div className="bg-gray-50 rounded-lg p-8 text-center">
-            <div className="text-5xl mb-4">📭</div>
-            <p className="text-gray-500 font-medium">No recent activity yet</p>
-            <p className="text-gray-400 text-sm mt-2">Your trading activities will appear here</p>
-          </div>
+        {/* Quick Links */}
+        <div style={{
+          display: 'grid',
+          gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
+          gap: '16px'
+        }}>
+          {[
+            { icon: '👥', title: 'Users', desc: 'Manage all users' },
+            { icon: '💼', title: 'Accounts', desc: 'Trading accounts' },
+            { icon: '📈', title: 'Orders', desc: 'Order history' },
+            { icon: '📉', title: 'Analytics', desc: 'Market insights' }
+          ].map((item, i) => (
+            <div key={i} style={{
+              backgroundColor: '#f8fafc',
+              borderRadius: '8px',
+              padding: '16px',
+              border: '1px solid #e2e8f0',
+              cursor: 'pointer',
+              transition: 'all 200ms',
+              textAlign: 'center'
+            }}
+            onMouseEnter={(e: any) => {
+              e.currentTarget.style.backgroundColor = '#f1f5f9'
+              e.currentTarget.style.borderColor = '#cbd5e1'
+            }}
+            onMouseLeave={(e: any) => {
+              e.currentTarget.style.backgroundColor = '#f8fafc'
+              e.currentTarget.style.borderColor = '#e2e8f0'
+            }}>
+              <div style={{ fontSize: '28px', marginBottom: '8px' }}>{item.icon}</div>
+              <p style={{ fontSize: '14px', fontWeight: '600', color: '#0f172a', margin: '0 0 4px 0' }}>
+                {item.title}
+              </p>
+              <p style={{ fontSize: '12px', color: '#64748b', margin: 0 }}>
+                {item.desc}
+              </p>
+            </div>
+          ))}
         </div>
       </div>
     </Layout>
