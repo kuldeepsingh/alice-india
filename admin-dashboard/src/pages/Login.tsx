@@ -34,7 +34,7 @@ export function Login() {
   return (
     <div style={{
       minHeight: '100vh',
-      background: 'linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #0c4a6e 100%)',
+      background: 'linear-gradient(135deg, #0a0a0a 0%, #1a1a1a 50%, #151515 100%)',
       display: 'flex',
       alignItems: 'center',
       justifyContent: 'center',
@@ -59,7 +59,7 @@ export function Login() {
               fontWeight: '800',
               margin: '0 0 16px 0',
               lineHeight: '1.1',
-              background: 'linear-gradient(135deg, #60a5fa, #06b6d4)',
+              background: 'linear-gradient(135deg, #D4AF37, #FFD700)',
               WebkitBackgroundClip: 'text',
               WebkitTextFillColor: 'transparent',
               backgroundClip: 'text'
@@ -93,7 +93,7 @@ export function Login() {
                   padding: '16px',
                   backgroundColor: 'rgba(255, 255, 255, 0.05)',
                   borderRadius: '12px',
-                  borderLeft: '3px solid #60a5fa',
+                  borderLeft: '3px solid #D4AF37',
                   transition: 'all 300ms',
                   cursor: 'pointer'
                 }}
@@ -133,7 +133,7 @@ export function Login() {
                 <p style={{
                   fontSize: '24px',
                   fontWeight: '700',
-                  color: '#60a5fa',
+                  color: '#D4AF37',
                   margin: '0 0 4px 0'
                 }}>
                   {stat.value}
@@ -230,8 +230,8 @@ export function Login() {
                     backgroundColor: 'white'
                   }}
                   onFocus={(e) => {
-                    e.currentTarget.style.borderColor = '#2563eb'
-                    e.currentTarget.style.boxShadow = '0 0 0 4px rgba(37, 99, 235, 0.1)'
+                    e.currentTarget.style.borderColor = '#D4AF37'
+                    e.currentTarget.style.boxShadow = '0 0 0 4px rgba(212, 175, 55, 0.1)'
                   }}
                   onBlur={(e) => {
                     e.currentTarget.style.borderColor = '#e2e8f0'
@@ -280,8 +280,8 @@ export function Login() {
                     backgroundColor: 'white'
                   }}
                   onFocus={(e) => {
-                    e.currentTarget.style.borderColor = '#2563eb'
-                    e.currentTarget.style.boxShadow = '0 0 0 4px rgba(37, 99, 235, 0.1)'
+                    e.currentTarget.style.borderColor = '#D4AF37'
+                    e.currentTarget.style.boxShadow = '0 0 0 4px rgba(212, 175, 55, 0.1)'
                   }}
                   onBlur={(e) => {
                     e.currentTarget.style.borderColor = '#e2e8f0'
@@ -300,7 +300,7 @@ export function Login() {
               style={{
                 width: '100%',
                 padding: '14px 16px',
-                background: loading ? '#94a3b8' : 'linear-gradient(135deg, #2563eb 0%, #0369a1 100%)',
+                background: loading ? '#999999' : 'linear-gradient(135deg, #D4AF37 0%, #F0C851 100%)',
                 color: 'white',
                 border: 'none',
                 borderRadius: '8px',
@@ -308,7 +308,7 @@ export function Login() {
                 fontWeight: '600',
                 cursor: loading ? 'not-allowed' : 'pointer',
                 transition: 'all 300ms',
-                boxShadow: loading ? 'none' : '0 8px 20px rgba(37, 99, 235, 0.3)',
+                boxShadow: loading ? 'none' : '0 8px 20px rgba(212, 175, 55, 0.3)',
                 opacity: loading ? 0.7 : 1,
                 letterSpacing: '0.3px'
               }}
