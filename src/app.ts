@@ -13,7 +13,15 @@ export function createApp() {
 
   // Security
   app.use(helmet())
-  app.use(cors())
+
+  // CORS Configuration - Allow specific origins
+  const corsOrigins = (process.env.CORS_ORIGINS || 'http://localhost:3000,http://localhost:5173').split(',')
+  app.use(cors({
+    origin: corsOrigins,
+    credentials: true,
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+    allowedHeaders: ['Content-Type', 'Authorization'],
+  }))
 
   // Logging
   app.use(pinoHttp({ logger }))
@@ -30,17 +38,23 @@ export function createApp() {
     res.json({ status: 'ready', timestamp: new Date().toISOString() })
   })
 
+  // API v1 routes
+  const v1 = express.Router()
+
   // Authentication routes
-  app.use('/auth', authRouter)
+  v1.use('/auth', authRouter)
 
   // Account routes (protected)
-  app.use('/accounts', accountsRouter)
+  v1.use('/accounts', accountsRouter)
 
   // Order routes (protected)
-  app.use('/orders', ordersRouter)
+  v1.use('/orders', ordersRouter)
 
   // Market data routes (some protected, some public)
-  app.use('/market', marketDataRouter)
+  v1.use('/market', marketDataRouter)
+
+  // Mount v1 API
+  app.use('/api/v1', v1)
 
   // User registration (backward compatibility)
   app.post('/users/register', (req, res) => {

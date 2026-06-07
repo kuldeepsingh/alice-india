@@ -1,0 +1,3 @@
+[submodule "core/openalice"]
+	path = core/openalice
+	url = https://github.com/TraderAlice/OpenAlice.git
