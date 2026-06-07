@@ -10,13 +10,13 @@ redisClient.on('error', (err) => {
 })
 
 export const cache = {
-  client: null as any,
+  client: redisClient as any,
 
   connect: async () => {
     try {
       await redisClient.connect()
       logger.info({ type: 'redis_connected' })
-      exports.cache.client = redisClient
+      cache.client = redisClient
     } catch (error) {
       logger.error({ type: 'redis_connection_failed', error })
       throw error
