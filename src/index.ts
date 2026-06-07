@@ -1,6 +1,6 @@
 import 'dotenv/config'
 import { createApp } from './app.ts'
-import { db } from './db/client.ts'
+import { connectDatabase, disconnectDatabase, runMigrations } from './services/database.ts'
 import { cache } from './cache/client.ts'
 import { logger } from './services/logger.ts'
 
@@ -9,8 +9,11 @@ const PORT = process.env.PORT || 3000
 async function main() {
   try {
     // Connect to database
-    await db.connect()
-    
+    await connectDatabase()
+
+    // Run migrations
+    await runMigrations()
+
     // Connect to cache
     await cache.connect()
 
@@ -28,7 +31,7 @@ async function main() {
     // Graceful shutdown
     process.on('SIGTERM', async () => {
       logger.info({ type: 'shutting_down' })
-      await db.disconnect()
+      await disconnectDatabase()
       await cache.disconnect()
       process.exit(0)
     })

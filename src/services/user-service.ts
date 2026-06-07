@@ -1,6 +1,7 @@
 import { v4 as uuidv4 } from 'uuid'
 import { passwordService } from './password.ts'
 import { logger } from './logger.ts'
+import { query } from './database.ts'
 
 export interface User {
   id: string
@@ -17,14 +18,6 @@ export interface CreateUserRequest {
   role?: 'admin' | 'trader' | 'viewer'
 }
 
-export interface LoginRequest {
-  email: string
-  password: string
-}
-
-// In-memory storage for demo (will be replaced with database)
-const users: Map<string, User> = new Map()
-
 export const userService = {
   async createUser(request: CreateUserRequest): Promise<Omit<User, 'password_hash'>> {
     logger.info({
@@ -33,25 +26,24 @@ export const userService = {
     })
 
     // Check if user exists
-    const existingUser = Array.from(users.values()).find(u => u.email === request.email)
-    if (existingUser) {
+    const existingResult = await query(
+      'SELECT id FROM users WHERE email = $1',
+      [request.email]
+    )
+
+    if (existingResult.rows.length > 0) {
       throw new Error('Email already registered')
     }
 
     const id = uuidv4()
     const passwordHash = await passwordService.hash(request.password)
+    const role = request.role || 'trader'
     const now = new Date().toISOString()
 
-    const user: User = {
-      id,
-      email: request.email,
-      password_hash: passwordHash,
-      role: request.role || 'trader',
-      created_at: now,
-      updated_at: now,
-    }
-
-    users.set(id, user)
+    const result = await query(
+      'INSERT INTO users (id, email, password_hash, role, created_at, updated_at) VALUES ($1, $2, $3, $4, $5, $6) RETURNING id, email, role, created_at, updated_at',
+      [id, request.email, passwordHash, role, now, now]
+    )
 
     logger.info({
       type: 'user_created',
@@ -59,17 +51,25 @@ export const userService = {
       email: request.email,
     })
 
-    const { password_hash, ...userWithoutHash } = user
-    return userWithoutHash as Omit<User, 'password_hash'>
+    return result.rows[0]
   },
 
   async getUserByEmail(email: string): Promise<User | null> {
-    const user = Array.from(users.values()).find(u => u.email === email)
-    return user || null
+    const result = await query(
+      'SELECT id, email, password_hash, role, created_at, updated_at FROM users WHERE email = $1',
+      [email]
+    )
+
+    return result.rows[0] || null
   },
 
   async getUserById(id: string): Promise<User | null> {
-    return users.get(id) || null
+    const result = await query(
+      'SELECT id, email, password_hash, role, created_at, updated_at FROM users WHERE id = $1',
+      [id]
+    )
+
+    return result.rows[0] || null
   },
 
   async verifyPassword(email: string, password: string): Promise<User | null> {

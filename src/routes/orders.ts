@@ -19,7 +19,6 @@ router.post('/', async (req: AuthRequest, res) => {
       return res.status(401).json({ error: 'Unauthorized' })
     }
 
-    // Validation
     if (!accountId || !symbol || !side || quantity === undefined || price === undefined) {
       return res.status(400).json({ error: 'Missing required fields' })
     }
@@ -40,7 +39,6 @@ router.post('/', async (req: AuthRequest, res) => {
       return res.status(400).json({ error: 'Symbol cannot be empty' })
     }
 
-    // Verify account ownership
     const account = await accountService.getAccountById(accountId)
     if (!account) {
       return res.status(404).json({ error: 'Account not found' })
@@ -110,8 +108,7 @@ router.get('/:id', async (req: AuthRequest, res) => {
       return res.status(404).json({ error: 'Order not found' })
     }
 
-    // Check ownership
-    if (order.userId !== userId) {
+    if (order.user_id !== userId) {
       return res.status(403).json({ error: 'Access denied' })
     }
 
@@ -141,8 +138,7 @@ router.put('/:id', async (req: AuthRequest, res) => {
       return res.status(404).json({ error: 'Order not found' })
     }
 
-    // Check ownership
-    if (order.userId !== userId) {
+    if (order.user_id !== userId) {
       return res.status(403).json({ error: 'Access denied' })
     }
 
@@ -180,8 +176,7 @@ router.post('/:id/cancel', async (req: AuthRequest, res) => {
       return res.status(404).json({ error: 'Order not found' })
     }
 
-    // Check ownership
-    if (order.userId !== userId) {
+    if (order.user_id !== userId) {
       return res.status(403).json({ error: 'Access denied' })
     }
 

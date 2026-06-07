@@ -18,7 +18,6 @@ router.post('/', async (req: AuthRequest, res) => {
       return res.status(401).json({ error: 'Unauthorized' })
     }
 
-    // Validation
     if (!brokerType || !accountLabel) {
       return res.status(400).json({ error: 'Broker type and account label required' })
     }
@@ -43,7 +42,17 @@ router.post('/', async (req: AuthRequest, res) => {
       accountId: account.id,
     })
 
-    res.status(201).json(account)
+    // Convert snake_case to camelCase for response
+    res.status(201).json({
+      id: account.id,
+      userId: account.userId,
+      brokerType: account.brokerType,
+      accountLabel: account.accountLabel,
+      status: account.status,
+      brokerAccountId: account.brokerAccountId,
+      created_at: account.created_at,
+      updated_at: account.updated_at,
+    })
   } catch (error) {
     logger.error({
       type: 'account_creation_error',
@@ -62,7 +71,16 @@ router.get('/', async (req: AuthRequest, res) => {
     }
 
     const accounts = await accountService.getUserAccounts(userId)
-    res.json(accounts)
+    res.json(accounts.map(a => ({
+      id: a.id,
+      userId: a.userId,
+      brokerType: a.brokerType,
+      accountLabel: a.accountLabel,
+      status: a.status,
+      brokerAccountId: a.brokerAccountId,
+      created_at: a.created_at,
+      updated_at: a.updated_at,
+    })))
   } catch (error) {
     logger.error({
       type: 'get_accounts_error',
@@ -88,12 +106,20 @@ router.get('/:id', async (req: AuthRequest, res) => {
       return res.status(404).json({ error: 'Account not found' })
     }
 
-    // Check ownership
     if (account.userId !== userId) {
       return res.status(403).json({ error: 'Access denied' })
     }
 
-    res.json(account)
+    res.json({
+      id: account.id,
+      userId: account.userId,
+      brokerType: account.brokerType,
+      accountLabel: account.accountLabel,
+      status: account.status,
+      brokerAccountId: account.brokerAccountId,
+      created_at: account.created_at,
+      updated_at: account.updated_at,
+    })
   } catch (error) {
     logger.error({
       type: 'get_account_error',
@@ -120,12 +146,10 @@ router.put('/:id', async (req: AuthRequest, res) => {
       return res.status(404).json({ error: 'Account not found' })
     }
 
-    // Check ownership
     if (account.userId !== userId) {
       return res.status(403).json({ error: 'Access denied' })
     }
 
-    // Validation
     if (status && !['active', 'inactive', 'suspended'].includes(status)) {
       return res.status(400).json({ error: 'Invalid status' })
     }
@@ -141,7 +165,16 @@ router.put('/:id', async (req: AuthRequest, res) => {
       accountId: id,
     })
 
-    res.json(updated)
+    res.json({
+      id: updated!.id,
+      userId: updated!.userId,
+      brokerType: updated!.brokerType,
+      accountLabel: updated!.accountLabel,
+      status: updated!.status,
+      brokerAccountId: updated!.brokerAccountId,
+      created_at: updated!.created_at,
+      updated_at: updated!.updated_at,
+    })
   } catch (error) {
     logger.error({
       type: 'update_account_error',
@@ -167,7 +200,6 @@ router.delete('/:id', async (req: AuthRequest, res) => {
       return res.status(404).json({ error: 'Account not found' })
     }
 
-    // Check ownership
     if (account.userId !== userId) {
       return res.status(403).json({ error: 'Access denied' })
     }
