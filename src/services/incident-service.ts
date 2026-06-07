@@ -4,7 +4,7 @@
  */
 
 import { v4 as uuidv4 } from 'uuid'
-import { db } from '../db.js'
+import { query } from './database.ts'
 import {
   Incident,
   IncidentWithUser,
@@ -15,8 +15,8 @@ import {
   IncidentQueryResult,
   IncidentStatus,
   getValidNextStatuses,
-} from '../models/incident.js'
-import { AuditService } from './audit-service.js'
+} from '../models/incident.ts'
+import { AuditService } from './audit-service.ts'
 
 export class IncidentService {
   /**
@@ -26,7 +26,7 @@ export class IncidentService {
     const id = uuidv4()
     const now = new Date()
 
-    const query = `
+    const sql = `
       INSERT INTO incidents (
         id, title, description, severity,
         created_by, status, created_at, updated_at
@@ -46,7 +46,7 @@ export class IncidentService {
       now,
     ]
 
-    const result = await db.query(query, values)
+    const result = await query(sql, values)
     const incident = result.rows[0]
 
     // Log to audit trail
@@ -66,7 +66,7 @@ export class IncidentService {
    * Get incidents with filtering and pagination
    */
   static async getIncidents(filter: IncidentFilter): Promise<IncidentQueryResult> {
-    let query = `
+    let sql = `
       SELECT
         i.*,
         json_build_object(
@@ -90,43 +90,41 @@ export class IncidentService {
 
     // Apply filters
     if (filter.status) {
-      query += ` AND i.status = $${paramCount++}`
+      sql += ` AND i.status = $${paramCount++}`
       values.push(filter.status)
     }
 
     if (filter.severity) {
-      query += ` AND i.severity = $${paramCount++}`
+      sql += ` AND i.severity = $${paramCount++}`
       values.push(filter.severity)
     }
 
     if (filter.assignedTo) {
-      query += ` AND i.assigned_to = $${paramCount++}`
+      sql += ` AND i.assigned_to = $${paramCount++}`
       values.push(filter.assignedTo)
     }
 
     if (filter.createdBy) {
-      query += ` AND i.created_by = $${paramCount++}`
+      sql += ` AND i.created_by = $${paramCount++}`
       values.push(filter.createdBy)
     }
 
     // Count total
-    const countResult = await db.query(
-      `SELECT COUNT(*) as count FROM incidents i WHERE 1=1` +
-        (filter.status ? ` AND i.status = $1` : '') +
-        (filter.severity ? ` AND i.severity = ${filter.status ? '$2' : '$1'}` : '') +
-        (filter.assignedTo ? ` AND i.assigned_to = ${filter.severity ? '$3' : filter.status ? '$2' : '$1'}` : ''),
-      values
-    )
+    const countSql = `SELECT COUNT(*) as count FROM incidents i WHERE 1=1` +
+      (filter.status ? ` AND i.status = $1` : '') +
+      (filter.severity ? ` AND i.severity = ${filter.status ? '$2' : '$1'}` : '') +
+      (filter.assignedTo ? ` AND i.assigned_to = ${filter.severity ? '$3' : filter.status ? '$2' : '$1'}` : '')
 
+    const countResult = await query(countSql, values.slice(0, paramCount - 1))
     const total = parseInt(countResult.rows[0].count)
 
     // Pagination
     const limit = filter.limit || 50
     const offset = filter.offset || 0
-    query += ` ORDER BY i.created_at DESC LIMIT $${paramCount++} OFFSET $${paramCount++}`
+    sql += ` ORDER BY i.created_at DESC LIMIT $${paramCount++} OFFSET $${paramCount++}`
     values.push(limit, offset)
 
-    const result = await db.query(query, values)
+    const result = await query(sql, values)
 
     return {
       data: result.rows,
@@ -140,7 +138,7 @@ export class IncidentService {
    * Get incident by ID with user details
    */
   static async getIncidentById(id: string): Promise<IncidentWithUser> {
-    const query = `
+    const sql = `
       SELECT
         i.*,
         json_build_object(
@@ -159,7 +157,7 @@ export class IncidentService {
       WHERE i.id = $1
     `
 
-    const result = await db.query(query, [id])
+    const result = await query(sql, [id])
 
     if (result.rows.length === 0) {
       throw new Error(`Incident not found: ${id}`)
@@ -201,10 +199,10 @@ export class IncidentService {
     setClause.push(`updated_at = $${paramCount++}`)
     values.push(new Date())
 
-    const query = `UPDATE incidents SET ${setClause.join(', ')} WHERE id = $${paramCount} RETURNING *`
+    const sql = `UPDATE incidents SET ${setClause.join(', ')} WHERE id = $${paramCount} RETURNING *`
     values.push(id)
 
-    const result = await db.query(query, values)
+    const result = await query(sql, values)
     const incident = result.rows[0]
 
     // Log to audit trail
@@ -232,19 +230,19 @@ export class IncidentService {
     const current = await this.getIncidentById(id)
 
     // Verify user exists
-    const userResult = await db.query('SELECT id FROM users WHERE id = $1', [input.assignedTo])
+    const userResult = await query('SELECT id FROM users WHERE id = $1', [input.assignedTo])
     if (userResult.rows.length === 0) {
       throw new Error(`User not found: ${input.assignedTo}`)
     }
 
-    const query = `
+    const sql = `
       UPDATE incidents
       SET assigned_to = $1, updated_at = $2
       WHERE id = $3
       RETURNING *
     `
 
-    const result = await db.query(query, [input.assignedTo, new Date(), id])
+    const result = await query(sql, [input.assignedTo, new Date(), id])
     const incident = result.rows[0]
 
     // Log to audit trail
@@ -277,14 +275,14 @@ export class IncidentService {
 
     const resolvedAt = status === 'resolved' ? new Date() : null
 
-    const query = `
+    const sql = `
       UPDATE incidents
       SET status = $1, resolved_at = $2, updated_at = $3
       WHERE id = $4
       RETURNING *
     `
 
-    const result = await db.query(query, [status, resolvedAt, new Date(), id])
+    const result = await query(sql, [status, resolvedAt, new Date(), id])
     const incident = result.rows[0]
 
     // Log to audit trail
@@ -307,13 +305,13 @@ export class IncidentService {
   static async closeIncident(id: string, notes: string, closedBy: string): Promise<void> {
     const current = await this.getIncidentById(id)
 
-    const query = `
+    const sql = `
       UPDATE incidents
       SET status = 'closed', resolution_notes = $1, resolved_at = $2, updated_at = $3
       WHERE id = $4
     `
 
-    await db.query(query, [notes, new Date(), new Date(), id])
+    await query(sql, [notes, new Date(), new Date(), id])
 
     // Log to audit trail
     await AuditService.createAuditLog({
@@ -331,7 +329,7 @@ export class IncidentService {
    * Get incident statistics
    */
   static async getIncidentStats() {
-    const query = `
+    const sql = `
       SELECT
         COUNT(*) FILTER (WHERE status = 'open') as open_count,
         COUNT(*) FILTER (WHERE status = 'investigating') as investigating_count,
@@ -343,7 +341,7 @@ export class IncidentService {
       FROM incidents
     `
 
-    const result = await db.query(query)
+    const result = await query(sql)
     return result.rows[0]
   }
 
@@ -351,7 +349,7 @@ export class IncidentService {
    * Get incident trends (last N days)
    */
   static async getIncidentTrends(days: number = 7) {
-    const query = `
+    const sql = `
       SELECT
         DATE(created_at) as date,
         COUNT(*) as incidents_created,
@@ -364,7 +362,7 @@ export class IncidentService {
       ORDER BY date DESC
     `
 
-    const result = await db.query(query)
+    const result = await query(sql)
     return result.rows
   }
 }
