@@ -128,30 +128,56 @@ dev-frontend: ## Start frontend development server (port 5173)
 # TESTING TARGETS
 # ============================================================================
 
-test: test-backend test-frontend ## Run all tests
+test: test-compile test-backend test-frontend ## Compile & run all tests
 
-test-backend: ## Run backend tests (if exists)
+test-compile: ## Compile TypeScript code (check for errors)
+	@echo "$(BLUE)🔨 Compiling TypeScript code...$(NC)"
+	@echo "$(YELLOW)Checking backend...$(NC)"
+	@cd $(BACKEND_DIR) && npx tsc --noEmit || (echo "$(RED)❌ Backend TypeScript errors$(NC)" && exit 1)
+	@echo "$(GREEN)✅ Backend compiled$(NC)"
+	@echo "$(YELLOW)Checking frontend...$(NC)"
+	@cd $(FRONTEND_DIR) && npx tsc --noEmit || (echo "$(RED)❌ Frontend TypeScript errors$(NC)" && exit 1)
+	@echo "$(GREEN)✅ Frontend compiled$(NC)"
+
+test-backend: ## Compile & run backend tests (if exists)
 	@echo "$(BLUE)🧪 Running backend tests...$(NC)"
 	@if [ -d "$(BACKEND_DIR)/tests" ]; then \
 		cd $(BACKEND_DIR) && npm test; \
+		if [ $$? -eq 0 ]; then \
+			echo "$(GREEN)✅ Backend tests passed$(NC)"; \
+		else \
+			echo "$(RED)❌ Backend tests failed$(NC)" && exit 1; \
+		fi \
 	else \
 		echo "$(YELLOW)⚠️  No backend tests found$(NC)"; \
 	fi
 
-test-frontend: ## Run frontend tests
+test-frontend: ## Compile & run frontend tests
 	@echo "$(BLUE)🧪 Running frontend tests...$(NC)"
 	@cd $(FRONTEND_DIR) && npm test
-	@echo "$(GREEN)✅ Frontend tests complete$(NC)"
+	@if [ $$? -eq 0 ]; then \
+		echo "$(GREEN)✅ Frontend tests passed$(NC)"; \
+	else \
+		echo "$(RED)❌ Frontend tests failed$(NC)" && exit 1; \
+	fi
 
-test-watch: ## Run frontend tests in watch mode
+test-build: test-compile ## Alias for test-compile (compile tests)
+	@echo "$(GREEN)✅ Test compilation complete$(NC)"
+
+test-run: test-backend test-frontend ## Run tests without compilation check
+
+test-watch: ## Compile & run frontend tests in watch mode
 	@echo "$(BLUE)🧪 Running tests in watch mode...$(NC)"
 	@cd $(FRONTEND_DIR) && npm run test:watch
 
-test-coverage: ## Generate test coverage reports
+test-coverage: test-compile ## Compile code & generate test coverage reports
 	@echo "$(BLUE)📊 Generating test coverage...$(NC)"
 	@cd $(FRONTEND_DIR) && npm run test:coverage
 	@echo "$(GREEN)✅ Coverage report generated$(NC)"
 	@echo "$(YELLOW)View report: open admin-dashboard/coverage/index.html$(NC)"
+
+test-ci: clean-dist test-compile validate ## CI/CD pipeline (clean, compile, validate, test)
+	@echo "$(GREEN)✅ CI pipeline complete$(NC)"
 
 # ============================================================================
 # LINTING & FORMATTING
