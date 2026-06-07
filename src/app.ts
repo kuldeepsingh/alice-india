@@ -7,6 +7,11 @@ import authRouter from './routes/auth.ts'
 import accountsRouter from './routes/accounts.ts'
 import ordersRouter from './routes/orders.ts'
 import marketDataRouter from './routes/market-data.ts'
+import logsRouter from './routes/logs.ts'
+import errorsRouter from './routes/errors.ts'
+import auditRouter from './routes/audit.ts'
+import debugRouter from './routes/debug.ts'
+import { logCaptureMiddleware, errorLoggingMiddleware } from './middleware/log-capture.ts'
 
 export function createApp() {
   const app = express()
@@ -15,7 +20,7 @@ export function createApp() {
   app.use(helmet())
 
   // CORS Configuration - Allow specific origins
-  const corsOrigins = (process.env.CORS_ORIGINS || 'http://localhost:3000,http://localhost:5173').split(',')
+  const corsOrigins = (process.env.CORS_ORIGINS || 'http://localhost:3000,http://localhost:5173,http://localhost:5174').split(',')
   app.use(cors({
     origin: corsOrigins,
     credentials: true,
@@ -28,6 +33,9 @@ export function createApp() {
 
   // Body parsing
   app.use(express.json())
+
+  // Log capture middleware (must be early in chain)
+  app.use(logCaptureMiddleware())
 
   // Health check endpoints
   app.get('/health/live', (_req, res) => {
@@ -53,6 +61,12 @@ export function createApp() {
   // Market data routes (some protected, some public)
   v1.use('/market', marketDataRouter)
 
+  // Debugging & Monitoring routes (protected)
+  v1.use('/logs', logsRouter)
+  v1.use('/errors', errorsRouter)
+  v1.use('/audit', auditRouter)
+  v1.use('/debug', debugRouter)
+
   // Mount v1 API
   app.use('/api/v1', v1)
 
@@ -65,6 +79,9 @@ export function createApp() {
       created_at: new Date().toISOString(),
     })
   })
+
+  // Error logging middleware (must be last)
+  app.use(errorLoggingMiddleware())
 
   // Not found handler
   app.use((_req, res) => {
