@@ -14,7 +14,14 @@ import debugRouter from './routes/debug.ts'
 import incidentsRouter from './routes/incidents.ts'
 import notificationsRouter from './routes/notifications.ts'
 import teamRouter from './routes/team.ts'
+import metricsRouter from './routes/metrics.ts'
 import { logCaptureMiddleware, errorLoggingMiddleware } from './middleware/log-capture.ts'
+import {
+  cacheResponseMiddleware,
+  performanceTrackingMiddleware,
+  cacheInvalidationMiddleware,
+  cacheStatsMiddleware,
+} from './middleware/cache-middleware.ts'
 
 export function createApp() {
   const app = express()
@@ -39,6 +46,12 @@ export function createApp() {
 
   // Log capture middleware (must be early in chain)
   app.use(logCaptureMiddleware())
+
+  // Performance & Caching middleware
+  app.use(performanceTrackingMiddleware())
+  app.use(cacheStatsMiddleware())
+  app.use(cacheResponseMiddleware(300)) // 5 minute cache for GET requests
+  app.use(cacheInvalidationMiddleware())
 
   // Health check endpoints
   app.get('/health/live', (_req, res) => {
@@ -74,6 +87,9 @@ export function createApp() {
   v1.use('/incidents', incidentsRouter)
   v1.use('/notifications', notificationsRouter)
   v1.use('/team', teamRouter)
+
+  // Metrics & Monitoring routes
+  v1.use('/metrics', metricsRouter)
 
   // Mount v1 API
   app.use('/api/v1', v1)
