@@ -5,6 +5,7 @@ import pinoHttp from 'pino-http'
 import { logger } from './services/logger.ts'
 import authRouter from './routes/auth.ts'
 import accountsRouter from './routes/accounts.ts'
+import ordersRouter from './routes/orders.ts'
 
 export function createApp() {
   const app = express()
@@ -33,6 +34,9 @@ export function createApp() {
 
   // Account routes (protected)
   app.use('/accounts', accountsRouter)
+
+  // Order routes (protected)
+  app.use('/orders', ordersRouter)
 
   // User registration (backward compatibility)
   app.post('/users/register', (req, res) => {
