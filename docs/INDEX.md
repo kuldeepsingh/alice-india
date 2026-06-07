@@ -5,13 +5,15 @@ Welcome to the Bot-Trade documentation! This folder contains comprehensive guide
 ## 🚀 Quick Start
 
 **New to the project?** Start here:
-1. [README.md](../README.md) - Project overview and installation
-2. [DASHBOARD_SETUP_GUIDE.md](./DASHBOARD_SETUP_GUIDE.md) - Admin dashboard setup
+1. **[GETTING_STARTED.md](./GETTING_STARTED.md)** ⭐ - Step-by-step setup guide for new developers
+2. [README.md](../README.md) - Project overview and features
+3. [ARCHITECTURE.md](./ARCHITECTURE.md) - System design and architecture
 
 ## 📖 Core Documentation
 
 ### Getting Started
-- **[README.md](../README.md)** - Project overview, features, tech stack, and installation instructions
+- **[GETTING_STARTED.md](./GETTING_STARTED.md)** - Complete setup guide for new developers (prerequisites, installation, environment setup, verification)
+- **[README.md](../README.md)** - Project overview, features, tech stack, and roadmap
 
 ### Development Guides
 - **[ARCHITECTURE.md](./ARCHITECTURE.md)** - System architecture, design patterns, and technical decisions
@@ -35,17 +37,24 @@ Welcome to the Bot-Trade documentation! This folder contains comprehensive guide
 
 ## 🎯 Guide Selection by Role
 
+### For All New Developers (Start Here!)
+1. **[GETTING_STARTED.md](./GETTING_STARTED.md)** - Complete setup instructions
+2. Then follow role-specific guides below
+
 ### For Frontend Developers
-1. Start with [README.md](../README.md) for setup
-2. Review [ARCHITECTURE.md](./ARCHITECTURE.md) for system design
-3. Check [TESTING.md](./TESTING.md) for testing patterns
-4. Use [DASHBOARD_SETUP_GUIDE.md](./DASHBOARD_SETUP_GUIDE.md) for component details
+1. [GETTING_STARTED.md](./GETTING_STARTED.md) - Setup environment
+2. [README.md](../README.md) - Project overview
+3. [ARCHITECTURE.md](./ARCHITECTURE.md) - System design
+4. [TESTING.md](./TESTING.md) - Testing patterns
+5. [DASHBOARD_SETUP_GUIDE.md](./DASHBOARD_SETUP_GUIDE.md) - Component details
 
 ### For Backend Developers
-1. Read [README.md](../README.md) for installation
-2. Study [ARCHITECTURE.md](./ARCHITECTURE.md) for system design
-3. Follow [TESTING.md](./TESTING.md) for API testing
-4. Review [DEPLOYMENT.md](./DEPLOYMENT.md) for server setup
+1. [GETTING_STARTED.md](./GETTING_STARTED.md) - Setup environment
+2. [README.md](../README.md) - Project overview
+3. [ARCHITECTURE.md](./ARCHITECTURE.md) - System design
+4. [CONFIG.md](./CONFIG.md) - Configuration system
+5. [TESTING.md](./TESTING.md) - API testing
+6. [DEPLOYMENT.md](./DEPLOYMENT.md) - Server setup
 
 ### For DevOps/Infrastructure
 1. Check [DEPLOYMENT.md](./DEPLOYMENT.md) for production setup
