@@ -6,6 +6,7 @@ import { logger } from './services/logger.ts'
 import authRouter from './routes/auth.ts'
 import accountsRouter from './routes/accounts.ts'
 import ordersRouter from './routes/orders.ts'
+import marketDataRouter from './routes/market-data.ts'
 
 export function createApp() {
   const app = express()
@@ -37,6 +38,9 @@ export function createApp() {
 
   // Order routes (protected)
   app.use('/orders', ordersRouter)
+
+  // Market data routes (some protected, some public)
+  app.use('/market', marketDataRouter)
 
   // User registration (backward compatibility)
   app.post('/users/register', (req, res) => {
