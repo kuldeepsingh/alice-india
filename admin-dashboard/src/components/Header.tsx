@@ -35,8 +35,8 @@ export function Header() {
             🚀
           </div>
           <div>
-            <h1 style={{ fontSize: '28px', fontWeight: 'bold', color: 'white', margin: 0 }}>Alice India</h1>
-            <p style={{ color: '#dbeafe', fontSize: '14px', margin: '4px 0 0 0' }}>Professional Trading Platform</p>
+            <h1 style={{ fontSize: '28px', fontWeight: 'bold', color: 'white', margin: 0 }}>Bot-Trade</h1>
+            <p style={{ color: '#dbeafe', fontSize: '14px', margin: '4px 0 0 0' }}>Automated Trading Dashboard</p>
           </div>
         </div>
         <div style={{ display: 'flex', alignItems: 'center', gap: '1.5rem' }}>
