@@ -11,6 +11,7 @@ import logsRouter from './routes/logs.ts'
 import errorsRouter from './routes/errors.ts'
 import auditRouter from './routes/audit.ts'
 import debugRouter from './routes/debug.ts'
+import incidentsRouter from './routes/incidents.ts'
 import { logCaptureMiddleware, errorLoggingMiddleware } from './middleware/log-capture.ts'
 
 export function createApp() {
@@ -66,6 +67,9 @@ export function createApp() {
   v1.use('/errors', errorsRouter)
   v1.use('/audit', auditRouter)
   v1.use('/debug', debugRouter)
+
+  // Team Coordination routes (protected)
+  v1.use('/incidents', incidentsRouter)
 
   // Mount v1 API
   app.use('/api/v1', v1)
