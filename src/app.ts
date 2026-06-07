@@ -4,6 +4,7 @@ import cors from 'cors'
 import pinoHttp from 'pino-http'
 import { logger } from './services/logger.ts'
 import authRouter from './routes/auth.ts'
+import accountsRouter from './routes/accounts.ts'
 
 export function createApp() {
   const app = express()
@@ -29,6 +30,9 @@ export function createApp() {
 
   // Authentication routes
   app.use('/auth', authRouter)
+
+  // Account routes (protected)
+  app.use('/accounts', accountsRouter)
 
   // User registration (backward compatibility)
   app.post('/users/register', (req, res) => {
