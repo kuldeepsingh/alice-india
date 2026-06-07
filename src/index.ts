@@ -1,0 +1,44 @@
+import 'dotenv/config'
+import { createApp } from './app.ts'
+import { db } from './db/client.ts'
+import { cache } from './cache/client.ts'
+import { logger } from './services/logger.ts'
+
+const PORT = process.env.PORT || 3000
+
+async function main() {
+  try {
+    // Connect to database
+    await db.connect()
+    
+    // Connect to cache
+    await cache.connect()
+
+    // Create and start app
+    const app = createApp()
+
+    app.listen(PORT, () => {
+      logger.info({
+        type: 'server_started',
+        port: PORT,
+        environment: process.env.NODE_ENV,
+      })
+    })
+
+    // Graceful shutdown
+    process.on('SIGTERM', async () => {
+      logger.info({ type: 'shutting_down' })
+      await db.disconnect()
+      await cache.disconnect()
+      process.exit(0)
+    })
+  } catch (error) {
+    logger.error({
+      type: 'startup_failed',
+      error: error instanceof Error ? error.message : String(error),
+    })
+    process.exit(1)
+  }
+}
+
+main()
