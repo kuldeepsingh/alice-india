@@ -124,3 +124,16 @@ export async function query(text: string, params?: unknown[]) {
     throw error
   }
 }
+
+// Execute migrations when run directly
+if (import.meta.main) {
+  runMigrations()
+    .then(() => {
+      logger.info({ type: 'migrations_complete' })
+      process.exit(0)
+    })
+    .catch((error) => {
+      logger.error({ type: 'migrations_failed', error })
+      process.exit(1)
+    })
+}
