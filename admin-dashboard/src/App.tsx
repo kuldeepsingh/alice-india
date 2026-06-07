@@ -11,6 +11,8 @@ import Logs from './pages/Logs'
 import Errors from './pages/Errors'
 import AuditTrail from './pages/AuditTrail'
 import DebugSessions from './pages/DebugSessions'
+import IncidentManagement from './pages/IncidentManagement'
+import TeamCoordination from './pages/TeamCoordination'
 
 function ProtectedRoute({ children }: { children: React.ReactNode }) {
   const { isAuthenticated } = useAuthStore()
@@ -93,6 +95,22 @@ export function App() {
           element={
             <ProtectedRoute>
               <DebugSessions />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/incidents"
+          element={
+            <ProtectedRoute>
+              <IncidentManagement />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/team"
+          element={
+            <ProtectedRoute>
+              <TeamCoordination />
             </ProtectedRoute>
           }
         />
