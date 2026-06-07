@@ -1,5 +1,5 @@
 import { Pool } from 'pg'
-import { readFileSync } from 'fs'
+import { readFileSync, readdirSync } from 'fs'
 import { join } from 'path'
 import { logger } from './logger.ts'
 
@@ -56,7 +56,7 @@ export async function runMigrations() {
 
     // Get list of migration files
     const migrationDir = join(process.cwd(), 'migrations')
-    const files = require('fs').readdirSync(migrationDir)
+    const files = readdirSync(migrationDir)
       .filter((f: string) => f.endsWith('.sql'))
       .sort()
 
