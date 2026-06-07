@@ -6,8 +6,8 @@ import { authAPI } from '../services/api'
 export function Login() {
   const navigate = useNavigate()
   const { setToken, setUser } = useAuthStore()
-  const [email, setEmail] = useState('test@example.com')
-  const [password, setPassword] = useState('password123')
+  const [email, setEmail] = useState('admin')
+  const [password, setPassword] = useState('admin')
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
 
@@ -34,10 +34,10 @@ export function Login() {
     <div className="min-h-screen bg-gradient-to-br from-blue-500 to-blue-700 flex items-center justify-center">
       <div className="bg-white rounded-lg shadow-lg p-8 w-full max-w-md">
         <h1 className="text-3xl font-bold text-center mb-6 text-gray-900">
-          Alice India
+          Bot-Trade
         </h1>
         <h2 className="text-xl text-center mb-8 text-gray-600">
-          Admin Dashboard
+          Admin Login
         </h2>
 
         <form onSubmit={handleLogin} className="space-y-4">
@@ -85,11 +85,11 @@ export function Login() {
         </form>
 
         <p className="text-center text-sm text-gray-600 mt-6">
-          Demo Credentials:
+          Admin Login Credentials:
           <br />
-          Email: test@example.com
+          Username: admin
           <br />
-          Password: password123
+          Password: admin
         </p>
 
         <p className="text-center text-xs text-gray-500 mt-4">
