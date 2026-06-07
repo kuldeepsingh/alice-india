@@ -12,21 +12,40 @@ export function Sidebar() {
   ]
 
   return (
-    <nav className="bg-gradient-to-b from-gray-900 to-gray-800 text-white w-64 min-h-screen p-6 border-r-2 border-gray-700 shadow-xl">
-      <ul className="space-y-3">
+    <nav style={{
+      background: 'linear-gradient(to bottom, #111827, #1f2937)',
+      color: 'white',
+      width: '256px',
+      minHeight: '100vh',
+      padding: '24px',
+      borderRight: '2px solid #374151',
+      boxShadow: '0 10px 25px rgba(0, 0, 0, 0.2)'
+    }}>
+      <ul style={{ listStyle: 'none', padding: 0, margin: 0, display: 'flex', flexDirection: 'column', gap: '12px' }}>
         {navItems.map((item) => {
           const isActive = location.pathname === item.path
           return (
             <li key={item.path}>
               <Link
                 to={item.path}
-                className={`flex items-center gap-3 px-5 py-3 rounded-xl font-medium transition-all duration-200 ${
-                  isActive
-                    ? 'bg-blue-600 text-white shadow-lg transform scale-105'
-                    : 'text-gray-300 hover:bg-gray-700 hover:text-white'
-                }`}
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '12px',
+                  padding: '12px 20px',
+                  borderRadius: '12px',
+                  fontWeight: '500',
+                  textDecoration: 'none',
+                  backgroundColor: isActive ? '#2563eb' : 'transparent',
+                  color: isActive ? 'white' : '#d1d5db',
+                  transition: 'all 200ms',
+                  transform: isActive ? 'scale(1.05)' : 'scale(1)',
+                  boxShadow: isActive ? '0 10px 20px rgba(37, 99, 235, 0.3)' : 'none'
+                }}
+                onMouseEnter={(e) => !isActive && (e.currentTarget.style.backgroundColor = '#374151')}
+                onMouseLeave={(e) => !isActive && (e.currentTarget.style.backgroundColor = 'transparent')}
               >
-                <span className="text-xl">{item.icon}</span>
+                <span style={{ fontSize: '20px' }}>{item.icon}</span>
                 <span>{item.label}</span>
               </Link>
             </li>
@@ -34,16 +53,16 @@ export function Sidebar() {
         })}
       </ul>
 
-      <div className="mt-12 pt-6 border-t border-gray-700">
-        <p className="text-gray-400 text-xs uppercase tracking-wider font-semibold">Quick Stats</p>
-        <div className="mt-4 space-y-3">
-          <div className="bg-gray-700 rounded-lg p-3">
-            <p className="text-gray-400 text-xs">Active Traders</p>
-            <p className="text-white text-xl font-bold">2.4K</p>
+      <div style={{ marginTop: '48px', paddingTop: '24px', borderTop: '1px solid #374151' }}>
+        <p style={{ color: '#9ca3af', fontSize: '12px', textTransform: 'uppercase', fontWeight: '600', margin: 0 }}>Quick Stats</p>
+        <div style={{ marginTop: '16px', display: 'flex', flexDirection: 'column', gap: '12px' }}>
+          <div style={{ backgroundColor: '#374151', borderRadius: '8px', padding: '12px' }}>
+            <p style={{ color: '#9ca3af', fontSize: '12px', margin: 0 }}>Active Traders</p>
+            <p style={{ color: 'white', fontSize: '20px', fontWeight: 'bold', margin: '8px 0 0 0' }}>2.4K</p>
           </div>
-          <div className="bg-gray-700 rounded-lg p-3">
-            <p className="text-gray-400 text-xs">Total Volume</p>
-            <p className="text-white text-xl font-bold">₹2.1B</p>
+          <div style={{ backgroundColor: '#374151', borderRadius: '8px', padding: '12px' }}>
+            <p style={{ color: '#9ca3af', fontSize: '12px', margin: 0 }}>Total Volume</p>
+            <p style={{ color: 'white', fontSize: '20px', fontWeight: 'bold', margin: '8px 0 0 0' }}>₹2.1B</p>
           </div>
         </div>
       </div>

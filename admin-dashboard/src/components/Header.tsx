@@ -5,28 +5,63 @@ export function Header() {
   const { user, logout } = useAuthStore()
 
   return (
-    <header className="bg-gradient-to-r from-blue-600 to-blue-800 shadow-xl border-b-4 border-blue-900">
-      <div className="max-w-7xl mx-auto px-6 sm:px-8 lg:px-10 py-6 flex justify-between items-center">
-        <div className="flex items-center gap-4">
-          <div className="w-12 h-12 bg-white rounded-xl flex items-center justify-center font-bold text-lg text-blue-600 shadow-md">
+    <header style={{
+      background: 'linear-gradient(to right, #2563eb, #1e40af)',
+      boxShadow: '0 10px 25px rgba(0, 0, 0, 0.2)',
+      borderBottom: '4px solid #1e3a8a',
+      padding: '1.5rem 2rem'
+    }}>
+      <div style={{
+        maxWidth: '1280px',
+        margin: '0 auto',
+        display: 'flex',
+        justifyContent: 'space-between',
+        alignItems: 'center'
+      }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+          <div style={{
+            width: '48px',
+            height: '48px',
+            backgroundColor: 'white',
+            borderRadius: '8px',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            fontSize: '24px',
+            fontWeight: 'bold',
+            color: '#2563eb',
+            boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)'
+          }}>
             🚀
           </div>
           <div>
-            <h1 className="text-3xl font-bold text-white">Alice India</h1>
-            <p className="text-blue-100 text-sm">Professional Trading Platform</p>
+            <h1 style={{ fontSize: '28px', fontWeight: 'bold', color: 'white', margin: 0 }}>Alice India</h1>
+            <p style={{ color: '#dbeafe', fontSize: '14px', margin: '4px 0 0 0' }}>Professional Trading Platform</p>
           </div>
         </div>
-        <div className="flex items-center gap-6">
+        <div style={{ display: 'flex', alignItems: 'center', gap: '1.5rem' }}>
           {user && (
             <>
-              <div className="text-right hidden sm:block">
-                <p className="text-white font-semibold">{user.email}</p>
-                <p className="text-blue-100 text-xs capitalize tracking-wide">{user.role} • Active</p>
+              <div style={{ textAlign: 'right' }}>
+                <p style={{ color: 'white', fontWeight: '600', margin: '0' }}>{user.email}</p>
+                <p style={{ color: '#dbeafe', fontSize: '12px', margin: '4px 0 0 0', textTransform: 'capitalize' }}>{user.role} • Active</p>
               </div>
-              <div className="w-px h-8 bg-blue-400"></div>
+              <div style={{ width: '1px', height: '32px', backgroundColor: '#60a5fa' }}></div>
               <button
                 onClick={logout}
-                className="px-6 py-2.5 bg-red-500 text-white rounded-lg font-semibold hover:bg-red-600 transition-all duration-200 shadow-md hover:shadow-lg"
+                style={{
+                  padding: '10px 24px',
+                  backgroundColor: '#ef4444',
+                  color: 'white',
+                  border: 'none',
+                  borderRadius: '8px',
+                  fontWeight: '600',
+                  cursor: 'pointer',
+                  boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)',
+                  transition: 'all 200ms'
+                }}
+                onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = '#dc2626')}
+                onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = '#ef4444')}
               >
                 Logout
               </button>
