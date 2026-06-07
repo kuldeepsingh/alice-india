@@ -3,6 +3,7 @@ import helmet from 'helmet'
 import cors from 'cors'
 import pinoHttp from 'pino-http'
 import { logger } from './services/logger.ts'
+import authRouter from './routes/auth.ts'
 
 export function createApp() {
   const app = express()
@@ -26,11 +27,14 @@ export function createApp() {
     res.json({ status: 'ready', timestamp: new Date().toISOString() })
   })
 
-  // User registration (placeholder)
-  app.post('/users/register', (_req, res) => {
+  // Authentication routes
+  app.use('/auth', authRouter)
+
+  // User registration (backward compatibility)
+  app.post('/users/register', (req, res) => {
     res.status(201).json({
       id: 'uuid-placeholder',
-      email: _req.body?.email,
+      email: req.body?.email,
       role: 'trader',
       created_at: new Date().toISOString(),
     })
