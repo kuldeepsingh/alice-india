@@ -57,7 +57,7 @@ const DURATION_OPTIONS = [
 ]
 
 export default function DebugSessions() {
-  const [sessions, setLosessions] = useState<DebugSession[]>([])
+  const [sessions, setSessions] = useState<DebugSession[]>([])
   const [stats, setStats] = useState<DebugStats | null>(null)
   const [loading, setLoading] = useState(false)
   const [openCreateDialog, setOpenCreateDialog] = useState(false)
@@ -81,7 +81,7 @@ export default function DebugSessions() {
       if (!response.ok) throw new Error('Failed to fetch sessions')
 
       const data = await response.json()
-      setLosessions(data.data || [])
+      setSessions(data.data || [])
     } catch (error) {
       console.error('Error fetching sessions:', error)
       alert('Failed to fetch sessions')
