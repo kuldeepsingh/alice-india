@@ -7,6 +7,10 @@ import { Users } from './pages/Users'
 import { Accounts } from './pages/Accounts'
 import { Orders } from './pages/Orders'
 import { Analytics } from './pages/Analytics'
+import Logs from './pages/Logs'
+import Errors from './pages/Errors'
+import AuditTrail from './pages/AuditTrail'
+import DebugSessions from './pages/DebugSessions'
 
 function ProtectedRoute({ children }: { children: React.ReactNode }) {
   const { isAuthenticated } = useAuthStore()
@@ -57,6 +61,38 @@ export function App() {
           element={
             <ProtectedRoute>
               <Analytics />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/logs"
+          element={
+            <ProtectedRoute>
+              <Logs />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/errors"
+          element={
+            <ProtectedRoute>
+              <Errors />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/audit"
+          element={
+            <ProtectedRoute>
+              <AuditTrail />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/debug"
+          element={
+            <ProtectedRoute>
+              <DebugSessions />
             </ProtectedRoute>
           }
         />

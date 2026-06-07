@@ -11,6 +11,13 @@ export function Sidebar() {
     { label: 'Analytics', path: '/analytics', icon: '📉' },
   ]
 
+  const debuggingItems = [
+    { label: 'Logs', path: '/logs', icon: '📋' },
+    { label: 'Errors', path: '/errors', icon: '🚨' },
+    { label: 'Audit Trail', path: '/audit', icon: '📄' },
+    { label: 'Debug Sessions', path: '/debug', icon: '🐛' },
+  ]
+
   return (
     <nav style={{
       background: 'linear-gradient(to bottom, #1a1a1a, #2d2d2d)',
@@ -52,6 +59,43 @@ export function Sidebar() {
           )
         })}
       </ul>
+
+      {/* Debugging & Monitoring Section */}
+      <div style={{ marginTop: '48px', paddingTop: '24px', borderTop: '1px solid #D4AF37' }}>
+        <p style={{ color: '#D4AF37', fontSize: '12px', textTransform: 'uppercase', fontWeight: '600', margin: '0 0 12px 0', letterSpacing: '0.5px' }}>
+          🔧 Debugging & Monitoring
+        </p>
+        <ul style={{ listStyle: 'none', padding: 0, margin: 0, display: 'flex', flexDirection: 'column', gap: '8px' }}>
+          {debuggingItems.map((item) => {
+            const isActive = location.pathname === item.path
+            return (
+              <li key={item.path}>
+                <Link
+                  to={item.path}
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '12px',
+                    padding: '10px 16px',
+                    borderRadius: '8px',
+                    fontWeight: '500',
+                    textDecoration: 'none',
+                    backgroundColor: isActive ? '#D4AF37' : 'transparent',
+                    color: isActive ? '#1a1a1a' : '#d1d5db',
+                    transition: 'all 200ms',
+                    fontSize: '14px',
+                  }}
+                  onMouseEnter={(e) => !isActive && (e.currentTarget.style.backgroundColor = '#374151')}
+                  onMouseLeave={(e) => !isActive && (e.currentTarget.style.backgroundColor = 'transparent')}
+                >
+                  <span style={{ fontSize: '18px' }}>{item.icon}</span>
+                  <span>{item.label}</span>
+                </Link>
+              </li>
+            )
+          })}
+        </ul>
+      </div>
 
       <div style={{ marginTop: '48px', paddingTop: '24px', borderTop: '1px solid #D4AF37' }}>
         <p style={{ color: '#9ca3af', fontSize: '12px', textTransform: 'uppercase', fontWeight: '600', margin: 0 }}>Quick Stats</p>
