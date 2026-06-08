@@ -1,6 +1,6 @@
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import { LayoutPro } from '../components/LayoutPro'
-import { Box, Card, Typography, Button, Divider, Alert, Select, MenuItem } from '@mui/material'
+import { Box, Card, Typography, Button, Switch, FormControlLabel, Divider, Alert, Select, MenuItem } from '@mui/material'
 import { Save } from '@mui/icons-material'
 import { useAuthStore } from '../state/store'
 import { THEME_PRO, getTheme, SPACING_PRO, RADIUS_PRO, SHADOWS_PRO } from '../theme-pro'
@@ -11,17 +11,39 @@ export function settingsPage() {
   const { currency, setCurrency, darkMode } = useAuthStore()
   const theme = getTheme(darkMode)
   const [savedMessage, setSavedMessage] = useState('')
+  const [notifications, setNotifications] = useState(true)
+  const [autoRefresh, setAutoRefresh] = useState(true)
   const [selectedCurrency, setSelectedCurrency] = useState(currency)
 
+  // Load settings from localStorage
+  useEffect(() => {
+    const saved = localStorage.getItem('appSettings')
+    if (saved) {
+      const settings = JSON.parse(saved)
+      setNotifications(settings.notifications !== false)
+      setAutoRefresh(settings.autoRefresh !== false)
+    }
+  }, [])
+
   const handleSaveSettings = () => {
+    const settings = {
+      notifications,
+      autoRefresh,
+      currency: selectedCurrency,
+      savedAt: new Date().toISOString(),
+    }
+    localStorage.setItem('appSettings', JSON.stringify(settings))
     setCurrency(selectedCurrency)
     setSavedMessage('✅ Settings saved successfully!')
     setTimeout(() => setSavedMessage(''), 3000)
   }
 
   const handleResetSettings = () => {
+    setNotifications(true)
+    setAutoRefresh(true)
     setSelectedCurrency(DEFAULT_CURRENCY.code)
     setCurrency(DEFAULT_CURRENCY.code)
+    localStorage.removeItem('appSettings')
     setSavedMessage('🔄 Settings reset to defaults')
     setTimeout(() => setSavedMessage(''), 2000)
   }
@@ -46,8 +68,51 @@ export function settingsPage() {
           </Alert>
         )}
 
-        {/* Currency Settings */}
-        <Card sx={{ p: SPACING_PRO.xxl, borderRadius: RADIUS_PRO.lg, border: `1px solid ${THEME_PRO.border}`, boxShadow: SHADOWS_PRO.md, mb: SPACING_PRO.xxxl }}>
+        {/* Settings Grid */}
+        <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', lg: '1fr 1fr' }, gap: 3, mb: SPACING_PRO.xxxl }}>
+          {/* Display & Preferences */}
+          <Card sx={{ p: SPACING_PRO.xxl, borderRadius: RADIUS_PRO.lg, border: `1px solid ${THEME_PRO.border}`, boxShadow: SHADOWS_PRO.md }}>
+            <Typography sx={{ fontSize: '18px', fontWeight: 700, color: THEME_PRO.textPrimary, mb: SPACING_PRO.lg }}>
+              ⚙️ Display & Preferences
+            </Typography>
+
+            <Box sx={{ display: 'flex', flexDirection: 'column', gap: SPACING_PRO.lg }}>
+              <FormControlLabel
+                control={<Switch checked={notifications} onChange={(e) => setNotifications(e.target.checked)} />}
+                label={
+                  <Box>
+                    <Typography sx={{ fontWeight: 600, color: THEME_PRO.textPrimary }}>
+                      Notifications
+                    </Typography>
+                    <Typography sx={{ fontSize: '12px', color: THEME_PRO.textSecondary }}>
+                      {notifications ? 'Enabled' : 'Disabled'}
+                    </Typography>
+                  </Box>
+                }
+                sx={{ width: '100%', m: 0 }}
+              />
+
+              <Divider sx={{ borderColor: THEME_PRO.border }} />
+
+              <FormControlLabel
+                control={<Switch checked={autoRefresh} onChange={(e) => setAutoRefresh(e.target.checked)} />}
+                label={
+                  <Box>
+                    <Typography sx={{ fontWeight: 600, color: THEME_PRO.textPrimary }}>
+                      Auto Refresh
+                    </Typography>
+                    <Typography sx={{ fontSize: '12px', color: THEME_PRO.textSecondary }}>
+                      {autoRefresh ? 'Every 30 seconds' : 'Disabled'}
+                    </Typography>
+                  </Box>
+                }
+                sx={{ width: '100%', m: 0 }}
+              />
+            </Box>
+          </Card>
+
+          {/* Currency Settings */}
+          <Card sx={{ p: SPACING_PRO.xxl, borderRadius: RADIUS_PRO.lg, border: `1px solid ${THEME_PRO.border}`, boxShadow: SHADOWS_PRO.md }}>
             <Typography sx={{ fontSize: '18px', fontWeight: 700, color: THEME_PRO.textPrimary, mb: SPACING_PRO.lg }}>
               💱 Currency Settings
             </Typography>
@@ -96,7 +161,8 @@ export function settingsPage() {
                 Current selection: {SUPPORTED_CURRENCIES.find(c => c.code === selectedCurrency)?.symbol} {selectedCurrency}
               </Typography>
             </Box>
-        </Card>
+          </Card>
+        </Box>
 
         {/* API Keys Configuration */}
         <Box sx={{ mb: SPACING_PRO.xxxl }}>
