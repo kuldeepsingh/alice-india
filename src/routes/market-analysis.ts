@@ -73,73 +73,78 @@ router.post('/sentiment', optionalClaude, async (req: AuthRequest, res) => {
       userId,
     })
 
-    const canUseClaude = (req as any).claudeAvailable === true
     let sentimentAnalysis: SentimentAnalysisResponse | null = null
     let claudeUsed = false
 
-    if (canUseClaude) {
-      try {
-        // Fetch Claude API key from secure backend storage
-        logger.debug({
-          type: 'fetching_claude_api_key',
-          userId,
-        })
+    // Try to use Claude - check if key is configured
+    try {
+      // Fetch Claude API key from secure backend storage
+      logger.debug({
+        type: 'fetching_claude_api_key',
+        userId,
+      })
 
-        const claudeApiKey = await keyRetrievalService.getClaudeApiKey(userId)
+      const claudeApiKey = await keyRetrievalService.getClaudeApiKey(userId)
 
-        if (!claudeApiKey) {
-          throw new Error('Claude API key not configured. Please configure in Settings.')
-        }
-
-        // Create Claude service with fetched API key
-        const claudeService = new ClaudeService({
-          apiKey: claudeApiKey,
-          model: 'claude-3-5-sonnet-20241022',
-          maxTokens: 500,
-          temperature: 0.3,
-          timeout: 2000,
-        })
-
-        const startTime = Date.now()
-        const claudeRequest: SentimentAnalysisRequest = {
-          marketData,
-          recentNews,
-          globalContext,
-        }
-
-        sentimentAnalysis = await claudeService.analyzeSentiment(userId, claudeRequest)
-        const responseTime = Date.now() - startTime
-
-        logger.info({
-          type: 'sentiment_analysis_completed',
-          userId,
-          responseTime,
-          sentiment: sentimentAnalysis.sentiment,
-        })
-
-        claudeUsed = true
-
-        // Track usage
-        await usageTrackingService.recordClaudeCall(userId, {
-          type: 'sentiment_analysis',
-          responseTime,
-          success: true,
-        })
-      } catch (error: any) {
-        logger.warn({
-          type: 'claude_analysis_error',
-          userId,
-          error: error.message,
-        })
-
-        await usageTrackingService.recordClaudeCall(userId, {
-          type: 'sentiment_analysis',
-          success: false,
-          error: error.message,
-        })
-
-        // Continue with fallback - don't block user
+      if (!claudeApiKey) {
+        throw new Error('Claude API key not configured. Please configure in Settings.')
       }
+
+      // Create Claude service with fetched API key
+      const claudeService = new ClaudeService({
+        apiKey: claudeApiKey,
+        model: 'claude-3-5-sonnet-20241022',
+        maxTokens: 500,
+        temperature: 0.3,
+        timeout: 2000,
+      })
+
+      const startTime = Date.now()
+      const claudeRequest: SentimentAnalysisRequest = {
+        marketData,
+        recentNews,
+        globalContext,
+      }
+
+      sentimentAnalysis = await claudeService.analyzeSentiment(userId, claudeRequest)
+      const responseTime = Date.now() - startTime
+
+      logger.info({
+        type: 'sentiment_analysis_completed',
+        userId,
+        responseTime,
+        sentiment: sentimentAnalysis.sentiment,
+      })
+
+      claudeUsed = true
+
+      // Track usage
+      await usageTrackingService.trackUsage({
+        userId,
+        useCase: 'sentiment_analysis',
+        timestamp: new Date(),
+        responseTimeMs: responseTime,
+        costInDollars: 0.001,
+        success: true,
+      })
+    } catch (error: any) {
+      logger.warn({
+        type: 'claude_analysis_error',
+        userId,
+        error: error.message,
+      })
+
+      await usageTrackingService.trackUsage({
+        userId,
+        useCase: 'sentiment_analysis',
+        timestamp: new Date(),
+        responseTimeMs: 0,
+        costInDollars: 0,
+        success: false,
+        error: error.message,
+      })
+
+      // Continue with fallback - don't block user
     }
 
     // Return response
@@ -229,9 +234,12 @@ router.post('/risk', optionalClaude, async (req: AuthRequest, res) => {
 
         claudeUsed = true
 
-        await usageTrackingService.recordClaudeCall(userId, {
-          type: 'risk_assessment',
-          responseTime,
+        await usageTrackingService.trackUsage({
+          userId,
+          useCase: 'risk_assessment',
+          timestamp: new Date(),
+          responseTimeMs: responseTime,
+          costInDollars: 0.001,
           success: true,
         })
       } catch (error: any) {
@@ -241,8 +249,12 @@ router.post('/risk', optionalClaude, async (req: AuthRequest, res) => {
           error: error.message,
         })
 
-        await usageTrackingService.recordClaudeCall(userId, {
-          type: 'risk_assessment',
+        await usageTrackingService.trackUsage({
+          userId,
+          useCase: 'risk_assessment',
+          timestamp: new Date(),
+          responseTimeMs: 0,
+          costInDollars: 0,
           success: false,
           error: error.message,
         })

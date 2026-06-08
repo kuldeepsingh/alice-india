@@ -46,7 +46,16 @@ export const TradingBot = () => {
         setBackendConnected(false)
       }
     }
+
+    // Initial check
     checkHealth()
+
+    // Poll for key status changes every 2 seconds
+    const statusInterval = setInterval(() => {
+      checkKeyStatus()
+    }, 2000)
+
+    return () => clearInterval(statusInterval)
   }, [userId])
 
   const checkKeyStatus = async () => {
