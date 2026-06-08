@@ -80,11 +80,30 @@ export async function runMigrations() {
             [file]
           )
           await client.query('COMMIT')
-          
+
           logger.info({ type: 'migration_executed', file })
-        } catch (error) {
+        } catch (error: any) {
           await client.query('ROLLBACK')
-          throw error
+
+          // If the error is "already exists", treat as success since migration is idempotent
+          if (error.code === '42P07' || error.message?.includes('already exists')) {
+            try {
+              await client.query(
+                'INSERT INTO _migrations (name) VALUES ($1)',
+                [file]
+              )
+              logger.info({ type: 'migration_skipped_already_exists', file })
+            } catch (insertError: any) {
+              if (insertError.code === '23505') {
+                // Unique constraint violation - migration already recorded
+                logger.info({ type: 'migration_already_recorded', file })
+              } else {
+                throw insertError
+              }
+            }
+          } else {
+            throw error
+          }
         } finally {
           client.release()
         }

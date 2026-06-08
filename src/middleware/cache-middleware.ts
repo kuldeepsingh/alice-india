@@ -122,7 +122,7 @@ export function performanceTrackingMiddleware() {
     const originalSend = res.send.bind(res)
     res.send = function (data: any) {
       const duration = Date.now() - startTime
-      const slow = duration > 200 ? '🐢 SLOW' : '✓ FAST'
+      const slow = duration > 200 ? 'SLOW' : 'FAST'
 
       // Add performance headers
       res.setHeader('X-Response-Time', `${duration}ms`)
