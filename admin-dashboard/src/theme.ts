@@ -28,16 +28,16 @@ export const COLORS = {
   info: '#3b82f6', // Blue
 
   // Log levels
-  debug: '#90CAF9', // Light blue
-  debugBg: '#E3F2FD', // Light blue background
-  info: '#A5D6A7', // Light green
-  infoBg: '#E8F5E9', // Light green background
-  warn: '#FFD54F', // Yellow
-  warnBg: '#FFFDE7', // Yellow background
-  error: '#EF5350', // Light red
-  errorBg: '#FFEBEE', // Light red background
-  fatal: '#C62828', // Dark red
-  fatalBg: '#B71C1C', // Dark red background
+  logDebug: '#90CAF9', // Light blue
+  logDebugBg: '#E3F2FD', // Light blue background
+  logInfo: '#A5D6A7', // Light green
+  logInfoBg: '#E8F5E9', // Light green background
+  logWarn: '#FFD54F', // Yellow
+  logWarnBg: '#FFFDE7', // Yellow background
+  logError: '#EF5350', // Light red
+  logErrorBg: '#FFEBEE', // Light red background
+  logFatal: '#C62828', // Dark red
+  logFatalBg: '#B71C1C', // Dark red background
 } as const
 
 export const SPACING = {
