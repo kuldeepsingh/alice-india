@@ -169,9 +169,6 @@ export function settingsPage() {
           <Typography variant="h5" sx={{ fontSize: '24px', fontWeight: 700, color: THEME_PRO.textPrimary, mb: SPACING_PRO.lg }}>
             🔑 API Keys Configuration
           </Typography>
-          <Typography sx={{ color: THEME_PRO.textSecondary, mb: SPACING_PRO.xl }}>
-            Configure your Claude and Zerodha API keys for trading and AI features
-          </Typography>
           <ApiKeySettings />
         </Box>
 
