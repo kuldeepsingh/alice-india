@@ -2,16 +2,17 @@ import React from 'react'
 import { useNavigate, useLocation } from 'react-router-dom'
 import { Box, Button, AppBar, Toolbar, Avatar } from '@mui/material'
 import { ArrowBack, Home, Logout } from '@mui/icons-material'
+import { useAuthStore } from '../state/store'
 import { THEME_PRO, SPACING_PRO, RADIUS_PRO, TRANSITIONS_PRO } from '../theme-pro'
 
 export function NavbarPro() {
   const navigate = useNavigate()
   const location = useLocation()
   const isHome = location.pathname === '/'
+  const { logout } = useAuthStore()
 
   const handleLogout = () => {
-    localStorage.removeItem('authToken')
-    localStorage.removeItem('user')
+    logout()
     navigate('/login')
   }
 
