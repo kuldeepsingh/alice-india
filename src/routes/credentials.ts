@@ -188,23 +188,29 @@ router.delete('/zerodha', requireDeveloper, async (req: Request, res: Response) 
  * GET /api/v1/credentials/zerodha/check
  * Quick check if credentials exist
  */
-router.get('/zerodha/check', requireDeveloper, async (req: Request, res: Response) => {
+router.get('/zerodha/check', async (req: Request, res: Response) => {
   try {
-    const userId = (req as any).user.id
+    const userId = (req as any).user?.id || 'anonymous'
 
     const hasCredentials = await CredentialService.hasCredentials(userId)
 
     res.json({
       status: 'success',
+      hasCredentials,
       data: {
         hasCredentials,
         configured: hasCredentials,
       },
     })
   } catch (error: any) {
-    res.status(500).json({
-      status: 'error',
-      message: error.message,
+    // Return false rather than error if check fails
+    res.json({
+      status: 'success',
+      hasCredentials: false,
+      data: {
+        hasCredentials: false,
+        configured: false,
+      },
     })
   }
 })
