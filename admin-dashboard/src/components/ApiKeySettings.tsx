@@ -10,7 +10,7 @@
 
 import { useState, useEffect } from 'react'
 import { Box, Card, TextField, Button, Alert, Chip, Typography, CircularProgress } from '@mui/material'
-import { CheckCircle, HighlightOff, Refresh, Save, Edit, Delete, X } from '@mui/icons-material'
+import { CheckCircle, HighlightOff, Save, Edit, Delete, X } from '@mui/icons-material'
 import { useAuthStore } from '../state/store'
 import { apiKeyService } from '../services/api-key-service'
 import { THEME_PRO, SPACING_PRO, RADIUS_PRO, SHADOWS_PRO } from '../theme-pro'
@@ -630,27 +630,6 @@ export const ApiKeySettings = ({ onKeysUpdated }: Props) => {
         </Box>
       </Card>
 
-      {/* Actions */}
-      <Box sx={{ gridColumn: { xs: '1fr', md: '1 / -1' } }}>
-        <Button
-          fullWidth
-          variant="outlined"
-          onClick={checkStatus}
-          disabled={loading}
-          startIcon={<Refresh />}
-          sx={{
-            borderColor: THEME_PRO.primary,
-            color: THEME_PRO.primary,
-            textTransform: 'none',
-            fontWeight: 600,
-            py: SPACING_PRO.md,
-            fontSize: '14px',
-          }}
-        >
-          🔄 Refresh Status
-        </Button>
-      </Box>
-
       {/* Message */}
       {message && (
         <Alert
@@ -664,19 +643,6 @@ export const ApiKeySettings = ({ onKeysUpdated }: Props) => {
           {message}
         </Alert>
       )}
-
-      {/* Security Notice */}
-      <Alert
-        sx={{
-          gridColumn: { xs: '1fr', md: '1 / -1' },
-          backgroundColor: THEME_PRO.warningLight,
-          color: THEME_PRO.warning,
-          border: `1px solid ${THEME_PRO.warning}`,
-          fontSize: '13px',
-        }}
-      >
-        🔐 <strong>Security:</strong> Your API keys are encrypted and stored securely on our server. They are never stored in your browser. Only you can manage your keys.
-      </Alert>
     </Box>
   )
 }
