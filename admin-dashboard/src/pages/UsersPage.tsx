@@ -1,7 +1,8 @@
 import React, { useState } from 'react'
 import { LayoutPro } from '../components/LayoutPro'
-import { Box, Card, Typography, Button, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Chip, TextField, Dialog, DialogTitle, DialogContent, DialogActions } from '@mui/material'
+import { Box, Card, Typography, Button, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Chip, TextField, Dialog, DialogTitle, DialogContent, DialogActions, Select, MenuItem, FormControl, InputLabel } from '@mui/material'
 import { Add, Edit, Delete, Search } from '@mui/icons-material'
+import { frontendLogger } from '../services/logging-client'
 import { THEME_PRO, SPACING_PRO, RADIUS_PRO, SHADOWS_PRO } from '../theme-pro'
 
 interface User {
@@ -21,24 +22,110 @@ const mockUsers: User[] = [
   { id: 5, name: 'Vikram Reddy', email: 'vikram@example.com', role: 'Analyst', status: 'Active', joinDate: '2024-04-05' },
 ]
 
+const AVAILABLE_ROLES = [
+  { value: 'Admin', label: '👨‍💼 Admin - Full system access' },
+  { value: 'Trader', label: '📈 Trader - Can place orders and manage positions' },
+  { value: 'Analyst', label: '📊 Analyst - View-only access to analytics' },
+  { value: 'Viewer', label: '👁️ Viewer - Read-only access' },
+]
+
 export function UsersPage() {
   const [users, setUsers] = useState<User[]>(mockUsers)
   const [searchTerm, setSearchTerm] = useState('')
   const [openDialog, setOpenDialog] = useState(false)
   const [editingUser, setEditingUser] = useState<User | null>(null)
+  const [formData, setFormData] = useState({ name: '', email: '', role: 'Trader' })
 
   const filteredUsers = users.filter(user =>
     user.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
     user.email.toLowerCase().includes(searchTerm.toLowerCase())
   )
 
+  const handleAddUser = () => {
+    frontendLogger.debug('Users', 'Add user dialog opened')
+    setFormData({ name: '', email: '', role: 'Trader' })
+    setEditingUser(null)
+    setOpenDialog(true)
+  }
+
   const handleDeleteUser = (id: number) => {
+    const deletedUser = users.find(u => u.id === id)
+    frontendLogger.info('Users', 'User deleted', {
+      userId: id,
+      userName: deletedUser?.name,
+      email: deletedUser?.email,
+    })
     setUsers(users.filter(u => u.id !== id))
   }
 
   const handleEditUser = (user: User) => {
+    frontendLogger.debug('Users', 'Edit user dialog opened', {
+      userId: user.id,
+      name: user.name,
+      email: user.email,
+      role: user.role,
+    })
+    setFormData({ name: user.name, email: user.email, role: user.role })
     setEditingUser(user)
     setOpenDialog(true)
+  }
+
+  const handleSaveUser = () => {
+    // Validation
+    if (!formData.name || !formData.email || !formData.role) {
+      frontendLogger.error('Users', 'Form validation failed', new Error('Missing fields'), {
+        name: formData.name,
+        email: formData.email,
+        role: formData.role,
+      })
+      alert('Please fill all fields')
+      return
+    }
+
+    if (!formData.email.includes('@')) {
+      frontendLogger.error('Users', 'Invalid email format', new Error('Invalid email'), {
+        email: formData.email,
+      })
+      alert('Please enter a valid email')
+      return
+    }
+
+    if (editingUser) {
+      // Update existing user
+      setUsers(users.map(u => u.id === editingUser.id ? { ...u, ...formData } : u))
+      frontendLogger.info('Users', 'User updated', {
+        userId: editingUser.id,
+        name: formData.name,
+        email: formData.email,
+        role: formData.role,
+      })
+    } else {
+      // Add new user
+      const newUser: User = {
+        id: Math.max(...users.map(u => u.id), 0) + 1,
+        name: formData.name,
+        email: formData.email,
+        role: formData.role,
+        status: 'Active',
+        joinDate: new Date().toISOString().split('T')[0],
+      }
+      setUsers([...users, newUser])
+      frontendLogger.info('Users', 'User created', {
+        userId: newUser.id,
+        name: newUser.name,
+        email: newUser.email,
+        role: newUser.role,
+      })
+    }
+
+    setOpenDialog(false)
+    setFormData({ name: '', email: '', role: 'Trader' })
+  }
+
+  const handleCloseDialog = () => {
+    setOpenDialog(false)
+    setFormData({ name: '', email: '', role: 'Trader' })
+    setEditingUser(null)
   }
 
   const getRoleColor = (role: string) => {
@@ -70,7 +157,7 @@ export function UsersPage() {
           <Button
             startIcon={<Add />}
             variant="contained"
-            onClick={() => { setEditingUser(null); setOpenDialog(true); }}
+            onClick={handleAddUser}
             sx={{
               backgroundColor: THEME_PRO.primary,
               color: '#fff',
@@ -150,19 +237,112 @@ export function UsersPage() {
         </Card>
 
         {/* Add/Edit Dialog */}
-        <Dialog open={openDialog} onClose={() => setOpenDialog(false)} maxWidth="sm" fullWidth>
+        <Dialog
+          open={openDialog}
+          onClose={handleCloseDialog}
+          maxWidth="sm"
+          fullWidth
+          slotProps={{
+            paper: {
+              sx: {
+                borderRadius: RADIUS_PRO.lg,
+                backgroundColor: THEME_PRO.bgSecondary,
+                border: `1px solid ${THEME_PRO.border}`,
+              },
+            },
+          }}
+        >
           <DialogTitle sx={{ color: THEME_PRO.textPrimary, fontWeight: 700 }}>
-            {editingUser ? 'Edit User' : 'Add New User'}
+            {editingUser ? '✏️ Edit User' : '➕ Add New User'}
           </DialogTitle>
-          <DialogContent sx={{ pt: SPACING_PRO.lg }}>
-            <TextField fullWidth label="Name" margin="normal" variant="outlined" />
-            <TextField fullWidth label="Email" margin="normal" variant="outlined" type="email" />
-            <TextField fullWidth label="Role" margin="normal" variant="outlined" />
+          <DialogContent sx={{ pt: SPACING_PRO.lg, display: 'flex', flexDirection: 'column', gap: SPACING_PRO.lg }}>
+            <TextField
+              fullWidth
+              label="Full Name"
+              margin="normal"
+              variant="outlined"
+              value={formData.name}
+              onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+              sx={{
+                '& .MuiOutlinedInput-root': {
+                  backgroundColor: THEME_PRO.bgTertiary,
+                  '& fieldset': { borderColor: THEME_PRO.border },
+                },
+              }}
+            />
+            <TextField
+              fullWidth
+              label="Email"
+              margin="normal"
+              variant="outlined"
+              type="email"
+              value={formData.email}
+              onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+              sx={{
+                '& .MuiOutlinedInput-root': {
+                  backgroundColor: THEME_PRO.bgTertiary,
+                  '& fieldset': { borderColor: THEME_PRO.border },
+                },
+              }}
+            />
+
+            <FormControl fullWidth>
+              <InputLabel>Role</InputLabel>
+              <Select
+                value={formData.role}
+                label="Role"
+                onChange={(e) => setFormData({ ...formData, role: e.target.value })}
+                sx={{
+                  backgroundColor: THEME_PRO.bgTertiary,
+                  color: THEME_PRO.textPrimary,
+                  '& .MuiOutlinedInput-notchedOutline': {
+                    borderColor: THEME_PRO.border,
+                  },
+                  '&:hover .MuiOutlinedInput-notchedOutline': {
+                    borderColor: THEME_PRO.primary,
+                  },
+                  '& .MuiSvgIcon-root': {
+                    color: THEME_PRO.textSecondary,
+                  },
+                }}
+              >
+                {AVAILABLE_ROLES.map((role) => (
+                  <MenuItem key={role.value} value={role.value}>
+                    <Box sx={{ display: 'flex', flexDirection: 'column' }}>
+                      <Typography sx={{ fontWeight: 600 }}>{role.label}</Typography>
+                    </Box>
+                  </MenuItem>
+                ))}
+              </Select>
+            </FormControl>
+
+            <Box sx={{ p: SPACING_PRO.lg, backgroundColor: THEME_PRO.bgTertiary, borderRadius: RADIUS_PRO.md }}>
+              <Typography sx={{ fontSize: '12px', fontWeight: 600, color: THEME_PRO.textTertiary, mb: SPACING_PRO.sm, textTransform: 'uppercase' }}>
+                📋 Role Descriptions
+              </Typography>
+              <Typography sx={{ fontSize: '12px', color: THEME_PRO.textSecondary, lineHeight: 1.6 }}>
+                {AVAILABLE_ROLES.find(r => r.value === formData.role)?.label}
+              </Typography>
+            </Box>
           </DialogContent>
           <DialogActions sx={{ p: SPACING_PRO.lg, gap: SPACING_PRO.sm }}>
-            <Button onClick={() => setOpenDialog(false)}>Cancel</Button>
-            <Button variant="contained" sx={{ backgroundColor: THEME_PRO.primary, color: '#fff' }}>
-              {editingUser ? 'Update' : 'Create'}
+            <Button
+              onClick={handleCloseDialog}
+              sx={{ color: THEME_PRO.textSecondary, textTransform: 'none', fontWeight: 600 }}
+            >
+              Cancel
+            </Button>
+            <Button
+              onClick={handleSaveUser}
+              variant="contained"
+              sx={{
+                backgroundColor: THEME_PRO.primary,
+                color: '#fff',
+                textTransform: 'none',
+                fontWeight: 600,
+              }}
+            >
+              {editingUser ? 'Update User' : 'Create User'}
             </Button>
           </DialogActions>
         </Dialog>
