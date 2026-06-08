@@ -14,6 +14,7 @@ import DebugSessions from './pages/DebugSessions'
 import IncidentManagement from './pages/IncidentManagement'
 import TeamCoordination from './pages/TeamCoordination'
 import Performance from './pages/Performance'
+import Trading from './pages/Trading'
 
 function ProtectedRoute({ children }: { children: React.ReactNode }) {
   const { isAuthenticated } = useAuthStore()
@@ -120,6 +121,14 @@ export function App() {
           element={
             <ProtectedRoute>
               <Performance />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/trading"
+          element={
+            <ProtectedRoute>
+              <Trading />
             </ProtectedRoute>
           }
         />
