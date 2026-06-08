@@ -64,8 +64,8 @@ export function Sidebar() {
                   transform: isActive ? 'scale(1.05)' : 'scale(1)',
                   boxShadow: isActive ? '0 10px 20px rgba(37, 99, 235, 0.3)' : 'none'
                 }}
-                onMouseEnter={(e) => !isActive && (e.currentTarget.style.backgroundColor = '#374151')}
-                onMouseLeave={(e) => !isActive && (e.currentTarget.style.backgroundColor = 'transparent')}
+                onMouseEnter={(e: React.MouseEvent<HTMLAnchorElement>) => !isActive && (e.currentTarget.style.backgroundColor = '#374151')}
+                onMouseLeave={(e: React.MouseEvent<HTMLAnchorElement>) => !isActive && (e.currentTarget.style.backgroundColor = 'transparent')}
               >
                 <span style={{ fontSize: '20px' }}>{item.icon}</span>
                 <span>{item.label}</span>
@@ -100,8 +100,8 @@ export function Sidebar() {
                     transition: 'all 200ms',
                     fontSize: '14px',
                   }}
-                  onMouseEnter={(e) => !isActive && (e.currentTarget.style.backgroundColor = '#374151')}
-                  onMouseLeave={(e) => !isActive && (e.currentTarget.style.backgroundColor = 'transparent')}
+                  onMouseEnter={(e: React.MouseEvent<HTMLAnchorElement>) =>!isActive && (e.currentTarget.style.backgroundColor = '#374151')}
+                  onMouseLeave={(e: React.MouseEvent<HTMLAnchorElement>) =>!isActive && (e.currentTarget.style.backgroundColor = 'transparent')}
                 >
                   <span style={{ fontSize: '18px' }}>{item.icon}</span>
                   <span>{item.label}</span>
@@ -137,8 +137,8 @@ export function Sidebar() {
                     transition: 'all 200ms',
                     fontSize: '14px',
                   }}
-                  onMouseEnter={(e) => !isActive && (e.currentTarget.style.backgroundColor = '#374151')}
-                  onMouseLeave={(e) => !isActive && (e.currentTarget.style.backgroundColor = 'transparent')}
+                  onMouseEnter={(e: React.MouseEvent<HTMLAnchorElement>) =>!isActive && (e.currentTarget.style.backgroundColor = '#374151')}
+                  onMouseLeave={(e: React.MouseEvent<HTMLAnchorElement>) =>!isActive && (e.currentTarget.style.backgroundColor = 'transparent')}
                 >
                   <span style={{ fontSize: '18px' }}>{item.icon}</span>
                   <span>{item.label}</span>
@@ -174,8 +174,8 @@ export function Sidebar() {
                     transition: 'all 200ms',
                     fontSize: '14px',
                   }}
-                  onMouseEnter={(e) => !isActive && (e.currentTarget.style.backgroundColor = '#374151')}
-                  onMouseLeave={(e) => !isActive && (e.currentTarget.style.backgroundColor = 'transparent')}
+                  onMouseEnter={(e: React.MouseEvent<HTMLAnchorElement>) =>!isActive && (e.currentTarget.style.backgroundColor = '#374151')}
+                  onMouseLeave={(e: React.MouseEvent<HTMLAnchorElement>) =>!isActive && (e.currentTarget.style.backgroundColor = 'transparent')}
                 >
                   <span style={{ fontSize: '18px' }}>{item.icon}</span>
                   <span>{item.label}</span>
@@ -211,8 +211,8 @@ export function Sidebar() {
                     transition: 'all 200ms',
                     fontSize: '14px',
                   }}
-                  onMouseEnter={(e) => !isActive && (e.currentTarget.style.backgroundColor = '#374151')}
-                  onMouseLeave={(e) => !isActive && (e.currentTarget.style.backgroundColor = 'transparent')}
+                  onMouseEnter={(e: React.MouseEvent<HTMLAnchorElement>) =>!isActive && (e.currentTarget.style.backgroundColor = '#374151')}
+                  onMouseLeave={(e: React.MouseEvent<HTMLAnchorElement>) =>!isActive && (e.currentTarget.style.backgroundColor = 'transparent')}
                 >
                   <span style={{ fontSize: '18px' }}>{item.icon}</span>
                   <span>{item.label}</span>

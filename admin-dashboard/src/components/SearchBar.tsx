@@ -29,7 +29,7 @@ const PAGES_REGISTRY: PageResult[] = [
   { label: 'Analytics', path: '/analytics', icon: '📉', keywords: ['analytics', 'reports', 'data'] },
   { label: 'Trading', path: '/trading', icon: '📊', keywords: ['trading', 'portfolio'] },
   { label: 'Settings', path: '/settings', icon: <Settings />, keywords: ['settings', 'config', 'preferences'] },
-  { label: 'Diagnostics', path: '/diagnostics', icon: <Diagnostics />, keywords: ['diagnostics', 'testing', 'health'] },
+  { label: 'Diagnostics', path: '/diagnostics', icon: <Settings />, keywords: ['diagnostics', 'testing', 'health'] },
   { label: 'Logs', path: '/logs', icon: '📋', keywords: ['logs', 'debugging'] },
   { label: 'Errors', path: '/errors', icon: '🚨', keywords: ['errors', 'failures'] },
   { label: 'Audit Trail', path: '/audit', icon: '📄', keywords: ['audit', 'history'] },
