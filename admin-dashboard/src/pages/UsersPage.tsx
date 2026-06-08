@@ -70,7 +70,7 @@ export function UsersPage() {
   }
 
   const filteredUsers = users.filter(user =>
-    user.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    (user.name?.toLowerCase() || '').includes(searchTerm.toLowerCase()) ||
     user.email.toLowerCase().includes(searchTerm.toLowerCase())
   )
 
