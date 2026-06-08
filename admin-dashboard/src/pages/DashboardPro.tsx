@@ -1,6 +1,6 @@
 import React from 'react'
 import { LayoutPro } from '../components/LayoutPro'
-import { Box, Card, Typography, LinearProgress, Chip, Button } from '@mui/material'
+import { Box, Card, Typography, LinearProgress, Chip, Button, Dialog, DialogTitle, DialogContent, DialogActions, TextField, Alert } from '@mui/material'
 import { TrendingUp, TrendingDown, Visibility, VisibilityOff } from '@mui/icons-material'
 import { useAuthStore } from '../state/store'
 import { formatCurrency, getCurrencyByCode } from '../content/currencies'
@@ -16,8 +16,31 @@ interface StatCard {
 
 export function DashboardPro() {
   const [showValues, setShowValues] = React.useState(true)
+  const [withdrawalOpen, setWithdrawalOpen] = React.useState(false)
+  const [withdrawalAmount, setWithdrawalAmount] = React.useState('')
+  const [withdrawalMessage, setWithdrawalMessage] = React.useState('')
   const { currency } = useAuthStore()
   const currencyInfo = getCurrencyByCode(currency)
+
+  const handleWithdrawal = () => {
+    if (!withdrawalAmount || parseFloat(withdrawalAmount) <= 0) {
+      setWithdrawalMessage('❌ Please enter a valid amount')
+      return
+    }
+
+    const amount = parseFloat(withdrawalAmount)
+    if (amount > 287450) {
+      setWithdrawalMessage('❌ Insufficient balance for this withdrawal')
+      return
+    }
+
+    setWithdrawalMessage(`✅ Withdrawal request of ${formatCurrency(amount, currency)} submitted! Processing...`)
+    setTimeout(() => {
+      setWithdrawalOpen(false)
+      setWithdrawalAmount('')
+      setWithdrawalMessage('')
+    }, 3000)
+  }
 
   const stats: StatCard[] = [
     {
@@ -244,6 +267,7 @@ export function DashboardPro() {
                   Deposit
                 </Button>
                 <Button
+                  onClick={() => setWithdrawalOpen(true)}
                   variant="outlined"
                   sx={{
                     flex: 1,
@@ -261,6 +285,108 @@ export function DashboardPro() {
           </Box>
         </Box>
       </Box>
+
+      {/* Withdrawal Dialog */}
+      <Dialog
+        open={withdrawalOpen}
+        onClose={() => setWithdrawalOpen(false)}
+        maxWidth="sm"
+        fullWidth
+        slotProps={{
+          paper: {
+            sx: {
+              borderRadius: RADIUS_PRO.lg,
+              backgroundColor: THEME_PRO.bgSecondary,
+              border: `1px solid ${THEME_PRO.border}`,
+            },
+          },
+        }}
+      >
+        <DialogTitle sx={{ color: THEME_PRO.textPrimary, fontWeight: 700 }}>
+          💸 Withdrawal Request
+        </DialogTitle>
+        <DialogContent sx={{ pt: SPACING_PRO.lg }}>
+          {withdrawalMessage && (
+            <Alert
+              sx={{
+                mb: SPACING_PRO.lg,
+                backgroundColor: withdrawalMessage.includes('✅') ? THEME_PRO.successLight : THEME_PRO.errorLight,
+                color: withdrawalMessage.includes('✅') ? THEME_PRO.success : THEME_PRO.error,
+                border: `1px solid ${withdrawalMessage.includes('✅') ? THEME_PRO.success : THEME_PRO.error}`,
+              }}
+            >
+              {withdrawalMessage}
+            </Alert>
+          )}
+
+          <Typography sx={{ color: THEME_PRO.textSecondary, fontSize: '13px', mb: SPACING_PRO.md }}>
+            Available Balance: {formatCurrency(287450, currency)}
+          </Typography>
+
+          <TextField
+            fullWidth
+            label="Withdrawal Amount"
+            type="number"
+            value={withdrawalAmount}
+            onChange={(e) => setWithdrawalAmount(e.target.value)}
+            placeholder="Enter amount"
+            inputProps={{ step: '0.01', min: '0' }}
+            sx={{
+              '& .MuiOutlinedInput-root': {
+                backgroundColor: THEME_PRO.bgTertiary,
+                color: THEME_PRO.textPrimary,
+                '& fieldset': { borderColor: THEME_PRO.border },
+                '&:hover fieldset': { borderColor: THEME_PRO.primary },
+              },
+              '& .MuiInputBase-input': {
+                color: THEME_PRO.textPrimary,
+              },
+              '& .MuiInputLabel-root': {
+                color: THEME_PRO.textSecondary,
+              },
+            }}
+          />
+
+          <Box sx={{ mt: SPACING_PRO.lg, p: SPACING_PRO.lg, backgroundColor: THEME_PRO.bgTertiary, borderRadius: RADIUS_PRO.md }}>
+            <Typography sx={{ fontSize: '12px', color: THEME_PRO.textSecondary, mb: SPACING_PRO.sm }}>
+              📋 Withdrawal Summary
+            </Typography>
+            <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: SPACING_PRO.sm }}>
+              <Typography sx={{ fontSize: '13px', color: THEME_PRO.textSecondary }}>Amount:</Typography>
+              <Typography sx={{ fontSize: '13px', fontWeight: 600, color: THEME_PRO.primary }}>
+                {withdrawalAmount ? formatCurrency(parseFloat(withdrawalAmount), currency) : '—'}
+              </Typography>
+            </Box>
+            <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
+              <Typography sx={{ fontSize: '13px', color: THEME_PRO.textSecondary }}>Remaining Balance:</Typography>
+              <Typography sx={{ fontSize: '13px', fontWeight: 600, color: THEME_PRO.primary }}>
+                {withdrawalAmount ? formatCurrency(287450 - parseFloat(withdrawalAmount), currency) : formatCurrency(287450, currency)}
+              </Typography>
+            </Box>
+          </Box>
+        </DialogContent>
+        <DialogActions sx={{ p: SPACING_PRO.lg, gap: SPACING_PRO.sm }}>
+          <Button
+            onClick={() => setWithdrawalOpen(false)}
+            sx={{ color: THEME_PRO.textSecondary, textTransform: 'none', fontWeight: 600 }}
+          >
+            Cancel
+          </Button>
+          <Button
+            onClick={handleWithdrawal}
+            variant="contained"
+            sx={{
+              backgroundColor: THEME_PRO.primary,
+              color: '#fff',
+              textTransform: 'none',
+              fontWeight: 600,
+              '&:hover': { backgroundColor: THEME_PRO.primaryDark },
+            }}
+          >
+            Confirm Withdrawal
+          </Button>
+        </DialogActions>
+      </Dialog>
     </LayoutPro>
   )
 }
