@@ -1,8 +1,9 @@
-import React from 'react'
+import React, { useState } from 'react'
 import { useNavigate, useLocation } from 'react-router-dom'
 import { Box, Button, AppBar, Toolbar, Avatar } from '@mui/material'
-import { ArrowBack, Home, Logout } from '@mui/icons-material'
+import { ArrowBack, Home, Logout, HelpOutline } from '@mui/icons-material'
 import { useAuthStore } from '../state/store'
+import { HelpModal } from './HelpModal'
 import { THEME_PRO, SPACING_PRO, RADIUS_PRO, TRANSITIONS_PRO } from '../theme-pro'
 
 export function NavbarPro() {
@@ -10,6 +11,7 @@ export function NavbarPro() {
   const location = useLocation()
   const isHome = location.pathname === '/'
   const { logout } = useAuthStore()
+  const [helpOpen, setHelpOpen] = useState(false)
 
   const handleLogout = () => {
     logout()
@@ -141,6 +143,28 @@ export function NavbarPro() {
           </Avatar>
 
           <Button
+            onClick={() => setHelpOpen(true)}
+            startIcon={<HelpOutline sx={{ fontSize: '18px' }} />}
+            sx={{
+              color: THEME_PRO.primary,
+              textTransform: 'none',
+              fontWeight: 500,
+              fontSize: '14px',
+              px: SPACING_PRO.lg,
+              py: SPACING_PRO.md,
+              borderRadius: RADIUS_PRO.md,
+              border: `1px solid ${THEME_PRO.border}`,
+              transition: TRANSITIONS_PRO.normal,
+              '&:hover': {
+                backgroundColor: THEME_PRO.primaryLight,
+                borderColor: THEME_PRO.primary,
+              },
+            }}
+          >
+            Help
+          </Button>
+
+          <Button
             onClick={handleLogout}
             startIcon={<Logout sx={{ fontSize: '18px' }} />}
             sx={{
@@ -163,6 +187,8 @@ export function NavbarPro() {
           </Button>
         </Box>
       </Toolbar>
+
+      <HelpModal open={helpOpen} onClose={() => setHelpOpen(false)} currentPage={location.pathname} />
     </AppBar>
   )
 }
