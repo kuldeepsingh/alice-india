@@ -1,6 +1,6 @@
 import React, { useState } from 'react'
 import { LayoutPro } from '../components/LayoutPro'
-import { Box, Card, Typography, TextField, Button, Grid, Chip } from '@mui/material'
+import { Box, Card, Typography, TextField, Button, Chip } from '@mui/material'
 import { SendToMobile } from '@mui/icons-material'
 import { THEME_PRO, SPACING_PRO, RADIUS_PRO, SHADOWS_PRO } from '../theme-pro'
 
@@ -19,9 +19,9 @@ export function tradingPage() {
           <Typography sx={{ color: THEME_PRO.textSecondary }}>Place and manage your trades</Typography>
         </Box>
 
-        <Grid container spacing={3}>
+        <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', md: '1fr 1fr' }, gap: 3 }}>
           {/* Order Form */}
-          <Grid item xs={12} md={6}>
+          <Box>
             <Card sx={{ p: SPACING_PRO.xxl, borderRadius: RADIUS_PRO.lg, border: `1px solid ${THEME_PRO.border}`, boxShadow: SHADOWS_PRO.md }}>
               <Typography sx={{ fontSize: '18px', fontWeight: 700, color: THEME_PRO.textPrimary, mb: SPACING_PRO.lg }}>
                 Place New Order
@@ -40,10 +40,10 @@ export function tradingPage() {
                 Place Order
               </Button>
             </Card>
-          </Grid>
+          </Box>
 
           {/* Market Watch */}
-          <Grid item xs={12} md={6}>
+          <Box>
             <Card sx={{ p: SPACING_PRO.xxl, borderRadius: RADIUS_PRO.lg, border: `1px solid ${THEME_PRO.border}`, boxShadow: SHADOWS_PRO.md }}>
               <Typography sx={{ fontSize: '18px', fontWeight: 700, color: THEME_PRO.textPrimary, mb: SPACING_PRO.lg }}>
                 Market Watch
@@ -63,8 +63,8 @@ export function tradingPage() {
                 </Box>
               ))}
             </Card>
-          </Grid>
-        </Grid>
+          </Box>
+        </Box>
       </Box>
     </LayoutPro>
   )

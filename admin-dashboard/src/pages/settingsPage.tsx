@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react'
 import { LayoutPro } from '../components/LayoutPro'
 import { Box, Card, Typography, Button, TextField, Switch, FormControlLabel, Divider, Alert } from '@mui/material'
-import { Save, Eye, EyeOff } from '@mui/icons-material'
+import { Save, Visibility, VisibilityOff } from '@mui/icons-material'
 import { THEME_PRO, SPACING_PRO, RADIUS_PRO, SHADOWS_PRO } from '../theme-pro'
 
 export function settingsPage() {
@@ -113,7 +113,7 @@ export function settingsPage() {
                     borderRadius: RADIUS_PRO.md,
                   }}
                 >
-                  {showApiKey ? <EyeOff /> : <Eye />}
+                  {showApiKey ? <VisibilityOff /> : <Visibility />}
                 </Button>
               </Box>
             </Box>

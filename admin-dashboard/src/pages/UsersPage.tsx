@@ -89,12 +89,14 @@ export function UsersPage() {
             placeholder="Search users by name or email..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            startAdornment={<Search sx={{ mr: SPACING_PRO.sm, color: THEME_PRO.textSecondary }} />}
             sx={{
               '& .MuiOutlinedInput-root': {
                 backgroundColor: THEME_PRO.bgTertiary,
                 '& fieldset': { borderColor: THEME_PRO.border },
               },
+            }}
+            InputProps={{
+              startAdornment: <Search sx={{ mr: SPACING_PRO.sm, color: THEME_PRO.textSecondary }} />,
             }}
           />
         </Card>
