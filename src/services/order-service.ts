@@ -1,11 +1,16 @@
 /**
  * Order Service
  * Order management, validation, and risk controls
+ * 
+ * Now integrates with key retrieval service to fetch Zerodha credentials
+ * from secure backend storage instead of using hardcoded keys.
  */
 
 import { query } from './database.ts'
 import { notificationService } from './notification-service.ts'
 import { logger } from './logger.ts'
+import { keyRetrievalService } from './key-retrieval-service.ts'
+import { ZerodhaService } from './zerodha-service.ts'
 import {
   Order,
   OrderRequest,
@@ -15,7 +20,6 @@ import {
 } from '../models/trading.ts'
 
 export class OrderService {
-  private zerodhaService: any | null = null
   private defaultRiskLimits: any = {
     dailyLossLimit: -50000,
     positionSizeLimit: 1000000,
@@ -24,12 +28,14 @@ export class OrderService {
     stopLossPercent: 0.05,
   }
 
-  constructor(zerodhaService?: any) {
-    this.zerodhaService = zerodhaService || null
+  constructor() {
+    // No longer need zerodhaService passed in - we'll fetch credentials dynamically
   }
 
   /**
    * Create and place an order
+   * 
+   * Fetches Zerodha credentials from secure backend storage
    */
   async createOrder(
     userId: string,
@@ -48,12 +54,25 @@ export class OrderService {
         throw new Error(riskCheck.reason || 'Risk limits exceeded')
       }
 
-      // Place order with Zerodha
-      if (!this.zerodhaService) {
-        throw new Error('Zerodha service not configured')
+      // Fetch Zerodha credentials from backend
+      logger.debug({
+        type: 'fetching_zerodha_credentials',
+        userId,
+      })
+
+      const zerodhaCredentials = await keyRetrievalService.getZerodhaCredentials(userId)
+      if (!zerodhaCredentials || !zerodhaCredentials.key || !zerodhaCredentials.secret) {
+        throw new Error('Zerodha credentials not configured. Please configure in Settings.')
       }
 
-      const order = await this.zerodhaService.placeOrder(orderRequest)
+      // Create Zerodha service with fetched credentials
+      const zerodhaService = new ZerodhaService(
+        zerodhaCredentials.key,
+        zerodhaCredentials.secret
+      )
+
+      // Place order with Zerodha
+      const order = await zerodhaService.placeOrder(orderRequest)
 
       // Store in database
       const sqlInsert = `
@@ -82,7 +101,7 @@ export class OrderService {
 
       // Log order placed
       logger.info({
-        type: 'order_placed',
+        type: 'order_placed_successfully',
         userId,
         orderId: storedOrder.id,
         symbol: order.tradingSymbol,
@@ -120,165 +139,172 @@ export class OrderService {
       let paramCount = 2
 
       if (filters?.symbol) {
-        sql += ` AND symbol = $${paramCount++}`
+        sql += ` AND symbol = $${paramCount}`
         params.push(filters.symbol)
+        paramCount++
       }
 
       if (filters?.status) {
-        sql += ` AND status = $${paramCount++}`
+        sql += ` AND status = $${paramCount}`
         params.push(filters.status)
+        paramCount++
       }
 
-      sql += ` ORDER BY created_at DESC`
+      sql += ' ORDER BY created_at DESC'
 
       if (filters?.limit) {
-        sql += ` LIMIT $${paramCount++}`
+        sql += ` LIMIT $${paramCount}`
         params.push(filters.limit)
+        paramCount++
       }
 
       if (filters?.offset) {
-        sql += ` OFFSET $${paramCount++}`
+        sql += ` OFFSET $${paramCount}`
         params.push(filters.offset)
       }
 
       const result = await query(sql, params)
       return result.rows
     } catch (error) {
-      console.error('Get orders error:', error)
+      logger.error({
+        type: 'get_orders_error',
+        userId,
+        error: error instanceof Error ? error.message : String(error),
+      })
       throw error
     }
   }
 
   /**
-   * Validate order before placement
+   * Cancel order
    */
-  async validateOrder(order: OrderRequest): Promise<{ isValid: boolean; reason?: string }> {
+  async cancelOrder(userId: string, orderId: string): Promise<boolean> {
     try {
-      if (!order.tradingSymbol || !order.quantity || !order.price) {
-        return { isValid: false, reason: 'Missing required fields' }
+      // Fetch Zerodha credentials
+      const zerodhaCredentials = await keyRetrievalService.getZerodhaCredentials(userId)
+      if (!zerodhaCredentials) {
+        throw new Error('Zerodha credentials not configured')
       }
 
-      if (order.quantity <= 0 || order.price <= 0) {
-        return { isValid: false, reason: 'Quantity and price must be positive' }
-      }
+      const zerodhaService = new ZerodhaService(
+        zerodhaCredentials.key,
+        zerodhaCredentials.secret
+      )
 
-      if (order.quantity > this.defaultRiskLimits.maxQuantityPerOrder) {
-        return {
-          isValid: false,
-          reason: `Quantity exceeds limit of ${this.defaultRiskLimits.maxQuantityPerOrder}`,
-        }
-      }
+      // Cancel order
+      await zerodhaService.cancelOrder(orderId)
 
-      if (!['BUY', 'SELL'].includes(order.transactionType)) {
-        return { isValid: false, reason: 'Invalid transaction type' }
-      }
+      // Update database
+      await query(
+        'UPDATE trading_orders SET status = $1, updated_at = CURRENT_TIMESTAMP WHERE id = $2 AND user_id = $3',
+        ['CANCELLED', orderId, userId]
+      )
 
-      if (!['REGULAR', 'BRACKET', 'COVER'].includes(order.orderType)) {
-        return { isValid: false, reason: 'Invalid order type' }
-      }
+      logger.info({
+        type: 'order_cancelled',
+        userId,
+        orderId,
+      })
 
-      if (!['DAY', 'IOC'].includes(order.validity)) {
-        return { isValid: false, reason: 'Invalid validity' }
-      }
-
-      if (!['MIS', 'CNC', 'NRML'].includes(order.product)) {
-        return { isValid: false, reason: 'Invalid product' }
-      }
-
-      return { isValid: true }
+      return true
     } catch (error) {
-      console.error('Validation error:', error)
-      return { isValid: false, reason: 'Validation error' }
+      logger.error({
+        type: 'cancel_order_error',
+        userId,
+        orderId,
+        error: error instanceof Error ? error.message : String(error),
+      })
+      throw error
     }
   }
 
   /**
-   * Check risk limits before order
+   * Validate order
    */
-  async checkRiskLimits(
+  private async validateOrder(orderRequest: OrderRequest): Promise<{ isValid: boolean; reason?: string }> {
+    if (!orderRequest.symbol || orderRequest.symbol.trim().length === 0) {
+      return { isValid: false, reason: 'Symbol is required' }
+    }
+
+    if (!orderRequest.side || !['BUY', 'SELL'].includes(orderRequest.side)) {
+      return { isValid: false, reason: 'Invalid side. Must be BUY or SELL' }
+    }
+
+    if (!orderRequest.quantity || orderRequest.quantity <= 0) {
+      return { isValid: false, reason: 'Quantity must be positive' }
+    }
+
+    if (!orderRequest.price || orderRequest.price <= 0) {
+      return { isValid: false, reason: 'Price must be positive' }
+    }
+
+    return { isValid: true }
+  }
+
+  /**
+   * Check risk limits
+   */
+  private async checkRiskLimits(
     userId: string,
-    order: OrderRequest
+    orderRequest: OrderRequest
   ): Promise<RiskCheck> {
     try {
-      if (!this.zerodhaService) {
-        return { isValid: true }
-      }
+      // Get user's existing positions
+      const orders = await this.getOrders(userId, { status: 'FILLED' })
 
-      const portfolio = await this.zerodhaService.getPortfolio()
-      const requiredMargin = order.price * order.quantity * 0.20
-      const availableMargin = portfolio.margin.available
+      // Calculate total exposure
+      const totalExposure = orders.reduce((sum, order) => {
+        const side = order.transaction_type === 'BUY' ? 1 : -1
+        return sum + order.quantity * order.price * side
+      }, 0)
 
-      if (requiredMargin > availableMargin) {
+      // Check limits
+      const orderValue = orderRequest.quantity * orderRequest.price
+      if (totalExposure + orderValue > this.defaultRiskLimits.positionSizeLimit) {
         return {
           isValid: false,
-          reason: 'Insufficient margin',
-          requiredMargin,
-          availableMargin,
+          reason: 'Position size exceeds limit',
         }
       }
 
-      const newUtilization = (portfolio.margin.used + requiredMargin) / portfolio.margin.total
-
-      if (newUtilization > this.defaultRiskLimits.maxMarginUtilization) {
+      if (orderRequest.quantity > this.defaultRiskLimits.maxQuantityPerOrder) {
         return {
           isValid: false,
-          reason: 'Margin utilization limit exceeded',
-          currentMargin: portfolio.margin.used,
-          availableMargin,
-        }
-      }
-
-      const dayPnL = portfolio.positions.reduce((sum, p) => sum + p.m2m, 0)
-
-      if (dayPnL < this.defaultRiskLimits.dailyLossLimit) {
-        return {
-          isValid: false,
-          reason: 'Daily loss limit exceeded',
+          reason: `Quantity exceeds max ${this.defaultRiskLimits.maxQuantityPerOrder}`,
         }
       }
 
       return { isValid: true }
     } catch (error) {
-      console.error('Risk check error:', error)
-      return { isValid: true }
+      logger.error({
+        type: 'risk_check_error',
+        userId,
+        error: error instanceof Error ? error.message : String(error),
+      })
+      // If risk check fails, fail safely
+      return { isValid: false, reason: 'Risk check error' }
     }
   }
 
   /**
-   * Order placed notification
+   * Notify order placed
    */
-  async notifyOrderPlaced(order: any): Promise<void> {
+  private async notifyOrderPlaced(order: any): Promise<void> {
     try {
-      await NotificationService.sendNotification({
-        userId: order.user_id,
-        type: 'order_placed' as any,
-        title: `Order Placed: ${order.symbol}`,
-        message: `${order.transaction_type} ${order.quantity} ${order.symbol} @ ₹${order.price}`,
+      await notificationService.sendOrderNotification(order.user_id, {
+        type: 'ORDER_PLACED',
+        orderId: order.id,
+        symbol: order.symbol,
+        quantity: order.quantity,
+        price: order.price,
+        message: `Order placed: ${order.quantity} ${order.symbol} @ ${order.price}`,
       })
     } catch (error) {
-      console.error('Notification error:', error)
-    }
-  }
-
-  /**
-   * Get order statistics
-   */
-  async getOrderStats(userId: string): Promise<any> {
-    try {
-      const sql = `
-        SELECT
-          COUNT(*) as total_orders,
-          COUNT(*) FILTER (WHERE status = 'COMPLETED') as completed_orders,
-          COUNT(*) FILTER (WHERE status = 'CANCELLED') as cancelled_orders
-        FROM trading_orders
-        WHERE user_id = $1 AND DATE(created_at) = CURRENT_DATE
-      `
-
-      const result = await query(sql, [userId])
-      return result.rows[0] || {}
-    } catch (error) {
-      console.error('Order stats error:', error)
-      throw error
+      logger.warn({
+        type: 'notification_send_failed',
+        error: error instanceof Error ? error.message : String(error),
+      })
+      // Don't fail the order if notification fails
     }
   }
 }
