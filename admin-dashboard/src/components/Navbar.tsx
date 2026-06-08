@@ -1,16 +1,12 @@
 import React from 'react'
 import { useNavigate, useLocation } from 'react-router-dom'
-import { Box, Button, AppBar, Toolbar, useMediaQuery, useTheme } from '@mui/material'
+import { Box, Button, AppBar, Toolbar } from '@mui/material'
 import { ArrowBack, Home } from '@mui/icons-material'
 import { COLORS, TRANSITIONS, SPACING } from '../theme'
-import { SearchBar } from './SearchBar'
-import { UserProfileDropdown } from './UserProfileDropdown'
 
 export function Navbar() {
   const navigate = useNavigate()
   const location = useLocation()
-  const theme = useTheme()
-  const isMobile = useMediaQuery(theme.breakpoints.down('sm'))
   const isHome = location.pathname === '/'
 
   return (
@@ -33,7 +29,7 @@ export function Navbar() {
         }}
       >
         {/* Left section - Navigation buttons */}
-        <Box sx={{ display: 'flex', gap: SPACING.sm, alignItems: 'center', minWidth: 'fit-content' }}>
+        <Box sx={{ display: 'flex', gap: SPACING.sm, alignItems: 'center' }}>
           {/* Home button - always visible */}
           <Button
             onClick={() => navigate('/')}
@@ -46,14 +42,13 @@ export function Navbar() {
               fontSize: '14px',
               fontWeight: '500',
               transition: TRANSITIONS.normal,
-              whiteSpace: 'nowrap',
               '&:hover': {
                 backgroundColor: 'rgba(212, 175, 55, 0.2)',
                 borderColor: COLORS.primary,
               },
             }}
           >
-            {!isMobile && 'Home'}
+            Home
           </Button>
 
           {/* Back button - hidden on home page */}
@@ -69,25 +64,33 @@ export function Navbar() {
                 fontSize: '14px',
                 fontWeight: '500',
                 transition: TRANSITIONS.normal,
-                whiteSpace: 'nowrap',
                 '&:hover': {
                   backgroundColor: 'rgba(212, 175, 55, 0.15)',
                   borderColor: COLORS.primary,
                 },
               }}
             >
-              {!isMobile && 'Back'}
+              Back
             </Button>
           )}
         </Box>
 
-        {/* Center section - Search Bar */}
-        {!isMobile && <SearchBar />}
-
-        {/* Right section - User Profile */}
-        <Box sx={{ display: 'flex', alignItems: 'center', gap: SPACING.md, minWidth: 'fit-content' }}>
-          <UserProfileDropdown />
+        {/* Center section - Page title */}
+        <Box
+          sx={{
+            flex: 1,
+            textAlign: 'center',
+            color: COLORS.primary,
+            fontSize: '18px',
+            fontWeight: '600',
+            textTransform: 'capitalize',
+          }}
+        >
+          {location.pathname === '/' ? 'Dashboard' : location.pathname.slice(1).replace(/-/g, ' ')}
         </Box>
+
+        {/* Right section - Empty for balance */}
+        <Box sx={{ width: '120px' }} />
       </Toolbar>
     </AppBar>
   )

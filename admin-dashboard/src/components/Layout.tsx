@@ -12,7 +12,7 @@ export function Layout({ children }: LayoutProps) {
   return (
     <Box sx={{ display: 'flex', flexDirection: 'column', minHeight: '100vh' }}>
       <Navbar />
-      <Breadcrumb />
+      {/* <Breadcrumb /> */}
       <Box sx={{ display: 'flex', flex: 1 }}>
         <Sidebar />
         <Box sx={{ flex: 1, overflow: 'auto', p: 2 }}>
