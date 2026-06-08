@@ -8,7 +8,7 @@ export function Login() {
   const navigate = useNavigate()
   const { setToken, setUser } = useAuthStore()
   const [isRegister, setIsRegister] = useState(false)
-  const [email, setEmail] = useState('admin@example.com')
+  const [email, setEmail] = useState('admin@bot-trade.com')
   const [password, setPassword] = useState('admin123')
   const [confirmPassword, setConfirmPassword] = useState('admin123')
   const [loading, setLoading] = useState(false)
@@ -568,21 +568,9 @@ export function Login() {
               <p style={{ fontSize: '12px', color: '#0c4a6e', fontWeight: '700', margin: '0 0 12px 0' }}>
                 ✨ Demo Credentials:
               </p>
-              <div style={{
-                display: 'grid',
-                gridTemplateColumns: '1fr 1fr',
-                gap: '12px',
-                fontSize: '13px',
-                color: '#0c4a6e'
-              }}>
-                <div style={{ backgroundColor: 'rgba(255,255,255,0.6)', padding: '8px', borderRadius: '6px' }}>
-                  <p style={{ margin: '0 0 4px 0', fontWeight: '600' }}>Option 1</p>
-                  <p style={{ margin: '0', fontSize: '11px', fontFamily: 'monospace' }}>admin / admin</p>
-                </div>
-                <div style={{ backgroundColor: 'rgba(255,255,255,0.6)', padding: '8px', borderRadius: '6px' }}>
-                  <p style={{ margin: '0 0 4px 0', fontWeight: '600' }}>Option 2</p>
-                  <p style={{ margin: '0', fontSize: '11px', fontFamily: 'monospace' }}>admin@test.com / admin</p>
-                </div>
+              <div style={{ backgroundColor: 'rgba(255,255,255,0.6)', padding: '8px', borderRadius: '6px' }}>
+                <p style={{ margin: '0 0 4px 0', fontWeight: '600', fontSize: '13px', color: '#0c4a6e' }}>admin@bot-trade.com</p>
+                <p style={{ margin: '0', fontSize: '11px', fontFamily: 'monospace', color: '#0c4a6e' }}>/ admin123</p>
               </div>
             </div>
           )}

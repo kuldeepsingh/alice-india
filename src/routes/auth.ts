@@ -138,7 +138,7 @@ router.post('/register', async (req: Request, res: Response) => {
     })
 
     // Return created user (exclude password hash)
-    res.status(201).json(user)
+    res.status(201).json({ user })
 
   } catch (error) {
     // Handle any unexpected errors during registration
