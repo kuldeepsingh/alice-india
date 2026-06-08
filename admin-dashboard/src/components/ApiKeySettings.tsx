@@ -22,6 +22,7 @@ interface Props {
 export const ApiKeySettings = ({ onKeysUpdated }: Props) => {
   const { user } = useAuthStore()
   const userId = user?.id || 'default-user'
+
   const [claudeKey, setClaudeKey] = useState('')
   const [zerodhaKey, setZerodhaKey] = useState('')
   const [zerodhaSecret, setZerodhaSecret] = useState('')
@@ -43,10 +44,12 @@ export const ApiKeySettings = ({ onKeysUpdated }: Props) => {
   const [claudeUpdatedAt, setClaudeUpdatedAt] = useState<string | null>(null)
   const [zerodhaUpdatedAt, setZerodhaUpdatedAt] = useState<string | null>(null)
 
-  // Load initial status
+  // Load initial status when userId changes
   useEffect(() => {
-    checkStatus()
-  }, [])
+    if (userId) {
+      checkStatus()
+    }
+  }, [userId])
 
   const checkStatus = async () => {
     setChecking(true)
@@ -94,10 +97,20 @@ export const ApiKeySettings = ({ onKeysUpdated }: Props) => {
       const data = await response.json()
       if (!response.ok) throw new Error(data.error)
 
+      // Verify save was successful
+      if (data.results?.claude?.stored !== true) {
+        throw new Error('Key was not stored - please try again')
+      }
+
       setMessage('✅ Claude API key saved securely!')
       setMessageType('success')
       setClaudeKey('')
       setClaudeEditMode(false)
+
+      // Small delay to ensure database transaction is complete
+      await new Promise(resolve => setTimeout(resolve, 500))
+
+      // Refresh status
       await checkStatus()
 
       if (onKeysUpdated) {
@@ -137,11 +150,21 @@ export const ApiKeySettings = ({ onKeysUpdated }: Props) => {
       const data = await response.json()
       if (!response.ok) throw new Error(data.error)
 
+      // Verify save was successful
+      if (data.results?.zerodha?.stored !== true) {
+        throw new Error('Keys were not stored - please try again')
+      }
+
       setMessage('✅ Zerodha API keys saved securely!')
       setMessageType('success')
       setZerodhaKey('')
       setZerodhaSecret('')
       setZerodhaEditMode(false)
+
+      // Small delay to ensure database transaction is complete
+      await new Promise(resolve => setTimeout(resolve, 500))
+
+      // Refresh status
       await checkStatus()
 
       if (onKeysUpdated) {
