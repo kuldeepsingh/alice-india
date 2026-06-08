@@ -16,6 +16,7 @@ import { DebugPage } from './pages/debugPage'
 import { IncidentsPage } from './pages/incidentsPage'
 import { TeamPage } from './pages/teamPage'
 import { PerformancePage } from './pages/performancePage'
+import { tradingPage as TradingPage } from './pages/tradingPage'
 
 function ProtectedRoute({ children }: { children: React.ReactNode }) {
   const { isAuthenticated } = useAuthStore()
@@ -33,6 +34,7 @@ export function App() {
         <Route path="/users" element={<ProtectedRoute><UsersPage /></ProtectedRoute>} />
         <Route path="/accounts" element={<ProtectedRoute><AccountsPage /></ProtectedRoute>} />
         <Route path="/orders" element={<ProtectedRoute><OrdersPage /></ProtectedRoute>} />
+        <Route path="/trading" element={<ProtectedRoute><TradingPage /></ProtectedRoute>} />
         <Route path="/analytics" element={<ProtectedRoute><AnalyticsPage /></ProtectedRoute>} />
         <Route path="/settings" element={<ProtectedRoute><SettingsPage /></ProtectedRoute>} />
         <Route path="/diagnostics" element={<ProtectedRoute><DiagnosticsPage /></ProtectedRoute>} />
