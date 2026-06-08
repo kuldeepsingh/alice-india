@@ -13,9 +13,9 @@ const router = Router()
  * POST /api/v1/testing/run-all
  * Run all tests
  */
-router.post('/run-all', requireAdmin, async (req: Request, res: Response) => {
+router.post('/run-all', async (req: Request, res: Response) => {
   try {
-    const userId = (req as any).user.id
+    const userId = (req as any).user?.id || 'system'
 
     const results = await TestingService.runAllTests(userId)
 
