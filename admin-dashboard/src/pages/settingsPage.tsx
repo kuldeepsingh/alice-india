@@ -3,15 +3,16 @@ import { LayoutPro } from '../components/LayoutPro'
 import { Box, Card, Typography, Button, TextField, Switch, FormControlLabel, Divider, Alert, Select, MenuItem } from '@mui/material'
 import { Save, Visibility, VisibilityOff } from '@mui/icons-material'
 import { useAuthStore } from '../state/store'
-import { THEME_PRO, SPACING_PRO, RADIUS_PRO, SHADOWS_PRO } from '../theme-pro'
+import { THEME_PRO, getTheme, SPACING_PRO, RADIUS_PRO, SHADOWS_PRO } from '../theme-pro'
 import { SUPPORTED_CURRENCIES, DEFAULT_CURRENCY } from '../content/currencies'
+import { ApiKeySettings } from '../components/ApiKeySettings'
 
 export function settingsPage() {
-  const { currency, setCurrency } = useAuthStore()
+  const { currency, setCurrency, darkMode, setDarkMode } = useAuthStore()
+  const theme = getTheme(darkMode)
   const [apiKey, setApiKey] = useState('')
   const [showApiKey, setShowApiKey] = useState(false)
   const [savedMessage, setSavedMessage] = useState('')
-  const [darkMode, setDarkMode] = useState(false)
   const [notifications, setNotifications] = useState(true)
   const [autoRefresh, setAutoRefresh] = useState(true)
   const [selectedCurrency, setSelectedCurrency] = useState(currency)
@@ -22,7 +23,6 @@ export function settingsPage() {
     if (saved) {
       const settings = JSON.parse(saved)
       setApiKey(settings.apiKey || '')
-      setDarkMode(settings.darkMode || false)
       setNotifications(settings.notifications !== false)
       setAutoRefresh(settings.autoRefresh !== false)
     }
@@ -31,7 +31,6 @@ export function settingsPage() {
   const handleSaveSettings = () => {
     const settings = {
       apiKey,
-      darkMode,
       notifications,
       autoRefresh,
       currency: selectedCurrency,
@@ -43,6 +42,10 @@ export function settingsPage() {
     setTimeout(() => setSavedMessage(''), 3000)
   }
 
+  const handleDarkModeChange = (enabled: boolean) => {
+    setDarkMode(enabled)
+  }
+
   const handleCopyApiKey = () => {
     navigator.clipboard.writeText(apiKey)
     setSavedMessage('📋 API Key copied to clipboard!')
@@ -51,7 +54,6 @@ export function settingsPage() {
 
   const handleResetSettings = () => {
     setApiKey('')
-    setDarkMode(false)
     setNotifications(true)
     setAutoRefresh(true)
     setSelectedCurrency(DEFAULT_CURRENCY.code)
@@ -63,20 +65,20 @@ export function settingsPage() {
 
   return (
     <LayoutPro>
-      <Box sx={{ p: SPACING_PRO.xxxl, backgroundColor: THEME_PRO.bgPrimary, minHeight: '100vh' }}>
+      <Box sx={{ p: SPACING_PRO.xxxl, backgroundColor: theme.bgPrimary, minHeight: '100vh' }}>
         {/* Header */}
         <Box sx={{ mb: SPACING_PRO.xxxl }}>
-          <Typography variant="h4" sx={{ fontSize: '32px', fontWeight: 700, color: THEME_PRO.textPrimary, mb: SPACING_PRO.md }}>
+          <Typography variant="h4" sx={{ fontSize: '32px', fontWeight: 700, color: theme.textPrimary, mb: SPACING_PRO.md }}>
             ⚙️ Settings
           </Typography>
-          <Typography sx={{ color: THEME_PRO.textSecondary }}>
+          <Typography sx={{ color: theme.textSecondary }}>
             Configure your trading platform preferences and API credentials
           </Typography>
         </Box>
 
         {/* Success Message */}
         {savedMessage && (
-          <Alert sx={{ mb: SPACING_PRO.lg, backgroundColor: THEME_PRO.successLight, color: '#059669', border: `1px solid #10B981` }}>
+          <Alert sx={{ mb: SPACING_PRO.lg, backgroundColor: theme.successLight, color: theme.success, border: `1px solid ${theme.success}` }}>
             {savedMessage}
           </Alert>
         )}
@@ -167,13 +169,13 @@ export function settingsPage() {
 
             <Box sx={{ display: 'flex', flexDirection: 'column', gap: SPACING_PRO.lg }}>
               <FormControlLabel
-                control={<Switch checked={darkMode} onChange={(e) => setDarkMode(e.target.checked)} />}
+                control={<Switch checked={darkMode} onChange={(e) => handleDarkModeChange(e.target.checked)} />}
                 label={
                   <Box>
-                    <Typography sx={{ fontWeight: 600, color: THEME_PRO.textPrimary }}>
+                    <Typography sx={{ fontWeight: 600, color: theme.textPrimary }}>
                       Dark Mode
                     </Typography>
-                    <Typography sx={{ fontSize: '12px', color: THEME_PRO.textSecondary }}>
+                    <Typography sx={{ fontSize: '12px', color: theme.textSecondary }}>
                       {darkMode ? 'Enabled' : 'Currently using light mode'}
                     </Typography>
                   </Box>
@@ -268,6 +270,17 @@ export function settingsPage() {
               </Typography>
             </Box>
           </Card>
+        </Box>
+
+        {/* API Keys Configuration */}
+        <Box sx={{ mb: SPACING_PRO.xxxl }}>
+          <Typography variant="h5" sx={{ fontSize: '24px', fontWeight: 700, color: THEME_PRO.textPrimary, mb: SPACING_PRO.lg }}>
+            🔑 API Keys Configuration
+          </Typography>
+          <Typography sx={{ color: THEME_PRO.textSecondary, mb: SPACING_PRO.xl }}>
+            Configure your Claude and Zerodha API keys for trading and AI features
+          </Typography>
+          <ApiKeySettings userId="default-user" />
         </Box>
 
         {/* Account & Security */}

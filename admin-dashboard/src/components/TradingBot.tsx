@@ -1,17 +1,15 @@
 /**
  * Trading Bot Component
  *
- * Main trading bot interface with two tabs:
- * 1. Settings - Configure API keys
- * 2. Trading - Create orders and test Claude AI features
+ * Main trading bot interface for creating orders and testing Claude AI features.
+ * API keys are now configured from the Settings page only.
  *
  * This component is part of the autonomous trading bot system.
  */
 
 import { useState, useEffect } from 'react'
-import { Box, Tabs, Tab, Card, Typography, TextField, Button, Alert, Chip, CircularProgress, Dialog, DialogTitle, DialogContent, DialogActions } from '@mui/material'
+import { Box, Card, Typography, TextField, Button, Alert, Chip, CircularProgress, Dialog, DialogTitle, DialogContent, DialogActions } from '@mui/material'
 import { CheckCircle, HighlightOff, SendToMobile, SmartToy } from '@mui/icons-material'
-import { ApiKeySettings } from './ApiKeySettings'
 import { THEME_PRO, SPACING_PRO, RADIUS_PRO, SHADOWS_PRO } from '../theme-pro'
 
 interface ApiKeys {
@@ -28,7 +26,6 @@ export const TradingBot = () => {
     zerodhaApiKey: localStorage.getItem('zerodhaApiKey') || '',
     zerodhaApiSecret: localStorage.getItem('zerodhaApiSecret') || '',
   })
-  const [tabIndex, setTabIndex] = useState(0)
   const [symbol, setSymbol] = useState('RELIANCE')
   const [quantity, setQuantity] = useState('10')
   const [price, setPrice] = useState('2850')
@@ -55,10 +52,6 @@ export const TradingBot = () => {
     }
     checkHealth()
   }, [])
-
-  const handleKeysUpdated = (newKeys: ApiKeys) => {
-    setApiKeys(newKeys)
-  }
 
   const handleCreateOrder = async () => {
     if (!apiKeys.zerodhaApiKey) {
@@ -175,59 +168,14 @@ export const TradingBot = () => {
         </Box>
       </Card>
 
-      {/* Tabs */}
-      <Card
+      {/* Trading Interface */}
+      <Box
         sx={{
-          borderRadius: RADIUS_PRO.lg,
-          border: `1px solid ${THEME_PRO.border}`,
-          overflow: 'hidden',
-          boxShadow: SHADOWS_PRO.md,
+          display: 'grid',
+          gridTemplateColumns: { xs: '1fr', md: '1fr 1fr' },
+          gap: SPACING_PRO.xxl,
         }}
       >
-        <Tabs
-          value={tabIndex}
-          onChange={(e, newValue) => setTabIndex(newValue)}
-          sx={{
-            backgroundColor: THEME_PRO.bgTertiary,
-            borderBottom: `1px solid ${THEME_PRO.border}`,
-            '& .MuiTab-root': {
-              textTransform: 'none',
-              fontWeight: 600,
-              fontSize: '15px',
-              color: THEME_PRO.textSecondary,
-              '&.Mui-selected': {
-                color: THEME_PRO.primary,
-              },
-            },
-            '& .MuiTabs-indicator': {
-              backgroundColor: THEME_PRO.primary,
-              height: '3px',
-            },
-          }}
-        >
-          <Tab label="⚙️ Settings" />
-          <Tab label="📊 Trading" />
-        </Tabs>
-
-        <Box sx={{ p: SPACING_PRO.xxl }}>
-          {/* Settings Tab */}
-          {tabIndex === 0 && (
-            <Box sx={{ display: 'flex', flexDirection: 'column', gap: SPACING_PRO.lg }}>
-              <Box>
-                <Typography sx={{ fontSize: '20px', fontWeight: 700, color: THEME_PRO.textPrimary, mb: SPACING_PRO.sm }}>
-                  Configure API Keys
-                </Typography>
-                <Typography sx={{ fontSize: '14px', color: THEME_PRO.textSecondary }}>
-                  Set up your Claude and Zerodha API credentials. You can configure one or both keys as needed.
-                </Typography>
-              </Box>
-              <ApiKeySettings onKeysUpdated={handleKeysUpdated} />
-            </Box>
-          )}
-
-          {/* Trading Tab */}
-          {tabIndex === 1 && (
-            <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', md: '1fr 1fr' }, gap: SPACING_PRO.xxl }}>
               {/* Order Creation */}
               <Box>
                 <Card
@@ -251,7 +199,7 @@ export const TradingBot = () => {
                         border: `1px solid ${THEME_PRO.warning}`,
                       }}
                     >
-                      ⚠️ Zerodha API key not configured. Go to Settings tab to configure.
+                      ⚠️ Zerodha API key not configured. Go to Settings page to configure.
                     </Alert>
                   )}
 
@@ -353,7 +301,7 @@ export const TradingBot = () => {
                         border: `1px solid ${THEME_PRO.warning}`,
                       }}
                     >
-                      ⚠️ Claude API key not configured. Go to Settings tab to configure.
+                      ⚠️ Claude API key not configured. Go to Settings page to configure.
                     </Alert>
                   )}
 
@@ -414,9 +362,6 @@ export const TradingBot = () => {
                 </Card>
               </Box>
             </Box>
-          )}
-        </Box>
-      </Card>
 
       {/* Result Dialog */}
       <Dialog

@@ -1,7 +1,7 @@
 import React, { useState } from 'react'
 import { useNavigate, useLocation } from 'react-router-dom'
-import { Box, Button, AppBar, Toolbar, Avatar } from '@mui/material'
-import { ArrowBack, Home, Logout, HelpOutlined } from '@mui/icons-material'
+import { Box, Button, AppBar, Toolbar, Avatar, IconButton } from '@mui/material'
+import { ArrowBack, Home, Logout, HelpOutlined, Brightness4, Brightness7 } from '@mui/icons-material'
 import { useAuthStore } from '../state/store'
 import { HelpModal } from './HelpModal'
 import { THEME_PRO, SPACING_PRO, RADIUS_PRO, TRANSITIONS_PRO } from '../theme-pro'
@@ -10,7 +10,7 @@ export function NavbarPro() {
   const navigate = useNavigate()
   const location = useLocation()
   const isHome = location.pathname === '/'
-  const { logout } = useAuthStore()
+  const { logout, darkMode, toggleDarkMode } = useAuthStore()
   const [helpOpen, setHelpOpen] = useState(false)
 
   const handleLogout = () => {
@@ -127,6 +127,29 @@ export function NavbarPro() {
 
         {/* Right - User Actions */}
         <Box sx={{ display: 'flex', gap: SPACING_PRO.lg, alignItems: 'center' }}>
+          {/* Dark Mode Toggle */}
+          <IconButton
+            onClick={toggleDarkMode}
+            title={darkMode ? 'Switch to light mode' : 'Switch to dark mode'}
+            sx={{
+              color: THEME_PRO.primary,
+              width: 40,
+              height: 40,
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              borderRadius: RADIUS_PRO.md,
+              border: `1px solid ${THEME_PRO.border}`,
+              transition: TRANSITIONS_PRO.normal,
+              '&:hover': {
+                backgroundColor: THEME_PRO.primaryLight,
+                borderColor: THEME_PRO.primary,
+              },
+            }}
+          >
+            {darkMode ? <Brightness7 sx={{ fontSize: '20px' }} /> : <Brightness4 sx={{ fontSize: '20px' }} />}
+          </IconButton>
+
           <Avatar
             sx={{
               width: 40,

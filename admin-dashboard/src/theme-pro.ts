@@ -1,9 +1,9 @@
 /**
  * Professional Financial App Theme
- * Modern, clean, professional color scheme
+ * Modern, clean, professional color scheme with dark mode support
  */
 
-export const THEME_PRO = {
+const LIGHT_THEME = {
   // Primary colors - Professional Blue
   primary: '#0066FF', // Professional Blue
   primaryDark: '#0052CC',
@@ -16,7 +16,6 @@ export const THEME_PRO = {
   bgPrimary: '#F8FAFF', // Very light blue-white
   bgSecondary: '#FFFFFF', // White
   bgTertiary: '#F3F6FB', // Light gray-blue
-  bgDark: '#1E293B', // Dark blue-gray (for dark mode)
 
   // Text colors
   textPrimary: '#0F172A', // Dark navy
@@ -45,6 +44,54 @@ export const THEME_PRO = {
   gradientWarning: 'linear-gradient(135deg, #F59E0B 0%, #D97706 100%)',
   gradientError: 'linear-gradient(135deg, #EF4444 0%, #DC2626 100%)',
 }
+
+const DARK_THEME = {
+  // Primary colors - Professional Blue (brighter for dark mode)
+  primary: '#0066FF', // Professional Blue
+  primaryDark: '#0052CC',
+  primaryLight: '#1E40AF',
+
+  // Secondary - Teal accent
+  secondary: '#00D9FF',
+
+  // Background colors
+  bgPrimary: '#0F172A', // Very dark navy
+  bgSecondary: '#1E293B', // Dark blue-gray
+  bgTertiary: '#334155', // Medium dark gray
+
+  // Text colors
+  textPrimary: '#F1F5F9', // Very light gray (almost white)
+  textSecondary: '#CBD5E1', // Light gray
+  textTertiary: '#94A3B8', // Medium gray
+  textInverse: '#0F172A', // Dark text on light backgrounds
+
+  // Status colors (adjusted for dark mode visibility)
+  success: '#10B981', // Green
+  successLight: '#064E3B',
+  warning: '#F59E0B', // Amber
+  warningLight: '#78350F',
+  error: '#EF4444', // Red
+  errorLight: '#7F1D1D',
+  info: '#0066FF', // Blue
+  infoLight: '#1E3A8A',
+
+  // Neutral
+  border: '#475569', // Dark border
+  divider: '#334155',
+  shadow: 'rgba(0, 0, 0, 0.3)',
+
+  // Gradients (darker versions)
+  gradientPrimary: 'linear-gradient(135deg, #0066FF 0%, #0084FF 100%)',
+  gradientSuccess: 'linear-gradient(135deg, #10B981 0%, #059669 100%)',
+  gradientWarning: 'linear-gradient(135deg, #F59E0B 0%, #D97706 100%)',
+  gradientError: 'linear-gradient(135deg, #EF4444 0%, #DC2626 100%)',
+}
+
+export const getTheme = (darkMode: boolean = false) => {
+  return darkMode ? DARK_THEME : LIGHT_THEME
+}
+
+export const THEME_PRO = LIGHT_THEME // Default to light theme
 
 export const SPACING_PRO = {
   xs: '4px',
