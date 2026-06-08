@@ -17,6 +17,7 @@ import marketDataRouter from './routes/market-data.ts'
 // import metricsRouter from './routes/metrics.ts'  // TODO: Check imports
 import tradingRouter from './routes/trading.ts'
 import credentialsRouter from './routes/credentials.ts'
+import marketAnalysisRouter from './routes/market-analysis.ts'
 // import testingRouter from './routes/testing.ts'  // TODO: Check imports
 import configRouter, { attachUserApiKeys } from './routes/config.ts'
 import apiKeysRouter from './routes/api-keys.ts'
@@ -106,6 +107,9 @@ export function createApp() {
 
   // Trading routes
   v1.use('/trading', tradingRouter)
+
+  // Market analysis routes (Claude AI analysis)
+  v1.use('/market-analysis', marketAnalysisRouter)
 
   // Credentials routes
   v1.use('/credentials', credentialsRouter)
