@@ -2,6 +2,7 @@ import React from 'react'
 import { LayoutPro } from '../components/LayoutPro'
 import { Box, Card, Typography, LinearProgress, Chip, Button, Dialog, DialogTitle, DialogContent, DialogActions, TextField, Alert } from '@mui/material'
 import { TrendingUp, TrendingDown, Visibility, VisibilityOff } from '@mui/icons-material'
+import { LineChart, Line, AreaChart, Area, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, PieChart, Pie, Cell } from 'recharts'
 import { useAuthStore } from '../state/store'
 import { formatCurrency, getCurrencyByCode } from '../content/currencies'
 import { THEME_PRO, SPACING_PRO, RADIUS_PRO, SHADOWS_PRO, TRANSITIONS_PRO } from '../theme-pro'
@@ -17,8 +18,12 @@ interface StatCard {
 export function DashboardPro() {
   const [showValues, setShowValues] = React.useState(true)
   const [withdrawalOpen, setWithdrawalOpen] = React.useState(false)
+  const [depositOpen, setDepositOpen] = React.useState(false)
   const [withdrawalAmount, setWithdrawalAmount] = React.useState('')
+  const [depositAmount, setDepositAmount] = React.useState('')
   const [withdrawalMessage, setWithdrawalMessage] = React.useState('')
+  const [depositMessage, setDepositMessage] = React.useState('')
+  const [accountBalance, setAccountBalance] = React.useState(287450)
   const { currency } = useAuthStore()
   const currencyInfo = getCurrencyByCode(currency)
 
@@ -29,18 +34,61 @@ export function DashboardPro() {
     }
 
     const amount = parseFloat(withdrawalAmount)
-    if (amount > 287450) {
+    if (amount > accountBalance) {
       setWithdrawalMessage('❌ Insufficient balance for this withdrawal')
       return
     }
 
     setWithdrawalMessage(`✅ Withdrawal request of ${formatCurrency(amount, currency)} submitted! Processing...`)
     setTimeout(() => {
+      setAccountBalance(accountBalance - amount)
       setWithdrawalOpen(false)
       setWithdrawalAmount('')
       setWithdrawalMessage('')
     }, 3000)
   }
+
+  const handleDeposit = () => {
+    if (!depositAmount || parseFloat(depositAmount) <= 0) {
+      setDepositMessage('❌ Please enter a valid amount')
+      return
+    }
+
+    const amount = parseFloat(depositAmount)
+    setDepositMessage(`✅ Deposit of ${formatCurrency(amount, currency)} submitted! Processing...`)
+    setTimeout(() => {
+      setAccountBalance(accountBalance + amount)
+      setDepositOpen(false)
+      setDepositAmount('')
+      setDepositMessage('')
+    }, 3000)
+  }
+
+  // Chart data
+  const portfolioData = [
+    { date: 'Mon', value: 2750000 },
+    { date: 'Tue', value: 2780000 },
+    { date: 'Wed', value: 2800000 },
+    { date: 'Thu', value: 2765000 },
+    { date: 'Fri', value: 2847500 },
+  ]
+
+  const dailyReturnsData = [
+    { time: '09:00', return: 0.2 },
+    { time: '11:00', return: 0.5 },
+    { time: '13:00', return: 0.8 },
+    { time: '15:00', return: 0.3 },
+    { time: '16:00', return: 1.2 },
+  ]
+
+  const strategyData = [
+    { name: 'Trend Following', value: 45 },
+    { name: 'Mean Reversion', value: 30 },
+    { name: 'Momentum', value: 15 },
+    { name: 'Other', value: 10 },
+  ]
+
+  const COLORS = [THEME_PRO.primary, THEME_PRO.success, THEME_PRO.warning, THEME_PRO.error]
 
   const stats: StatCard[] = [
     {
@@ -250,10 +298,11 @@ export function DashboardPro() {
                 Account Balance
               </Typography>
               <Typography sx={{ fontSize: '32px', fontWeight: 700, color: THEME_PRO.textInverse, mb: SPACING_PRO.lg }}>
-                {showValues ? formatCurrency(287450, currency) : '••••••'}
+                {showValues ? formatCurrency(accountBalance, currency) : '••••••'}
               </Typography>
               <Box sx={{ display: 'flex', gap: SPACING_PRO.sm }}>
                 <Button
+                  onClick={() => setDepositOpen(true)}
                   variant="contained"
                   sx={{
                     flex: 1,
@@ -281,6 +330,101 @@ export function DashboardPro() {
                   Withdraw
                 </Button>
               </Box>
+            </Card>
+          </Box>
+        </Box>
+
+        {/* Charts Section */}
+        <Box sx={{ mt: SPACING_PRO.xxxl }}>
+          <Typography variant="h5" sx={{ fontSize: '22px', fontWeight: 700, color: THEME_PRO.textPrimary, mb: SPACING_PRO.lg }}>
+            📊 Performance Analytics
+          </Typography>
+
+          <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', md: '1fr 1fr' }, gap: 3, mb: SPACING_PRO.xxxl }}>
+            {/* Portfolio Value Chart */}
+            <Card sx={{ p: SPACING_PRO.xxl, borderRadius: RADIUS_PRO.lg, border: `1px solid ${THEME_PRO.border}` }}>
+              <Typography sx={{ fontSize: '16px', fontWeight: 700, color: THEME_PRO.textPrimary, mb: SPACING_PRO.lg }}>
+                Portfolio Value Trend
+              </Typography>
+              <ResponsiveContainer width="100%" height={300}>
+                <AreaChart data={portfolioData}>
+                  <defs>
+                    <linearGradient id="colorValue" x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="5%" stopColor={THEME_PRO.primary} stopOpacity={0.8} />
+                      <stop offset="95%" stopColor={THEME_PRO.primary} stopOpacity={0} />
+                    </linearGradient>
+                  </defs>
+                  <CartesianGrid strokeDasharray="3 3" stroke={THEME_PRO.border} />
+                  <XAxis dataKey="date" stroke={THEME_PRO.textSecondary} />
+                  <YAxis stroke={THEME_PRO.textSecondary} />
+                  <Tooltip contentStyle={{ backgroundColor: THEME_PRO.bgSecondary, border: `1px solid ${THEME_PRO.border}` }} />
+                  <Area type="monotone" dataKey="value" stroke={THEME_PRO.primary} fillOpacity={1} fill="url(#colorValue)" />
+                </AreaChart>
+              </ResponsiveContainer>
+            </Card>
+
+            {/* Daily Returns Chart */}
+            <Card sx={{ p: SPACING_PRO.xxl, borderRadius: RADIUS_PRO.lg, border: `1px solid ${THEME_PRO.border}` }}>
+              <Typography sx={{ fontSize: '16px', fontWeight: 700, color: THEME_PRO.textPrimary, mb: SPACING_PRO.lg }}>
+                Daily Returns (%)
+              </Typography>
+              <ResponsiveContainer width="100%" height={300}>
+                <BarChart data={dailyReturnsData}>
+                  <CartesianGrid strokeDasharray="3 3" stroke={THEME_PRO.border} />
+                  <XAxis dataKey="time" stroke={THEME_PRO.textSecondary} />
+                  <YAxis stroke={THEME_PRO.textSecondary} />
+                  <Tooltip contentStyle={{ backgroundColor: THEME_PRO.bgSecondary, border: `1px solid ${THEME_PRO.border}` }} />
+                  <Bar dataKey="return" fill={THEME_PRO.success} radius={[8, 8, 0, 0]} />
+                </BarChart>
+              </ResponsiveContainer>
+            </Card>
+
+            {/* Strategy Performance */}
+            <Card sx={{ p: SPACING_PRO.xxl, borderRadius: RADIUS_PRO.lg, border: `1px solid ${THEME_PRO.border}` }}>
+              <Typography sx={{ fontSize: '16px', fontWeight: 700, color: THEME_PRO.textPrimary, mb: SPACING_PRO.lg }}>
+                Strategy Allocation
+              </Typography>
+              <ResponsiveContainer width="100%" height={300}>
+                <PieChart>
+                  <Pie
+                    data={strategyData}
+                    cx="50%"
+                    cy="50%"
+                    labelLine={false}
+                    label={({ name, value }) => `${name}: ${value}%`}
+                    outerRadius={100}
+                    fill="#8884d8"
+                    dataKey="value"
+                  >
+                    {strategyData.map((entry, index) => (
+                      <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                    ))}
+                  </Pie>
+                  <Tooltip contentStyle={{ backgroundColor: THEME_PRO.bgSecondary, border: `1px solid ${THEME_PRO.border}` }} />
+                </PieChart>
+              </ResponsiveContainer>
+            </Card>
+
+            {/* Win Rate Chart */}
+            <Card sx={{ p: SPACING_PRO.xxl, borderRadius: RADIUS_PRO.lg, border: `1px solid ${THEME_PRO.border}` }}>
+              <Typography sx={{ fontSize: '16px', fontWeight: 700, color: THEME_PRO.textPrimary, mb: SPACING_PRO.lg }}>
+                Weekly Win Rate
+              </Typography>
+              <ResponsiveContainer width="100%" height={300}>
+                <LineChart data={[
+                  { week: 'Week 1', wins: 65 },
+                  { week: 'Week 2', wins: 70 },
+                  { week: 'Week 3', wins: 68 },
+                  { week: 'Week 4', wins: 74 },
+                  { week: 'Week 5', wins: 72 },
+                ]}>
+                  <CartesianGrid strokeDasharray="3 3" stroke={THEME_PRO.border} />
+                  <XAxis dataKey="week" stroke={THEME_PRO.textSecondary} />
+                  <YAxis stroke={THEME_PRO.textSecondary} />
+                  <Tooltip contentStyle={{ backgroundColor: THEME_PRO.bgSecondary, border: `1px solid ${THEME_PRO.border}` }} />
+                  <Line type="monotone" dataKey="wins" stroke={THEME_PRO.primary} strokeWidth={2} dot={{ fill: THEME_PRO.primary, r: 5 }} />
+                </LineChart>
+              </ResponsiveContainer>
             </Card>
           </Box>
         </Box>
@@ -384,6 +528,114 @@ export function DashboardPro() {
             }}
           >
             Confirm Withdrawal
+          </Button>
+        </DialogActions>
+      </Dialog>
+
+      {/* Deposit Dialog */}
+      <Dialog
+        open={depositOpen}
+        onClose={() => setDepositOpen(false)}
+        maxWidth="sm"
+        fullWidth
+        slotProps={{
+          paper: {
+            sx: {
+              borderRadius: RADIUS_PRO.lg,
+              backgroundColor: THEME_PRO.bgSecondary,
+              border: `1px solid ${THEME_PRO.border}`,
+            },
+          },
+        }}
+      >
+        <DialogTitle sx={{ color: THEME_PRO.textPrimary, fontWeight: 700 }}>
+          💰 Deposit Funds
+        </DialogTitle>
+        <DialogContent sx={{ pt: SPACING_PRO.lg }}>
+          {depositMessage && (
+            <Alert
+              sx={{
+                mb: SPACING_PRO.lg,
+                backgroundColor: depositMessage.includes('✅') ? THEME_PRO.successLight : THEME_PRO.errorLight,
+                color: depositMessage.includes('✅') ? THEME_PRO.success : THEME_PRO.error,
+                border: `1px solid ${depositMessage.includes('✅') ? THEME_PRO.success : THEME_PRO.error}`,
+              }}
+            >
+              {depositMessage}
+            </Alert>
+          )}
+
+          <Typography sx={{ color: THEME_PRO.textSecondary, fontSize: '13px', mb: SPACING_PRO.md }}>
+            Deposit funds to your trading account using various payment methods
+          </Typography>
+
+          <TextField
+            fullWidth
+            label="Deposit Amount"
+            type="number"
+            value={depositAmount}
+            onChange={(e) => setDepositAmount(e.target.value)}
+            placeholder="Enter amount"
+            inputProps={{ step: '0.01', min: '0' }}
+            sx={{
+              '& .MuiOutlinedInput-root': {
+                backgroundColor: THEME_PRO.bgTertiary,
+                color: THEME_PRO.textPrimary,
+                '& fieldset': { borderColor: THEME_PRO.border },
+                '&:hover fieldset': { borderColor: THEME_PRO.primary },
+              },
+              '& .MuiInputBase-input': {
+                color: THEME_PRO.textPrimary,
+              },
+              '& .MuiInputLabel-root': {
+                color: THEME_PRO.textSecondary,
+              },
+            }}
+          />
+
+          <Box sx={{ mt: SPACING_PRO.lg, p: SPACING_PRO.lg, backgroundColor: THEME_PRO.bgTertiary, borderRadius: RADIUS_PRO.md }}>
+            <Typography sx={{ fontSize: '12px', color: THEME_PRO.textSecondary, mb: SPACING_PRO.sm }}>
+              📋 Deposit Summary
+            </Typography>
+            <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: SPACING_PRO.sm }}>
+              <Typography sx={{ fontSize: '13px', color: THEME_PRO.textSecondary }}>Current Balance:</Typography>
+              <Typography sx={{ fontSize: '13px', fontWeight: 600, color: THEME_PRO.primary }}>
+                {formatCurrency(accountBalance, currency)}
+              </Typography>
+            </Box>
+            <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: SPACING_PRO.sm }}>
+              <Typography sx={{ fontSize: '13px', color: THEME_PRO.textSecondary }}>Deposit Amount:</Typography>
+              <Typography sx={{ fontSize: '13px', fontWeight: 600, color: THEME_PRO.success }}>
+                +{depositAmount ? formatCurrency(parseFloat(depositAmount), currency) : '—'}
+              </Typography>
+            </Box>
+            <Box sx={{ borderTop: `1px solid ${THEME_PRO.border}`, pt: SPACING_PRO.sm, display: 'flex', justifyContent: 'space-between' }}>
+              <Typography sx={{ fontSize: '13px', color: THEME_PRO.textSecondary, fontWeight: 600 }}>New Balance:</Typography>
+              <Typography sx={{ fontSize: '13px', fontWeight: 700, color: THEME_PRO.primary }}>
+                {depositAmount ? formatCurrency(accountBalance + parseFloat(depositAmount), currency) : formatCurrency(accountBalance, currency)}
+              </Typography>
+            </Box>
+          </Box>
+        </DialogContent>
+        <DialogActions sx={{ p: SPACING_PRO.lg, gap: SPACING_PRO.sm }}>
+          <Button
+            onClick={() => setDepositOpen(false)}
+            sx={{ color: THEME_PRO.textSecondary, textTransform: 'none', fontWeight: 600 }}
+          >
+            Cancel
+          </Button>
+          <Button
+            onClick={handleDeposit}
+            variant="contained"
+            sx={{
+              backgroundColor: THEME_PRO.success,
+              color: '#fff',
+              textTransform: 'none',
+              fontWeight: 600,
+              '&:hover': { backgroundColor: '#059669' },
+            }}
+          >
+            Confirm Deposit
           </Button>
         </DialogActions>
       </Dialog>

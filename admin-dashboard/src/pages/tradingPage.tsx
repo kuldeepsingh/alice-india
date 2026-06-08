@@ -1,13 +1,72 @@
 import React, { useState } from 'react'
 import { LayoutPro } from '../components/LayoutPro'
-import { Box, Card, Typography, TextField, Button, Chip } from '@mui/material'
-import { SendToMobile } from '@mui/icons-material'
+import { Box, Card, Typography, TextField, Button, Chip, Alert, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Dialog, DialogTitle, DialogContent, DialogActions } from '@mui/material'
+import { SendToMobile, CheckCircle } from '@mui/icons-material'
 import { THEME_PRO, SPACING_PRO, RADIUS_PRO, SHADOWS_PRO } from '../theme-pro'
 
+interface ExecutedOrder {
+  id: string
+  symbol: string
+  type: 'Buy' | 'Sell'
+  quantity: number
+  price: number
+  total: number
+  status: 'Filled' | 'Pending'
+  timestamp: string
+}
+
 export function tradingPage() {
+  const [orderType, setOrderType] = useState<'Buy' | 'Sell'>('Buy')
   const [symbol, setSymbol] = useState('INFY')
   const [quantity, setQuantity] = useState('100')
   const [price, setPrice] = useState('1850')
+  const [executedOrders, setExecutedOrders] = useState<ExecutedOrder[]>([])
+  const [orderMessage, setOrderMessage] = useState('')
+  const [confirmDialogOpen, setConfirmDialogOpen] = useState(false)
+
+  const handlePlaceOrder = () => {
+    // Validation
+    if (!symbol || !quantity || !price) {
+      setOrderMessage('❌ Please fill all fields')
+      return
+    }
+
+    const qty = parseFloat(quantity)
+    const prc = parseFloat(price)
+
+    if (qty <= 0 || prc <= 0) {
+      setOrderMessage('❌ Quantity and price must be greater than 0')
+      return
+    }
+
+    setConfirmDialogOpen(true)
+  }
+
+  const handleConfirmOrder = () => {
+    const qty = parseFloat(quantity)
+    const prc = parseFloat(price)
+    const total = qty * prc
+
+    const newOrder: ExecutedOrder = {
+      id: `ORD${Date.now()}`,
+      symbol: symbol.toUpperCase(),
+      type: orderType,
+      quantity: qty,
+      price: prc,
+      total: total,
+      status: 'Filled',
+      timestamp: new Date().toLocaleTimeString(),
+    }
+
+    setExecutedOrders([newOrder, ...executedOrders])
+    setOrderMessage(`✅ ${orderType} order for ${qty} ${symbol.toUpperCase()} @ ${prc} executed successfully!`)
+    setConfirmDialogOpen(false)
+    setSymbol('INFY')
+    setQuantity('100')
+    setPrice('1850')
+
+    setTimeout(() => setOrderMessage(''), 4000)
+  }
 
   return (
     <LayoutPro>
@@ -26,18 +85,81 @@ export function tradingPage() {
               <Typography sx={{ fontSize: '18px', fontWeight: 700, color: THEME_PRO.textPrimary, mb: SPACING_PRO.lg }}>
                 Place New Order
               </Typography>
-              
+
+              {orderMessage && (
+                <Alert
+                  sx={{
+                    mb: SPACING_PRO.lg,
+                    backgroundColor: orderMessage.includes('✅') ? THEME_PRO.successLight : THEME_PRO.errorLight,
+                    color: orderMessage.includes('✅') ? THEME_PRO.success : THEME_PRO.error,
+                    border: `1px solid ${orderMessage.includes('✅') ? THEME_PRO.success : THEME_PRO.error}`,
+                  }}
+                >
+                  {orderMessage}
+                </Alert>
+              )}
+
               <Box sx={{ display: 'flex', gap: SPACING_PRO.sm, mb: SPACING_PRO.lg }}>
-                <Button variant={true ? 'contained' : 'outlined'} sx={{ flex: 1, backgroundColor: THEME_PRO.success, color: '#fff', textTransform: 'none' }}>Buy</Button>
-                <Button variant="outlined" sx={{ flex: 1, color: THEME_PRO.error, borderColor: THEME_PRO.error, textTransform: 'none' }}>Sell</Button>
+                <Button
+                  variant={orderType === 'Buy' ? 'contained' : 'outlined'}
+                  onClick={() => setOrderType('Buy')}
+                  sx={{
+                    flex: 1,
+                    backgroundColor: orderType === 'Buy' ? THEME_PRO.success : 'transparent',
+                    color: orderType === 'Buy' ? '#fff' : THEME_PRO.success,
+                    borderColor: THEME_PRO.success,
+                    textTransform: 'none',
+                    fontWeight: 600,
+                  }}
+                >
+                  Buy
+                </Button>
+                <Button
+                  variant={orderType === 'Sell' ? 'contained' : 'outlined'}
+                  onClick={() => setOrderType('Sell')}
+                  sx={{
+                    flex: 1,
+                    backgroundColor: orderType === 'Sell' ? THEME_PRO.error : 'transparent',
+                    color: orderType === 'Sell' ? '#fff' : THEME_PRO.error,
+                    borderColor: THEME_PRO.error,
+                    textTransform: 'none',
+                    fontWeight: 600,
+                  }}
+                >
+                  Sell
+                </Button>
               </Box>
 
               <TextField fullWidth label="Symbol" value={symbol} onChange={(e) => setSymbol(e.target.value)} margin="normal" sx={{ '& .MuiOutlinedInput-root': { backgroundColor: THEME_PRO.bgTertiary } }} />
               <TextField fullWidth label="Quantity" value={quantity} onChange={(e) => setQuantity(e.target.value)} margin="normal" type="number" sx={{ '& .MuiOutlinedInput-root': { backgroundColor: THEME_PRO.bgTertiary } }} />
               <TextField fullWidth label="Price" value={price} onChange={(e) => setPrice(e.target.value)} margin="normal" type="number" sx={{ '& .MuiOutlinedInput-root': { backgroundColor: THEME_PRO.bgTertiary } }} />
 
-              <Button fullWidth variant="contained" startIcon={<SendToMobile />} sx={{ mt: SPACING_PRO.lg, backgroundColor: THEME_PRO.primary, color: '#fff', textTransform: 'none', fontWeight: 600 }}>
-                Place Order
+              <Box sx={{ mt: SPACING_PRO.lg, p: SPACING_PRO.lg, backgroundColor: THEME_PRO.bgTertiary, borderRadius: RADIUS_PRO.md }}>
+                <Typography sx={{ fontSize: '12px', color: THEME_PRO.textSecondary, mb: SPACING_PRO.sm }}>
+                  💰 Order Summary
+                </Typography>
+                <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
+                  <Typography sx={{ fontSize: '13px', color: THEME_PRO.textSecondary }}>Total Value:</Typography>
+                  <Typography sx={{ fontSize: '13px', fontWeight: 600, color: THEME_PRO.primary }}>
+                    {quantity && price ? (parseFloat(quantity) * parseFloat(price)).toLocaleString() : '—'}
+                  </Typography>
+                </Box>
+              </Box>
+
+              <Button
+                fullWidth
+                variant="contained"
+                startIcon={<SendToMobile />}
+                onClick={handlePlaceOrder}
+                sx={{
+                  mt: SPACING_PRO.lg,
+                  backgroundColor: orderType === 'Buy' ? THEME_PRO.success : THEME_PRO.error,
+                  color: '#fff',
+                  textTransform: 'none',
+                  fontWeight: 600,
+                }}
+              >
+                Place {orderType} Order
               </Button>
             </Card>
           </Box>
@@ -65,7 +187,135 @@ export function tradingPage() {
             </Card>
           </Box>
         </Box>
+
+        {/* Order History */}
+        {executedOrders.length > 0 && (
+          <Box sx={{ mt: SPACING_PRO.xxxl }}>
+            <Typography sx={{ fontSize: '20px', fontWeight: 700, color: THEME_PRO.textPrimary, mb: SPACING_PRO.lg }}>
+              📋 Recent Orders
+            </Typography>
+            <Card sx={{ borderRadius: RADIUS_PRO.lg, border: `1px solid ${THEME_PRO.border}`, overflow: 'hidden' }}>
+              <TableContainer>
+                <Table>
+                  <TableHead sx={{ backgroundColor: THEME_PRO.bgTertiary }}>
+                    <TableRow>
+                      <TableCell sx={{ fontWeight: 700, color: THEME_PRO.textPrimary }}>Order ID</TableCell>
+                      <TableCell sx={{ fontWeight: 700, color: THEME_PRO.textPrimary }}>Symbol</TableCell>
+                      <TableCell sx={{ fontWeight: 700, color: THEME_PRO.textPrimary }}>Type</TableCell>
+                      <TableCell sx={{ fontWeight: 700, color: THEME_PRO.textPrimary }}>Qty</TableCell>
+                      <TableCell sx={{ fontWeight: 700, color: THEME_PRO.textPrimary }}>Price</TableCell>
+                      <TableCell sx={{ fontWeight: 700, color: THEME_PRO.textPrimary }}>Total</TableCell>
+                      <TableCell sx={{ fontWeight: 700, color: THEME_PRO.textPrimary }}>Status</TableCell>
+                      <TableCell sx={{ fontWeight: 700, color: THEME_PRO.textPrimary }}>Time</TableCell>
+                    </TableRow>
+                  </TableHead>
+                  <TableBody>
+                    {executedOrders.map((order) => (
+                      <TableRow key={order.id} sx={{ borderBottom: `1px solid ${THEME_PRO.border}` }}>
+                        <TableCell sx={{ color: THEME_PRO.primary, fontWeight: 700 }}>{order.id}</TableCell>
+                        <TableCell sx={{ color: THEME_PRO.textPrimary, fontWeight: 600 }}>{order.symbol}</TableCell>
+                        <TableCell>
+                          <Chip
+                            label={order.type}
+                            sx={{
+                              backgroundColor: order.type === 'Buy' ? THEME_PRO.successLight : THEME_PRO.errorLight,
+                              color: order.type === 'Buy' ? THEME_PRO.success : THEME_PRO.error,
+                              fontWeight: 600,
+                            }}
+                          />
+                        </TableCell>
+                        <TableCell sx={{ color: THEME_PRO.textSecondary }}>{order.quantity}</TableCell>
+                        <TableCell sx={{ color: THEME_PRO.textSecondary }}>₹{order.price.toLocaleString()}</TableCell>
+                        <TableCell sx={{ color: THEME_PRO.primary, fontWeight: 600 }}>₹{order.total.toLocaleString()}</TableCell>
+                        <TableCell>
+                          <Chip label={order.status} sx={{ backgroundColor: THEME_PRO.successLight, color: THEME_PRO.success }} />
+                        </TableCell>
+                        <TableCell sx={{ color: THEME_PRO.textSecondary, fontSize: '13px' }}>{order.timestamp}</TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              </TableContainer>
+            </Card>
+          </Box>
+        )}
       </Box>
+
+      {/* Order Confirmation Dialog */}
+      <Dialog
+        open={confirmDialogOpen}
+        onClose={() => setConfirmDialogOpen(false)}
+        maxWidth="sm"
+        fullWidth
+        slotProps={{
+          paper: {
+            sx: {
+              borderRadius: RADIUS_PRO.lg,
+              backgroundColor: THEME_PRO.bgSecondary,
+              border: `1px solid ${THEME_PRO.border}`,
+            },
+          },
+        }}
+      >
+        <DialogTitle sx={{ color: THEME_PRO.textPrimary, fontWeight: 700 }}>
+          Confirm {orderType} Order
+        </DialogTitle>
+        <DialogContent sx={{ pt: SPACING_PRO.lg }}>
+          <Typography sx={{ color: THEME_PRO.textSecondary, fontSize: '13px', mb: SPACING_PRO.lg }}>
+            Please review your order details before confirming:
+          </Typography>
+
+          <Box sx={{ p: SPACING_PRO.lg, backgroundColor: THEME_PRO.bgTertiary, borderRadius: RADIUS_PRO.md, mb: SPACING_PRO.lg }}>
+            <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: SPACING_PRO.md }}>
+              <Typography sx={{ color: THEME_PRO.textSecondary }}>Symbol:</Typography>
+              <Typography sx={{ fontWeight: 600, color: THEME_PRO.textPrimary }}>{symbol.toUpperCase()}</Typography>
+            </Box>
+            <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: SPACING_PRO.md }}>
+              <Typography sx={{ color: THEME_PRO.textSecondary }}>Order Type:</Typography>
+              <Chip
+                label={orderType}
+                sx={{
+                  backgroundColor: orderType === 'Buy' ? THEME_PRO.successLight : THEME_PRO.errorLight,
+                  color: orderType === 'Buy' ? THEME_PRO.success : THEME_PRO.error,
+                }}
+              />
+            </Box>
+            <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: SPACING_PRO.md }}>
+              <Typography sx={{ color: THEME_PRO.textSecondary }}>Quantity:</Typography>
+              <Typography sx={{ fontWeight: 600, color: THEME_PRO.textPrimary }}>{quantity}</Typography>
+            </Box>
+            <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: SPACING_PRO.md }}>
+              <Typography sx={{ color: THEME_PRO.textSecondary }}>Price:</Typography>
+              <Typography sx={{ fontWeight: 600, color: THEME_PRO.textPrimary }}>₹{parseFloat(price).toLocaleString()}</Typography>
+            </Box>
+            <Box sx={{ borderTop: `1px solid ${THEME_PRO.border}`, pt: SPACING_PRO.md, display: 'flex', justifyContent: 'space-between' }}>
+              <Typography sx={{ color: THEME_PRO.textSecondary, fontWeight: 600 }}>Total Value:</Typography>
+              <Typography sx={{ fontWeight: 700, color: THEME_PRO.primary }}>
+                ₹{(parseFloat(quantity) * parseFloat(price)).toLocaleString()}
+              </Typography>
+            </Box>
+          </Box>
+        </DialogContent>
+        <DialogActions sx={{ p: SPACING_PRO.lg, gap: SPACING_PRO.sm }}>
+          <Button onClick={() => setConfirmDialogOpen(false)} sx={{ color: THEME_PRO.textSecondary, textTransform: 'none', fontWeight: 600 }}>
+            Cancel
+          </Button>
+          <Button
+            onClick={handleConfirmOrder}
+            variant="contained"
+            startIcon={<CheckCircle />}
+            sx={{
+              backgroundColor: orderType === 'Buy' ? THEME_PRO.success : THEME_PRO.error,
+              color: '#fff',
+              textTransform: 'none',
+              fontWeight: 600,
+              '&:hover': { opacity: 0.9 },
+            }}
+          >
+            Confirm {orderType}
+          </Button>
+        </DialogActions>
+      </Dialog>
     </LayoutPro>
   )
 }
