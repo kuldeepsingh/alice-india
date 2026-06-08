@@ -108,10 +108,15 @@ export const requireClaudeAccess = async (req: Request, res: Response, next: Nex
 /**
  * Optional Claude enhancement
  * Attaches Claude validation if available, doesn't block
+ * Accepts userId from Bearer token OR X-User-ID header
  */
 export const optionalClaude = async (req: Request, res: Response, next: NextFunction) => {
   try {
-    const userId = (req as any).userId
+    // Get userId from Bearer token first, then try X-User-ID header
+    let userId = (req as any).userId
+    if (!userId) {
+      userId = req.headers['x-user-id'] as string
+    }
 
     if (!userId) {
       (req as any).claudeAvailable = false
