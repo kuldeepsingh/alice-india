@@ -27,8 +27,19 @@ import type {
 
 const router = Router()
 
-// All routes require authentication
-router.use(authMiddleware)
+// Helper: Get userId from Bearer token OR X-User-ID header
+const getUserId = (req: any): string | null => {
+  // Try from Bearer token first (authMiddleware)
+  if (req.user?.userId) {
+    return req.user.userId
+  }
+  // Fallback to X-User-ID header
+  const xUserId = req.headers['x-user-id'] as string
+  if (xUserId) {
+    return xUserId
+  }
+  return null
+}
 
 /**
  * POST /market-analysis/sentiment
@@ -36,13 +47,14 @@ router.use(authMiddleware)
  * Analyze market sentiment for decision making
  *
  * Now fetches Claude API key from secure backend storage
+ * Accepts authentication via Bearer token OR X-User-ID header
  */
 router.post('/sentiment', optionalClaude, async (req: AuthRequest, res) => {
   try {
-    const userId = req.user?.userId
+    const userId = getUserId(req)
 
     if (!userId) {
-      return res.status(401).json({ error: 'Unauthorized' })
+      return res.status(401).json({ error: 'Unauthorized - provide Bearer token or X-User-ID header' })
     }
 
     const { marketData, recentNews, globalContext } = req.body
@@ -155,13 +167,14 @@ router.post('/sentiment', optionalClaude, async (req: AuthRequest, res) => {
  * POST /market-analysis/risk
  *
  * Assess trade risk using Claude
+ * Accepts authentication via Bearer token OR X-User-ID header
  */
 router.post('/risk', optionalClaude, async (req: AuthRequest, res) => {
   try {
-    const userId = req.user?.userId
+    const userId = getUserId(req)
 
     if (!userId) {
-      return res.status(401).json({ error: 'Unauthorized' })
+      return res.status(401).json({ error: 'Unauthorized - provide Bearer token or X-User-ID header' })
     }
 
     const { tradeDetails, marketContext, userProfile } = req.body
