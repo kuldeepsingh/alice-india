@@ -18,7 +18,7 @@ import marketDataRouter from './routes/market-data.ts'
 import tradingRouter from './routes/trading.ts'
 import credentialsRouter from './routes/credentials.ts'
 // import testingRouter from './routes/testing.ts'  // TODO: Check imports
-import configRouter, { attachUserApiKeys } from './routes/config.ts'
+// import { logCaptureMiddleware, errorLoggingMiddleware } from './middleware/log-capture.ts'  // TODO: Fix imports
 import {
   cacheResponseMiddleware,
   performanceTrackingMiddleware,
@@ -38,7 +38,7 @@ export function createApp() {
     origin: corsOrigins,
     credentials: true,
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-    allowedHeaders: ['Content-Type', 'Authorization', 'X-User-ID'],
+    allowedHeaders: ['Content-Type', 'Authorization'],
   }))
 
   // Logging
@@ -56,9 +56,6 @@ export function createApp() {
   app.use(cacheResponseMiddleware(300)) // 5 minute cache for GET requests
   app.use(cacheInvalidationMiddleware())
 
-  // Attach user API keys to request
-  app.use(attachUserApiKeys)
-
   // Health check endpoints
   app.get('/health/live', (_req, res) => {
     res.json({ status: 'alive', timestamp: new Date().toISOString() })
@@ -70,9 +67,6 @@ export function createApp() {
 
   // API v1 routes
   const v1 = express.Router()
-
-  // Configuration routes (comes first - needed by other routes)
-  v1.use('/config', configRouter)
 
   // Authentication routes
   v1.use('/auth', authRouter)
