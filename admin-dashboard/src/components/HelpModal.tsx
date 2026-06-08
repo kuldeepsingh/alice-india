@@ -20,11 +20,13 @@ export function HelpModal({ open, onClose, currentPage }: HelpModalProps) {
       onClose={onClose}
       maxWidth="sm"
       fullWidth
-      PaperProps={{
-        sx: {
-          borderRadius: RADIUS_PRO.lg,
-          backgroundColor: THEME_PRO.bgSecondary,
-          border: `1px solid ${THEME_PRO.border}`,
+      slotProps={{
+        paper: {
+          sx: {
+            borderRadius: RADIUS_PRO.lg,
+            backgroundColor: THEME_PRO.bgSecondary,
+            border: `1px solid ${THEME_PRO.border}`,
+          },
         },
       }}
     >

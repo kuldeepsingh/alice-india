@@ -1,7 +1,7 @@
 import React, { useState } from 'react'
 import { useNavigate, useLocation } from 'react-router-dom'
 import { Box, Button, AppBar, Toolbar, Avatar } from '@mui/material'
-import { ArrowBack, Home, Logout, HelpOutline } from '@mui/icons-material'
+import { ArrowBack, Home, Logout, HelpOutlined } from '@mui/icons-material'
 import { useAuthStore } from '../state/store'
 import { HelpModal } from './HelpModal'
 import { THEME_PRO, SPACING_PRO, RADIUS_PRO, TRANSITIONS_PRO } from '../theme-pro'
@@ -144,7 +144,7 @@ export function NavbarPro() {
 
           <Button
             onClick={() => setHelpOpen(true)}
-            startIcon={<HelpOutline sx={{ fontSize: '18px' }} />}
+            startIcon={<HelpOutlined sx={{ fontSize: '18px' }} />}
             sx={{
               color: THEME_PRO.primary,
               textTransform: 'none',
