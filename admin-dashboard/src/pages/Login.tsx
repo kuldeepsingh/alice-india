@@ -6,8 +6,8 @@ import { authAPI } from '../services/api'
 export function Login() {
   const navigate = useNavigate()
   const { setToken, setUser } = useAuthStore()
-  const [email, setEmail] = useState('admin')
-  const [password, setPassword] = useState('admin')
+  const [email, setEmail] = useState('admin@example.com')
+  const [password, setPassword] = useState('admin123')
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
   const [hoveredFeature, setHoveredFeature] = useState<number | null>(null)
