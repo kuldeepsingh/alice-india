@@ -9,7 +9,7 @@ import { ordersPage as OrdersPage } from './pages/ordersPage'
 import { analyticsPage as AnalyticsPage } from './pages/analyticsPage'
 import { settingsPage as SettingsPage } from './pages/settingsPage'
 import { diagnosticsPage as DiagnosticsPage } from './pages/diagnosticsPage'
-import { logsPage as LogsPage } from './pages/logsPage'
+import { AdminLogsPage } from './pages/AdminLogsPage'
 import { errorsPage as ErrorsPage } from './pages/errorsPage'
 import { auditPage as AuditPage } from './pages/auditPage'
 import { debugPage as DebugPage } from './pages/debugPage'
@@ -38,7 +38,7 @@ export function App() {
         <Route path="/analytics" element={<ProtectedRoute><AnalyticsPage /></ProtectedRoute>} />
         <Route path="/settings" element={<ProtectedRoute><SettingsPage /></ProtectedRoute>} />
         <Route path="/diagnostics" element={<ProtectedRoute><DiagnosticsPage /></ProtectedRoute>} />
-        <Route path="/logs" element={<ProtectedRoute><LogsPage /></ProtectedRoute>} />
+        <Route path="/logs" element={<ProtectedRoute><AdminLogsPage /></ProtectedRoute>} />
         <Route path="/errors" element={<ProtectedRoute><ErrorsPage /></ProtectedRoute>} />
         <Route path="/audit" element={<ProtectedRoute><AuditPage /></ProtectedRoute>} />
         <Route path="/debug" element={<ProtectedRoute><DebugPage /></ProtectedRoute>} />

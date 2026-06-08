@@ -1,245 +1,244 @@
-/**
- * Logging Service
- * Handles storage and retrieval of structured logs
- */
+import fs from 'fs'
+import path from 'path'
+import { format } from 'date-fns'
 
-import { v4 as uuidv4 } from 'uuid'
-import { query } from './database.ts'
-import { logger } from './logger.ts'
-import type { Log, CreateLogInput, LogFilter, LogQueryResult } from '../models/log.ts'
+const LOG_DIR = path.join(process.cwd(), 'logs')
+const MAX_LOG_SIZE = 10 * 1024 * 1024 // 10MB per file
+const MAX_FILES = 10
 
-export class LoggingService {
-  /**
-   * Store a log entry
-   */
-  static async storeLog(input: CreateLogInput): Promise<Log> {
+// Ensure logs directory exists
+if (!fs.existsSync(LOG_DIR)) {
+  fs.mkdirSync(LOG_DIR, { recursive: true })
+}
+
+export type LogLevel = 'DEBUG' | 'INFO' | 'WARN' | 'ERROR' | 'FATAL'
+
+export interface LogEntry {
+  timestamp: string
+  level: LogLevel
+  service: string
+  message: string
+  data?: any
+  error?: string
+  stack?: string
+}
+
+class LoggingService {
+  private currentLogFile: string
+
+  constructor() {
+    this.currentLogFile = this.getLogFilePath()
+    this.initializeLogFile()
+  }
+
+  private getLogFilePath(): string {
+    const date = format(new Date(), 'yyyy-MM-dd')
+    return path.join(LOG_DIR, `application-${date}.log`)
+  }
+
+  private initializeLogFile(): void {
+    if (!fs.existsSync(this.currentLogFile)) {
+      fs.writeFileSync(this.currentLogFile, '')
+    }
+  }
+
+  private formatLogEntry(entry: LogEntry): string {
+    let logLine = `[${entry.timestamp}] [${entry.level}] [${entry.service}] ${entry.message}`
+
+    if (entry.data) {
+      logLine += ` | Data: ${JSON.stringify(entry.data)}`
+    }
+
+    if (entry.error) {
+      logLine += ` | Error: ${entry.error}`
+    }
+
+    if (entry.stack) {
+      logLine += `\n${entry.stack}`
+    }
+
+    return logLine
+  }
+
+  private writeLog(entry: LogEntry): void {
     try {
-      const id = uuidv4()
-      const createdAt = new Date()
+      const logLine = this.formatLogEntry(entry)
+      fs.appendFileSync(this.currentLogFile, logLine + '\n')
+    } catch (e) {
+      console.error('Failed to write log:', e)
+    }
+  }
 
-      await query(
-        `INSERT INTO logs (
-          id, timestamp, level, message, user_id, correlation_id,
-          module, context, stack_trace, request_id, session_id,
-          ip_address, created_at
-        ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13)`,
-        [
-          id,
-          input.timestamp || new Date(),
-          input.level,
-          input.message,
-          input.userId || null,
-          input.correlationId || null,
-          input.module || null,
-          input.context ? JSON.stringify(input.context) : null,
-          input.stackTrace || null,
-          input.requestId || null,
-          input.sessionId || null,
-          input.ipAddress || null,
-          createdAt,
-        ]
-      )
+  log(level: LogLevel, service: string, message: string, data?: any, error?: Error): void {
+    const entry: LogEntry = {
+      timestamp: new Date().toISOString(),
+      level,
+      service,
+      message,
+      data,
+      error: error?.message,
+      stack: error?.stack,
+    }
+
+    this.writeLog(entry)
+  }
+
+  debug(service: string, message: string, data?: any): void {
+    this.log('DEBUG', service, message, data)
+  }
+
+  info(service: string, message: string, data?: any): void {
+    this.log('INFO', service, message, data)
+  }
+
+  warn(service: string, message: string, data?: any): void {
+    this.log('WARN', service, message, data)
+  }
+
+  error(service: string, message: string, error?: Error, data?: any): void {
+    this.log('ERROR', service, message, data, error)
+  }
+
+  fatal(service: string, message: string, error?: Error, data?: any): void {
+    this.log('FATAL', service, message, data, error)
+  }
+
+  // Read logs from file
+  readLogs(options: {
+    limit?: number
+    offset?: number
+    level?: LogLevel
+    service?: string
+    search?: string
+  } = {}): { logs: LogEntry[]; total: number } {
+    try {
+      const { limit = 100, offset = 0, level, service, search } = options
+      let logs: LogEntry[] = []
+
+      const files = fs.readdirSync(LOG_DIR).filter((f) => f.endsWith('.log')).sort().reverse()
+
+      for (const file of files) {
+        const filePath = path.join(LOG_DIR, file)
+        const content = fs.readFileSync(filePath, 'utf-8')
+        const lines = content.split('\n').filter((l) => l.trim())
+
+        for (const line of lines.reverse()) {
+          const logEntry = this.parseLogLine(line)
+          if (!logEntry) continue
+
+          if (level && logEntry.level !== level) continue
+          if (service && !logEntry.service.includes(service)) continue
+          if (search && !line.toLowerCase().includes(search.toLowerCase())) continue
+
+          logs.push(logEntry)
+
+          if (logs.length >= limit + offset) break
+        }
+
+        if (logs.length >= limit + offset) break
+      }
 
       return {
-        id,
-        timestamp: input.timestamp || new Date(),
-        level: input.level,
-        message: input.message,
-        userId: input.userId,
-        correlationId: input.correlationId,
-        module: input.module,
-        context: input.context,
-        stackTrace: input.stackTrace,
-        requestId: input.requestId,
-        sessionId: input.sessionId,
-        ipAddress: input.ipAddress,
-        createdAt,
+        logs: logs.slice(offset, offset + limit),
+        total: logs.length,
       }
-    } catch (error) {
-      logger.error({
-        type: 'log_store_failed',
-        error: error instanceof Error ? error.message : String(error),
-      })
-      throw error
+    } catch (e) {
+      return { logs: [], total: 0 }
     }
   }
 
-  /**
-   * Retrieve logs with filtering
-   */
-  static async getLogs(filter: LogFilter): Promise<LogQueryResult> {
+  private parseLogLine(line: string): LogEntry | null {
     try {
-      const limit = filter.limit || 50
-      const offset = filter.offset || 0
-
-      let whereClause = '1=1'
-      const params: any[] = []
-      let paramCount = 1
-
-      if (filter.userId) {
-        whereClause += ` AND user_id = $${paramCount}`
-        params.push(filter.userId)
-        paramCount++
-      }
-
-      if (filter.level) {
-        whereClause += ` AND level = $${paramCount}`
-        params.push(filter.level)
-        paramCount++
-      }
-
-      if (filter.module) {
-        whereClause += ` AND module = $${paramCount}`
-        params.push(filter.module)
-        paramCount++
-      }
-
-      if (filter.correlationId) {
-        whereClause += ` AND correlation_id = $${paramCount}`
-        params.push(filter.correlationId)
-        paramCount++
-      }
-
-      if (filter.startDate) {
-        whereClause += ` AND created_at >= $${paramCount}`
-        params.push(filter.startDate)
-        paramCount++
-      }
-
-      if (filter.endDate) {
-        whereClause += ` AND created_at <= $${paramCount}`
-        params.push(filter.endDate)
-        paramCount++
-      }
-
-      if (filter.search) {
-        whereClause += ` AND message ILIKE $${paramCount}`
-        params.push(`%${filter.search}%`)
-        paramCount++
-      }
-
-      // Get total count
-      const countResult = await query(
-        `SELECT COUNT(*) as total FROM logs WHERE ${whereClause}`,
-        params
+      const match = line.match(
+        /\[(.+?)\] \[(.+?)\] \[(.+?)\] (.+?)(?:\s\|\s(.+))?$/
       )
-      const total = parseInt(countResult.rows[0].total, 10)
+      if (!match) return null
 
-      // Get paginated results
-      const dataQuery = `
-        SELECT
-          id, timestamp, level, message, user_id, correlation_id,
-          module, context, stack_trace, request_id, session_id,
-          ip_address, created_at
-        FROM logs
-        WHERE ${whereClause}
-        ORDER BY created_at DESC
-        LIMIT $${paramCount} OFFSET $${paramCount + 1}
-      `
-
-      const dataResult = await query(dataQuery, [...params, limit, offset])
-
-      const data: Log[] = dataResult.rows.map((row: any) => ({
-        id: row.id,
-        timestamp: row.timestamp,
-        level: row.level,
-        message: row.message,
-        userId: row.user_id,
-        correlationId: row.correlation_id,
-        module: row.module,
-        context: row.context,
-        stackTrace: row.stack_trace,
-        requestId: row.request_id,
-        sessionId: row.session_id,
-        ipAddress: row.ip_address,
-        createdAt: row.created_at,
-      }))
+      const [, timestamp, level, service, message] = match
 
       return {
-        data,
-        total,
-        page: Math.floor(offset / limit) + 1,
-        pageSize: limit,
+        timestamp,
+        level: level as LogLevel,
+        service,
+        message,
       }
-    } catch (error) {
-      logger.error({
-        type: 'log_retrieval_failed',
-        error: error instanceof Error ? error.message : String(error),
-      })
-      throw error
+    } catch (e) {
+      return null
     }
   }
 
-  /**
-   * Get logs for a specific correlation ID (trace request across services)
-   */
-  static async getLogsByCorrelationId(correlationId: string): Promise<Log[]> {
+  // Get log file stats
+  getLogStats(): {
+    files: Array<{ name: string; size: number; modified: string }>
+    totalSize: number
+  } {
     try {
-      const result = await query(
-        `SELECT
-          id, timestamp, level, message, user_id, correlation_id,
-          module, context, stack_trace, request_id, session_id,
-          ip_address, created_at
-        FROM logs
-        WHERE correlation_id = $1
-        ORDER BY timestamp ASC`,
-        [correlationId]
-      )
+      const files = fs.readdirSync(LOG_DIR).filter((f) => f.endsWith('.log'))
 
-      return result.rows.map((row: any) => ({
-        id: row.id,
-        timestamp: row.timestamp,
-        level: row.level,
-        message: row.message,
-        userId: row.user_id,
-        correlationId: row.correlation_id,
-        module: row.module,
-        context: row.context,
-        stackTrace: row.stack_trace,
-        requestId: row.request_id,
-        sessionId: row.session_id,
-        ipAddress: row.ip_address,
-        createdAt: row.created_at,
-      }))
-    } catch (error) {
-      logger.error({
-        type: 'log_correlation_failed',
-        correlationId,
-        error: error instanceof Error ? error.message : String(error),
+      const stats = files.map((f) => {
+        const filePath = path.join(LOG_DIR, f)
+        const stat = fs.statSync(filePath)
+        return {
+          name: f,
+          size: stat.size,
+          modified: format(stat.mtime, 'yyyy-MM-dd HH:mm:ss'),
+        }
       })
-      throw error
+
+      const totalSize = stats.reduce((sum, s) => sum + s.size, 0)
+
+      return {
+        files: stats.sort((a, b) => new Date(b.modified).getTime() - new Date(a.modified).getTime()),
+        totalSize,
+      }
+    } catch (e) {
+      return { files: [], totalSize: 0 }
     }
   }
 
-  /**
-   * Delete old logs (for maintenance)
-   */
-  static async deleteOldLogs(daysOld: number): Promise<number> {
+  // Download log file
+  getLogFileContent(filename: string): string | null {
     try {
+      const filePath = path.join(LOG_DIR, filename)
+
+      if (!filePath.startsWith(LOG_DIR)) {
+        return null
+      }
+
+      if (!fs.existsSync(filePath)) {
+        return null
+      }
+
+      return fs.readFileSync(filePath, 'utf-8')
+    } catch (e) {
+      return null
+    }
+  }
+
+  // Clear old logs
+  clearOldLogs(daysToKeep: number = 30): number {
+    try {
+      const files = fs.readdirSync(LOG_DIR).filter((f) => f.endsWith('.log'))
       const cutoffDate = new Date()
-      cutoffDate.setDate(cutoffDate.getDate() - daysOld)
+      cutoffDate.setDate(cutoffDate.getDate() - daysToKeep)
 
-      const result = await query(
-        'DELETE FROM logs WHERE created_at < $1',
-        [cutoffDate]
-      )
+      let deletedCount = 0
 
-      const deletedCount = result.rowCount || 0
+      files.forEach((f) => {
+        const filePath = path.join(LOG_DIR, f)
+        const stat = fs.statSync(filePath)
 
-      logger.info({
-        type: 'logs_deleted',
-        count: deletedCount,
-        daysOld,
+        if (stat.mtime < cutoffDate) {
+          fs.unlinkSync(filePath)
+          deletedCount++
+        }
       })
 
       return deletedCount
-    } catch (error) {
-      logger.error({
-        type: 'log_deletion_failed',
-        daysOld,
-        error: error instanceof Error ? error.message : String(error),
-      })
-      throw error
+    } catch (e) {
+      return 0
     }
   }
 }
+
+export const loggingService = new LoggingService()
