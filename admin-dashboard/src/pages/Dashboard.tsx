@@ -1,235 +1,283 @@
 import React, { useEffect, useState } from 'react'
 import { Layout } from '../components/Layout'
+import {
+  Box,
+  Card,
+  CardContent,
+  Typography,
+  Grid,
+  Paper,
+  LinearProgress,
+  Chip,
+} from '@mui/material'
+import { TrendingUp, Users, ShoppingCart, Activity } from '@mui/icons-material'
+import { COLORS, SPACING, BORDER_RADIUS, SHADOWS, TRANSITIONS } from '../theme'
+
+interface StatItem {
+  title: string
+  value: number
+  subtitle: string
+  icon: React.ReactNode
+  gradient: string
+  change?: number
+}
 
 export function Dashboard() {
-  const [stats, setStats] = useState({
-    totalUsers: 2450,
-    totalAccounts: 856,
-    totalOrders: 12500,
-    activeTraders: 1203,
-  })
+  const [stats, setStats] = useState<StatItem[]>([
+    {
+      title: 'Total Users',
+      value: 2450,
+      subtitle: 'All registered users',
+      icon: <Users sx={{ fontSize: 40 }} />,
+      gradient: `linear-gradient(135deg, #667eea 0%, #764ba2 100%)`,
+      change: 12,
+    },
+    {
+      title: 'Trading Accounts',
+      value: 856,
+      subtitle: 'Active accounts',
+      icon: <ShoppingCart sx={{ fontSize: 40 }} />,
+      gradient: `linear-gradient(135deg, #f093fb 0%, #f5576c 100%)`,
+      change: 8,
+    },
+    {
+      title: 'Total Orders',
+      value: 12500,
+      subtitle: 'All-time trades',
+      icon: <TrendingUp sx={{ fontSize: 40 }} />,
+      gradient: `linear-gradient(135deg, #4facfe 0%, #00f2fe 100%)`,
+      change: 23,
+    },
+    {
+      title: 'Active Traders',
+      value: 1203,
+      subtitle: 'Trading this month',
+      icon: <Activity sx={{ fontSize: 40 }} />,
+      gradient: `linear-gradient(135deg, #43e97b 0%, #38f9d7 100%)`,
+      change: 15,
+    },
+  ])
 
   useEffect(() => {
-    setStats({
-      totalUsers: 2450,
-      totalAccounts: 856,
-      totalOrders: 12500,
-      activeTraders: 1203,
-    })
+    // Simulate data loading
+    setStats(stats)
   }, [])
-
-  const StatCard = ({ title, value, subtitle, icon, gradient }: any) => (
-    <div style={{
-      background: gradient,
-      borderRadius: '12px',
-      padding: '24px',
-      boxShadow: '0 4px 12px rgba(0, 0, 0, 0.08)',
-      transition: 'all 300ms',
-      cursor: 'pointer',
-      border: '1px solid rgba(255, 255, 255, 0.1)'
-    }}
-    onMouseEnter={(e: any) => {
-      e.currentTarget.style.boxShadow = '0 12px 30px rgba(0, 0, 0, 0.15)'
-      e.currentTarget.style.transform = 'translateY(-4px)'
-    }}
-    onMouseLeave={(e: any) => {
-      e.currentTarget.style.boxShadow = '0 4px 12px rgba(0, 0, 0, 0.08)'
-      e.currentTarget.style.transform = 'translateY(0)'
-    }}>
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
-        <div>
-          <p style={{
-            fontSize: '12px',
-            fontWeight: '600',
-            color: 'rgba(255, 255, 255, 0.8)',
-            textTransform: 'uppercase',
-            letterSpacing: '0.5px',
-            margin: '0 0 8px 0'
-          }}>
-            {title}
-          </p>
-          <p style={{
-            fontSize: '36px',
-            fontWeight: '700',
-            color: 'white',
-            margin: '0 0 4px 0'
-          }}>
-            {value.toLocaleString()}
-          </p>
-          <p style={{
-            fontSize: '12px',
-            color: 'rgba(255, 255, 255, 0.7)',
-            margin: 0
-          }}>
-            {subtitle}
-          </p>
-        </div>
-        <div style={{ fontSize: '40px' }}>{icon}</div>
-      </div>
-    </div>
-  )
 
   return (
     <Layout>
-      <div style={{ padding: '0 20px' }}>
-        {/* Header */}
-        <div style={{ marginBottom: '40px' }}>
-          <h2 style={{
-            fontSize: '36px',
-            fontWeight: '700',
-            color: '#0f172a',
-            margin: '0 0 8px 0'
-          }}>
+      <Box sx={{ p: SPACING.xl }}>
+        {/* Header Section */}
+        <Box sx={{ mb: SPACING.xxl }}>
+          <Typography
+            variant="h4"
+            sx={{
+              color: COLORS.primary,
+              fontWeight: '700',
+              mb: SPACING.md,
+            }}
+          >
             Dashboard Overview
-          </h2>
-          <p style={{
-            fontSize: '15px',
-            color: '#64748b',
-            margin: 0
-          }}>
+          </Typography>
+          <Typography
+            variant="body1"
+            sx={{
+              color: COLORS.textSecondary,
+            }}
+          >
             Real-time statistics and platform metrics
-          </p>
-        </div>
+          </Typography>
+        </Box>
 
         {/* Stats Grid */}
-        <div style={{
-          display: 'grid',
-          gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))',
-          gap: '20px',
-          marginBottom: '40px'
-        }}>
-          <StatCard
-            title="Total Users"
-            value={stats.totalUsers}
-            subtitle="All registered users"
-            icon="👥"
-            gradient="linear-gradient(135deg, #667eea 0%, #764ba2 100%)"
-          />
-          <StatCard
-            title="Trading Accounts"
-            value={stats.totalAccounts}
-            subtitle="Active accounts"
-            icon="💼"
-            gradient="linear-gradient(135deg, #f093fb 0%, #f5576c 100%)"
-          />
-          <StatCard
-            title="Total Orders"
-            value={stats.totalOrders}
-            subtitle="All-time trades"
-            icon="📊"
-            gradient="linear-gradient(135deg, #4facfe 0%, #00f2fe 100%)"
-          />
-          <StatCard
-            title="Active Traders"
-            value={stats.activeTraders}
-            subtitle="Trading this month"
-            icon="🎯"
-            gradient="linear-gradient(135deg, #43e97b 0%, #38f9d7 100%)"
-          />
-        </div>
-
-        {/* Activity Section */}
-        <div style={{
-          backgroundColor: 'white',
-          borderRadius: '12px',
-          padding: '32px',
-          boxShadow: '0 2px 8px rgba(0, 0, 0, 0.06)',
-          border: '1px solid #e2e8f0',
-          marginBottom: '40px'
-        }}>
-          <div style={{
-            display: 'flex',
-            justifyContent: 'space-between',
-            alignItems: 'center',
-            marginBottom: '24px'
-          }}>
-            <h3 style={{
-              fontSize: '22px',
-              fontWeight: '700',
-              color: '#0f172a',
-              margin: 0
-            }}>
-              Recent Activity
-            </h3>
-            <span style={{
-              backgroundColor: '#dbeafe',
-              color: '#0c4a6e',
-              padding: '8px 16px',
-              borderRadius: '6px',
-              fontSize: '12px',
-              fontWeight: '600'
-            }}>
-              Last 30 Days
-            </span>
-          </div>
-
-          {/* Empty State */}
-          <div style={{
-            backgroundColor: '#f8fafc',
-            borderRadius: '8px',
-            padding: '48px 24px',
-            textAlign: 'center',
-            border: '2px dashed #cbd5e1'
-          }}>
-            <div style={{ fontSize: '48px', marginBottom: '16px' }}>📭</div>
-            <p style={{
-              fontSize: '16px',
-              fontWeight: '600',
-              color: '#475569',
-              margin: '0 0 8px 0'
-            }}>
-              No recent activity yet
-            </p>
-            <p style={{
-              fontSize: '14px',
-              color: '#94a3b8',
-              margin: 0
-            }}>
-              Trading activities and orders will appear here in real-time
-            </p>
-          </div>
-        </div>
-
-        {/* Quick Links */}
-        <div style={{
-          display: 'grid',
-          gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
-          gap: '16px'
-        }}>
-          {[
-            { icon: '👥', title: 'Users', desc: 'Manage all users' },
-            { icon: '💼', title: 'Accounts', desc: 'Trading accounts' },
-            { icon: '📈', title: 'Orders', desc: 'Order history' },
-            { icon: '📉', title: 'Analytics', desc: 'Market insights' }
-          ].map((item, i) => (
-            <div key={i} style={{
-              backgroundColor: '#f8fafc',
-              borderRadius: '8px',
-              padding: '16px',
-              border: '1px solid #e2e8f0',
-              cursor: 'pointer',
-              transition: 'all 200ms',
-              textAlign: 'center'
-            }}
-            onMouseEnter={(e: any) => {
-              e.currentTarget.style.backgroundColor = '#f1f5f9'
-              e.currentTarget.style.borderColor = '#cbd5e1'
-            }}
-            onMouseLeave={(e: any) => {
-              e.currentTarget.style.backgroundColor = '#f8fafc'
-              e.currentTarget.style.borderColor = '#e2e8f0'
-            }}>
-              <div style={{ fontSize: '28px', marginBottom: '8px' }}>{item.icon}</div>
-              <p style={{ fontSize: '14px', fontWeight: '600', color: '#0f172a', margin: '0 0 4px 0' }}>
-                {item.title}
-              </p>
-              <p style={{ fontSize: '12px', color: '#64748b', margin: 0 }}>
-                {item.desc}
-              </p>
-            </div>
+        <Grid container spacing={3} sx={{ mb: SPACING.xxl }}>
+          {stats.map((stat, index) => (
+            <Grid item xs={12} sm={6} md={3} key={index}>
+              <Card
+                sx={{
+                  background: stat.gradient,
+                  backgroundAttachment: 'fixed',
+                  borderRadius: BORDER_RADIUS.lg,
+                  boxShadow: SHADOWS.md,
+                  transition: TRANSITIONS.normal,
+                  cursor: 'pointer',
+                  border: `1px solid ${COLORS.primary}40`,
+                  height: '100%',
+                  '&:hover': {
+                    transform: 'translateY(-8px)',
+                    boxShadow: SHADOWS.lg,
+                  },
+                }}
+              >
+                <CardContent sx={{ p: SPACING.xl }}>
+                  <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', mb: SPACING.md }}>
+                    <Box>
+                      <Typography
+                        variant="caption"
+                        sx={{
+                          color: 'rgba(255, 255, 255, 0.8)',
+                          fontWeight: '600',
+                          textTransform: 'uppercase',
+                          letterSpacing: '0.5px',
+                          display: 'block',
+                          mb: SPACING.sm,
+                        }}
+                      >
+                        {stat.title}
+                      </Typography>
+                      <Typography
+                        variant="h4"
+                        sx={{
+                          color: '#ffffff',
+                          fontWeight: '700',
+                          mb: SPACING.xs,
+                        }}
+                      >
+                        {stat.value.toLocaleString()}
+                      </Typography>
+                      <Typography
+                        variant="body2"
+                        sx={{
+                          color: 'rgba(255, 255, 255, 0.8)',
+                        }}
+                      >
+                        {stat.subtitle}
+                      </Typography>
+                    </Box>
+                    <Box
+                      sx={{
+                        color: 'rgba(255, 255, 255, 0.9)',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                      }}
+                    >
+                      {stat.icon}
+                    </Box>
+                  </Box>
+                  {stat.change && (
+                    <Chip
+                      label={`+${stat.change}% this month`}
+                      size="small"
+                      sx={{
+                        backgroundColor: 'rgba(255, 255, 255, 0.2)',
+                        color: '#ffffff',
+                        fontWeight: '600',
+                      }}
+                    />
+                  )}
+                </CardContent>
+              </Card>
+            </Grid>
           ))}
-        </div>
-      </div>
+        </Grid>
+
+        {/* Recent Activity Section */}
+        <Paper
+          sx={{
+            backgroundColor: COLORS.bgMedium,
+            borderLeft: `4px solid ${COLORS.primary}`,
+            borderRadius: BORDER_RADIUS.lg,
+            p: SPACING.xl,
+            boxShadow: SHADOWS.md,
+          }}
+        >
+          <Typography
+            variant="h6"
+            sx={{
+              color: COLORS.primary,
+              fontWeight: '700',
+              mb: SPACING.lg,
+            }}
+          >
+            Recent Activity
+          </Typography>
+
+          <Box
+            sx={{
+              display: 'flex',
+              flexDirection: 'column',
+              alignItems: 'center',
+              justifyContent: 'center',
+              py: SPACING.xxl,
+              color: COLORS.textSecondary,
+            }}
+          >
+            <Typography variant="body1" sx={{ mb: SPACING.md }}>
+              📊 No recent activity yet
+            </Typography>
+            <Typography variant="caption">
+              Trading activities and orders will appear here in real-time
+            </Typography>
+          </Box>
+        </Paper>
+
+        {/* System Health */}
+        <Grid container spacing={3} sx={{ mt: SPACING.lg }}>
+          <Grid item xs={12} md={6}>
+            <Paper
+              sx={{
+                backgroundColor: COLORS.bgMedium,
+                borderLeft: `4px solid ${COLORS.success}`,
+                p: SPACING.lg,
+                borderRadius: BORDER_RADIUS.lg,
+                boxShadow: SHADOWS.md,
+              }}
+            >
+              <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: SPACING.md }}>
+                <Typography variant="subtitle1" sx={{ color: COLORS.primary, fontWeight: '700' }}>
+                  System Health
+                </Typography>
+                <Chip label="Healthy" size="small" sx={{ backgroundColor: COLORS.success, color: '#fff' }} />
+              </Box>
+              <LinearProgress
+                variant="determinate"
+                value={95}
+                sx={{
+                  backgroundColor: COLORS.bgLight,
+                  '& .MuiLinearProgress-bar': {
+                    backgroundColor: COLORS.success,
+                  },
+                }}
+              />
+              <Typography variant="caption" sx={{ color: COLORS.textTertiary, display: 'block', mt: SPACING.md }}>
+                System uptime: 99.9% | Response time: 145ms
+              </Typography>
+            </Paper>
+          </Grid>
+
+          <Grid item xs={12} md={6}>
+            <Paper
+              sx={{
+                backgroundColor: COLORS.bgMedium,
+                borderLeft: `4px solid ${COLORS.primary}`,
+                p: SPACING.lg,
+                borderRadius: BORDER_RADIUS.lg,
+                boxShadow: SHADOWS.md,
+              }}
+            >
+              <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: SPACING.md }}>
+                <Typography variant="subtitle1" sx={{ color: COLORS.primary, fontWeight: '700' }}>
+                  Database
+                </Typography>
+                <Chip label="Connected" size="small" sx={{ backgroundColor: COLORS.success, color: '#fff' }} />
+              </Box>
+              <LinearProgress
+                variant="determinate"
+                value={88}
+                sx={{
+                  backgroundColor: COLORS.bgLight,
+                  '& .MuiLinearProgress-bar': {
+                    backgroundColor: COLORS.info,
+                  },
+                }}
+              />
+              <Typography variant="caption" sx={{ color: COLORS.textTertiary, display: 'block', mt: SPACING.md }}>
+                Connections: 42 | Queries/sec: 1,250
+              </Typography>
+            </Paper>
+          </Grid>
+        </Grid>
+      </Box>
     </Layout>
   )
 }

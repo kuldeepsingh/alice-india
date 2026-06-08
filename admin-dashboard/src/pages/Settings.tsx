@@ -19,11 +19,19 @@ import {
   Divider,
 } from '@mui/material'
 import { styled } from '@mui/material/styles'
+import { COLORS, SPACING, BORDER_RADIUS, SHADOWS, TRANSITIONS } from '../theme'
 
 const SettingsCard = styled(Paper)(({ theme }) => ({
-  padding: '24px',
-  marginBottom: '24px',
-  borderLeft: '4px solid #D4AF37',
+  padding: SPACING.xl,
+  marginBottom: SPACING.xl,
+  borderLeft: `4px solid ${COLORS.primary}`,
+  backgroundColor: COLORS.bgMedium,
+  borderRadius: BORDER_RADIUS.lg,
+  boxShadow: SHADOWS.md,
+  transition: TRANSITIONS.normal,
+  '&:hover': {
+    boxShadow: SHADOWS.lg,
+  },
 }))
 
 export default function Settings() {
@@ -186,8 +194,8 @@ export default function Settings() {
   }
 
   return (
-    <Container maxWidth="lg" sx={{ py: 4 }}>
-      <Typography variant="h4" sx={{ fontWeight: 'bold', mb: 3 }}>
+    <Container maxWidth="lg" sx={{ py: SPACING.xl }}>
+      <Typography variant="h4" sx={{ fontWeight: 'bold', mb: SPACING.lg, color: COLORS.primary }}>
         ⚙️ Settings
       </Typography>
 
