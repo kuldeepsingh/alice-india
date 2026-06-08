@@ -1,8 +1,8 @@
 import React from 'react'
 import { useNavigate, useLocation } from 'react-router-dom'
 import { Box, Button, AppBar, Toolbar, Avatar } from '@mui/material'
-import { ArrowBack, Home, LogOut } from '@mui/icons-material'
-import { THEME_PRO, SPACING_PRO, TRANSITIONS_PRO } from '../theme-pro'
+import { ArrowBack, Home, Logout } from '@mui/icons-material'
+import { THEME_PRO, SPACING_PRO, RADIUS_PRO, TRANSITIONS_PRO } from '../theme-pro'
 
 export function NavbarPro() {
   const navigate = useNavigate()
@@ -86,7 +86,7 @@ export function NavbarPro() {
               fontSize: '14px',
               px: SPACING_PRO.lg,
               py: SPACING_PRO.md,
-              borderRadius: THEME_PRO.radius.md,
+              borderRadius: RADIUS_PRO.md,
               border: isHome ? `1px solid ${THEME_PRO.primaryLight}` : 'none',
               transition: TRANSITIONS_PRO.normal,
               '&:hover': {
@@ -109,7 +109,7 @@ export function NavbarPro() {
                 fontSize: '14px',
                 px: SPACING_PRO.lg,
                 py: SPACING_PRO.md,
-                borderRadius: THEME_PRO.radius.md,
+                borderRadius: RADIUS_PRO.md,
                 transition: TRANSITIONS_PRO.normal,
                 '&:hover': {
                   backgroundColor: THEME_PRO.bgTertiary,
@@ -149,7 +149,7 @@ export function NavbarPro() {
               fontSize: '14px',
               px: SPACING_PRO.lg,
               py: SPACING_PRO.md,
-              borderRadius: THEME_PRO.radius.md,
+              borderRadius: RADIUS_PRO.md,
               border: `1px solid ${THEME_PRO.border}`,
               transition: TRANSITIONS_PRO.normal,
               '&:hover': {

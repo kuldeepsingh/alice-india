@@ -17,12 +17,12 @@ import {
   ShoppingCart,
   TrendingUp,
   Settings,
-  Diagnostics,
+  Build,
   Description,
-  ErrorOutline,
+  ErrorOutlined,
   History,
   BugReport,
-  Incident,
+  WarningAmber,
   Group,
   Speed,
 } from '@mui/icons-material'
@@ -44,14 +44,14 @@ const menuSections = [
     title: 'System',
     items: [
       { label: 'Settings', path: '/settings', icon: Settings },
-      { label: 'Diagnostics', path: '/diagnostics', icon: Diagnostics },
+      { label: 'Diagnostics', path: '/diagnostics', icon: Build },
     ],
   },
   {
     title: 'Monitoring',
     items: [
       { label: 'Logs', path: '/logs', icon: Description },
-      { label: 'Errors', path: '/errors', icon: ErrorOutline },
+      { label: 'Errors', path: '/errors', icon: ErrorOutlined },
       { label: 'Audit Trail', path: '/audit', icon: History },
       { label: 'Debug', path: '/debug', icon: BugReport },
     ],
@@ -59,7 +59,7 @@ const menuSections = [
   {
     title: 'Operations',
     items: [
-      { label: 'Incidents', path: '/incidents', icon: Incident },
+      { label: 'Incidents', path: '/incidents', icon: WarningAmber },
       { label: 'Team', path: '/team', icon: Group },
       { label: 'Performance', path: '/performance', icon: Speed },
     ],

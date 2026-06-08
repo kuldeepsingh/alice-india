@@ -1,7 +1,7 @@
 import React from 'react'
 import { LayoutPro } from '../components/LayoutPro'
 import { Box, Card, Grid, Typography, LinearProgress, Chip, Button } from '@mui/material'
-import { TrendingUp, TrendingDown, Eye, EyeOff } from '@mui/icons-material'
+import { TrendingUp, TrendingDown, Visibility, VisibilityOff } from '@mui/icons-material'
 import { THEME_PRO, SPACING_PRO, RADIUS_PRO, SHADOWS_PRO, TRANSITIONS_PRO } from '../theme-pro'
 
 interface StatCard {
@@ -74,7 +74,7 @@ export function DashboardPro() {
             </Typography>
           </Box>
           <Button
-            startIcon={showValues ? <Eye /> : <EyeOff />}
+            startIcon={showValues ? <Visibility /> : <VisibilityOff />}
             onClick={() => setShowValues(!showValues)}
             sx={{
               textTransform: 'none',
