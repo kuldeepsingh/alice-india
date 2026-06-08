@@ -283,7 +283,7 @@ router.get('/usage', async (req: AuthRequest, res) => {
     const stats = await usageTrackingService.getUserAnalytics(userId)
 
     res.json({
-      totalCalls: stats.totalClaude Calls || 0,
+      totalCalls: stats.totalClaudeCalls || 0,
       successfulCalls: stats.successfulCalls || 0,
       failedCalls: stats.failedCalls || 0,
       averageResponseTime: stats.averageResponseTime || 0,
