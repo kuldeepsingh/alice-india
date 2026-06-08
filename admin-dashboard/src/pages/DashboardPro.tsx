@@ -2,6 +2,8 @@ import React from 'react'
 import { LayoutPro } from '../components/LayoutPro'
 import { Box, Card, Typography, LinearProgress, Chip, Button } from '@mui/material'
 import { TrendingUp, TrendingDown, Visibility, VisibilityOff } from '@mui/icons-material'
+import { useAuthStore } from '../state/store'
+import { formatCurrency, getCurrencyByCode } from '../content/currencies'
 import { THEME_PRO, SPACING_PRO, RADIUS_PRO, SHADOWS_PRO, TRANSITIONS_PRO } from '../theme-pro'
 
 interface StatCard {
@@ -14,11 +16,13 @@ interface StatCard {
 
 export function DashboardPro() {
   const [showValues, setShowValues] = React.useState(true)
+  const { currency } = useAuthStore()
+  const currencyInfo = getCurrencyByCode(currency)
 
   const stats: StatCard[] = [
     {
       title: 'Total Portfolio Value',
-      value: '$2,847,500',
+      value: formatCurrency(2847500, currency),
       change: 12.5,
       isPositive: true,
       icon: <TrendingUp sx={{ fontSize: 28 }} />,
@@ -32,7 +36,7 @@ export function DashboardPro() {
     },
     {
       title: 'Daily Profit/Loss',
-      value: '$12,450',
+      value: formatCurrency(12450, currency),
       change: -2.1,
       isPositive: false,
       icon: <TrendingUp sx={{ fontSize: 28 }} />,
@@ -70,7 +74,7 @@ export function DashboardPro() {
               Trading Dashboard
             </Typography>
             <Typography sx={{ color: THEME_PRO.textSecondary, fontSize: '14px' }}>
-              Welcome back! Here's your trading overview
+              Welcome back! Here's your trading overview • Currency: {currencyInfo.symbol} {currency}
             </Typography>
           </Box>
           <Button
@@ -223,7 +227,7 @@ export function DashboardPro() {
                 Account Balance
               </Typography>
               <Typography sx={{ fontSize: '32px', fontWeight: 700, color: THEME_PRO.textInverse, mb: SPACING_PRO.lg }}>
-                ${showValues ? '287,450' : '••••••'}
+                {showValues ? formatCurrency(287450, currency) : '••••••'}
               </Typography>
               <Box sx={{ display: 'flex', gap: SPACING_PRO.sm }}>
                 <Button
