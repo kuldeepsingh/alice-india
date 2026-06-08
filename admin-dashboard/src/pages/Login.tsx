@@ -7,16 +7,20 @@ import { frontendLogger } from '../services/logging-client'
 export function Login() {
   const navigate = useNavigate()
   const { setToken, setUser } = useAuthStore()
+  const [isRegister, setIsRegister] = useState(false)
   const [email, setEmail] = useState('admin@example.com')
   const [password, setPassword] = useState('admin123')
+  const [confirmPassword, setConfirmPassword] = useState('admin123')
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
+  const [success, setSuccess] = useState('')
   const [hoveredFeature, setHoveredFeature] = useState<number | null>(null)
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault()
     setLoading(true)
     setError('')
+    setSuccess('')
 
     frontendLogger.debug('Auth', 'Login attempt started', { email })
 
@@ -49,6 +53,77 @@ export function Login() {
       setError(errorMessage)
     } finally {
       setLoading(false)
+    }
+  }
+
+  const handleRegister = async (e: React.FormEvent) => {
+    e.preventDefault()
+    setLoading(true)
+    setError('')
+    setSuccess('')
+
+    // Validation
+    if (!email || !password || !confirmPassword) {
+      setError('All fields are required')
+      setLoading(false)
+      return
+    }
+
+    if (password !== confirmPassword) {
+      setError('Passwords do not match')
+      setLoading(false)
+      return
+    }
+
+    if (password.length < 6) {
+      setError('Password must be at least 6 characters')
+      setLoading(false)
+      return
+    }
+
+    frontendLogger.debug('Auth', 'Registration attempt started', { email })
+
+    try {
+      frontendLogger.debug('Auth', 'Sending registration request', { email })
+      const response = await authAPI.register(email, password)
+      const { user } = response.data
+
+      frontendLogger.info('Auth', 'Registration successful', {
+        userId: user.id,
+        email: user.email,
+        role: user.role,
+      })
+
+      setSuccess('Registration successful! Redirecting to login...')
+      setTimeout(() => {
+        setIsRegister(false)
+        setPassword('')
+        setConfirmPassword('')
+        setEmail('')
+      }, 2000)
+    } catch (err: any) {
+      const errorMessage = err.response?.data?.error || 'Registration failed'
+      frontendLogger.error(
+        'Auth',
+        'Registration failed',
+        new Error(errorMessage),
+        {
+          email,
+          status: err.response?.status,
+          error: errorMessage,
+        }
+      )
+      setError(errorMessage)
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  const handleSubmit = (e: React.FormEvent) => {
+    if (isRegister) {
+      handleRegister(e)
+    } else {
+      handleLogin(e)
     }
   }
 
@@ -167,7 +242,7 @@ export function Login() {
           </div>
         </div>
 
-        {/* Right side - Login Form */}
+        {/* Right side - Login/Register Form */}
         <div style={{
           backgroundColor: 'rgba(255, 255, 255, 0.95)',
           borderRadius: '20px',
@@ -184,15 +259,74 @@ export function Login() {
               color: '#0f172a',
               margin: '0 0 8px 0'
             }}>
-              Welcome Back
+              {isRegister ? 'Create Account' : 'Welcome Back'}
             </h2>
             <p style={{
               fontSize: '14px',
               color: '#64748b',
               margin: 0
             }}>
-              Sign in to your trading dashboard
+              {isRegister ? 'Join the platform and start trading' : 'Sign in to your trading dashboard'}
             </p>
+          </div>
+
+          {/* Mode Toggle */}
+          <div style={{
+            display: 'flex',
+            backgroundColor: '#f1f5f9',
+            borderRadius: '8px',
+            padding: '4px',
+            marginBottom: '24px',
+            gap: '4px'
+          }}>
+            <button
+              type="button"
+              onClick={() => {
+                setIsRegister(false)
+                setError('')
+                setSuccess('')
+              }}
+              style={{
+                flex: 1,
+                padding: '10px 16px',
+                border: 'none',
+                borderRadius: '6px',
+                fontSize: '14px',
+                fontWeight: '600',
+                cursor: 'pointer',
+                backgroundColor: !isRegister ? 'white' : 'transparent',
+                color: !isRegister ? '#D4AF37' : '#64748b',
+                transition: 'all 200ms',
+                boxShadow: !isRegister ? '0 2px 4px rgba(0,0,0,0.1)' : 'none'
+              }}
+            >
+              🔑 Login
+            </button>
+            <button
+              type="button"
+              onClick={() => {
+                setIsRegister(true)
+                setError('')
+                setSuccess('')
+                setPassword('')
+                setConfirmPassword('')
+              }}
+              style={{
+                flex: 1,
+                padding: '10px 16px',
+                border: 'none',
+                borderRadius: '6px',
+                fontSize: '14px',
+                fontWeight: '600',
+                cursor: 'pointer',
+                backgroundColor: isRegister ? 'white' : 'transparent',
+                color: isRegister ? '#D4AF37' : '#64748b',
+                transition: 'all 200ms',
+                boxShadow: isRegister ? '0 2px 4px rgba(0,0,0,0.1)' : 'none'
+              }}
+            >
+              📝 Register
+            </button>
           </div>
 
           {/* Error Alert */}
@@ -212,9 +346,26 @@ export function Login() {
             </div>
           )}
 
+          {/* Success Alert */}
+          {success && (
+            <div style={{
+              backgroundColor: '#dcfce7',
+              border: '1px solid #86efac',
+              color: '#166534',
+              padding: '12px 16px',
+              borderRadius: '8px',
+              marginBottom: '24px',
+              fontSize: '14px',
+              fontWeight: '500',
+              animation: 'slideDown 300ms ease-out'
+            }}>
+              ✅ {success}
+            </div>
+          )}
+
           {/* Form */}
-          <form onSubmit={handleLogin} style={{ marginBottom: '24px' }}>
-            {/* Username Field */}
+          <form onSubmit={handleSubmit} style={{ marginBottom: '24px' }}>
+            {/* Email Field */}
             <div style={{ marginBottom: '20px' }}>
               <label style={{
                 display: 'block',
@@ -223,7 +374,7 @@ export function Login() {
                 color: '#1e293b',
                 marginBottom: '8px'
               }}>
-                Username or Email
+                Email Address
               </label>
               <div style={{
                 position: 'relative',
@@ -234,9 +385,9 @@ export function Login() {
                   position: 'absolute',
                   left: '12px',
                   fontSize: '16px'
-                }}>👤</span>
+                }}>📧</span>
                 <input
-                  type="text"
+                  type="email"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   style={{
@@ -258,14 +409,14 @@ export function Login() {
                     e.currentTarget.style.borderColor = '#e2e8f0'
                     e.currentTarget.style.boxShadow = 'none'
                   }}
-                  placeholder="admin"
+                  placeholder={isRegister ? 'your@email.com' : 'admin@example.com'}
                   required
                 />
               </div>
             </div>
 
             {/* Password Field */}
-            <div style={{ marginBottom: '28px' }}>
+            <div style={{ marginBottom: isRegister ? '20px' : '28px' }}>
               <label style={{
                 display: 'block',
                 fontSize: '14px',
@@ -308,66 +459,133 @@ export function Login() {
                     e.currentTarget.style.borderColor = '#e2e8f0'
                     e.currentTarget.style.boxShadow = 'none'
                   }}
-                  placeholder="••••••••"
+                  placeholder={isRegister ? 'Min 6 characters' : '••••••••'}
                   required
                 />
               </div>
             </div>
 
-            {/* Login Button */}
+            {/* Confirm Password Field - Only for Register */}
+            {isRegister && (
+              <div style={{ marginBottom: '28px' }}>
+                <label style={{
+                  display: 'block',
+                  fontSize: '14px',
+                  fontWeight: '600',
+                  color: '#1e293b',
+                  marginBottom: '8px'
+                }}>
+                  Confirm Password
+                </label>
+                <div style={{
+                  position: 'relative',
+                  display: 'flex',
+                  alignItems: 'center'
+                }}>
+                  <span style={{
+                    position: 'absolute',
+                    left: '12px',
+                    fontSize: '16px'
+                  }}>✓</span>
+                  <input
+                    type="password"
+                    value={confirmPassword}
+                    onChange={(e) => setConfirmPassword(e.target.value)}
+                    style={{
+                      width: '100%',
+                      padding: '12px 14px 12px 40px',
+                      border: '2px solid #e2e8f0',
+                      borderRadius: '8px',
+                      fontSize: '14px',
+                      transition: 'all 200ms',
+                      fontFamily: 'inherit',
+                      boxSizing: 'border-box',
+                      backgroundColor: 'white',
+                      borderColor: confirmPassword && password !== confirmPassword ? '#ef4444' : '#e2e8f0'
+                    }}
+                    onFocus={(e) => {
+                      if (!(confirmPassword && password !== confirmPassword)) {
+                        e.currentTarget.style.borderColor = '#D4AF37'
+                        e.currentTarget.style.boxShadow = '0 0 0 4px rgba(212, 175, 55, 0.1)'
+                      }
+                    }}
+                    onBlur={(e) => {
+                      e.currentTarget.style.borderColor = confirmPassword && password !== confirmPassword ? '#ef4444' : '#e2e8f0'
+                      e.currentTarget.style.boxShadow = 'none'
+                    }}
+                    placeholder="Re-enter password"
+                    required
+                  />
+                </div>
+                {confirmPassword && password !== confirmPassword && (
+                  <p style={{
+                    fontSize: '12px',
+                    color: '#ef4444',
+                    marginTop: '6px',
+                    margin: '6px 0 0 0'
+                  }}>
+                    ⚠️ Passwords do not match
+                  </p>
+                )}
+              </div>
+            )}
+
+            {/* Submit Button */}
             <button
               type="submit"
-              disabled={loading}
+              disabled={loading || (isRegister && password !== confirmPassword)}
               style={{
                 width: '100%',
                 padding: '14px 16px',
-                background: loading ? '#999999' : 'linear-gradient(135deg, #D4AF37 0%, #F0C851 100%)',
+                background: (loading || (isRegister && password !== confirmPassword)) ? '#999999' : 'linear-gradient(135deg, #D4AF37 0%, #F0C851 100%)',
                 color: 'white',
                 border: 'none',
                 borderRadius: '8px',
                 fontSize: '16px',
                 fontWeight: '600',
-                cursor: loading ? 'not-allowed' : 'pointer',
+                cursor: (loading || (isRegister && password !== confirmPassword)) ? 'not-allowed' : 'pointer',
                 transition: 'all 300ms',
-                boxShadow: loading ? 'none' : '0 8px 20px rgba(212, 175, 55, 0.3)',
-                opacity: loading ? 0.7 : 1,
+                boxShadow: (loading || (isRegister && password !== confirmPassword)) ? 'none' : '0 8px 20px rgba(212, 175, 55, 0.3)',
+                opacity: (loading || (isRegister && password !== confirmPassword)) ? 0.7 : 1,
                 letterSpacing: '0.3px'
               }}
-              onMouseEnter={(e) => !loading && (e.currentTarget.style.boxShadow = '0 12px 30px rgba(37, 99, 235, 0.4)')}
-              onMouseLeave={(e) => !loading && (e.currentTarget.style.boxShadow = '0 8px 20px rgba(37, 99, 235, 0.3)')}
+              onMouseEnter={(e) => !(loading || (isRegister && password !== confirmPassword)) && (e.currentTarget.style.boxShadow = '0 12px 30px rgba(212, 175, 55, 0.4)')}
+              onMouseLeave={(e) => !(loading || (isRegister && password !== confirmPassword)) && (e.currentTarget.style.boxShadow = '0 8px 20px rgba(212, 175, 55, 0.3)')}
             >
-              {loading ? '🔄 Logging in...' : '🚀 Sign In'}
+              {loading ? (isRegister ? '🔄 Creating Account...' : '🔄 Logging in...') : (isRegister ? '🚀 Create Account' : '🚀 Sign In')}
             </button>
           </form>
 
-          {/* Demo Credentials */}
-          <div style={{
-            backgroundColor: '#dbeafe',
-            border: '1px solid #7dd3fc',
-            borderRadius: '8px',
-            padding: '16px',
-            marginBottom: '20px'
-          }}>
-            <p style={{ fontSize: '12px', color: '#0c4a6e', fontWeight: '700', margin: '0 0 12px 0' }}>
-              ✨ Demo Credentials:
-            </p>
+          {/* Demo Credentials - Only for Login */}
+          {!isRegister && (
             <div style={{
-              display: 'grid',
-              gridTemplateColumns: '1fr 1fr',
-              gap: '12px',
-              fontSize: '13px',
-              color: '#0c4a6e'
+              backgroundColor: '#dbeafe',
+              border: '1px solid #7dd3fc',
+              borderRadius: '8px',
+              padding: '16px',
+              marginBottom: '20px'
             }}>
-              <div style={{ backgroundColor: 'rgba(255,255,255,0.6)', padding: '8px', borderRadius: '6px' }}>
-                <p style={{ margin: '0 0 4px 0', fontWeight: '600' }}>Option 1</p>
-                <p style={{ margin: '0', fontSize: '11px', fontFamily: 'monospace' }}>admin / admin</p>
-              </div>
-              <div style={{ backgroundColor: 'rgba(255,255,255,0.6)', padding: '8px', borderRadius: '6px' }}>
-                <p style={{ margin: '0 0 4px 0', fontWeight: '600' }}>Option 2</p>
-                <p style={{ margin: '0', fontSize: '11px', fontFamily: 'monospace' }}>admin@test.com / admin</p>
+              <p style={{ fontSize: '12px', color: '#0c4a6e', fontWeight: '700', margin: '0 0 12px 0' }}>
+                ✨ Demo Credentials:
+              </p>
+              <div style={{
+                display: 'grid',
+                gridTemplateColumns: '1fr 1fr',
+                gap: '12px',
+                fontSize: '13px',
+                color: '#0c4a6e'
+              }}>
+                <div style={{ backgroundColor: 'rgba(255,255,255,0.6)', padding: '8px', borderRadius: '6px' }}>
+                  <p style={{ margin: '0 0 4px 0', fontWeight: '600' }}>Option 1</p>
+                  <p style={{ margin: '0', fontSize: '11px', fontFamily: 'monospace' }}>admin / admin</p>
+                </div>
+                <div style={{ backgroundColor: 'rgba(255,255,255,0.6)', padding: '8px', borderRadius: '6px' }}>
+                  <p style={{ margin: '0 0 4px 0', fontWeight: '600' }}>Option 2</p>
+                  <p style={{ margin: '0', fontSize: '11px', fontFamily: 'monospace' }}>admin@test.com / admin</p>
+                </div>
               </div>
             </div>
-          </div>
+          )}
 
           {/* Footer */}
           <p style={{
