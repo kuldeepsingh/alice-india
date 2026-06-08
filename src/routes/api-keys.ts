@@ -1,7 +1,7 @@
 /**
  * API Keys Route
  *
- * Secure endpoints for managing user API keys.
+ * Secure endpoints for managing user API keys with encryption.
  * - POST /api/v1/user/api-keys - Save encrypted API keys
  * - GET /api/v1/user/api-keys/status - Check which keys are configured
  * - DELETE /api/v1/user/api-keys/:keyType - Delete a specific key
@@ -13,36 +13,31 @@
 import express, { Request, Response } from 'express'
 import { apiKeyVaultService } from '../services/api-key-vault-service'
 import { logger } from '../services/logger'
+import pg from 'pg'
 
 const router = express.Router()
+const pool = new pg.Pool({
+  connectionString: process.env.DATABASE_URL,
+})
 
-// Middleware: Require authentication
-const requireAuth = (req: Request, res: Response, next: Function) => {
-  const userId = req.headers['x-user-id'] as string
-  if (!userId) {
-    return res.status(401).json({ error: 'User ID required (x-user-id header)' })
-  }
-  req.user = { id: userId }
-  next()
-}
-
-// Declare module to extend Express Request
-declare global {
-  namespace Express {
-    interface Request {
-      user?: { id: string }
-    }
-  }
+// Middleware: Extract user ID from header
+const getUserId = (req: Request): string | null => {
+  return (req.headers['x-user-id'] as string) || (req.user as any)?.id || null
 }
 
 /**
  * POST /api/v1/user/api-keys
  * Save encrypted API keys for the current user
  */
-router.post('/', requireAuth, async (req: Request, res: Response) => {
+router.post('/', async (req: Request, res: Response) => {
   try {
-    const userId = req.user!.id
+    const userId = getUserId(req)
+    if (!userId) {
+      return res.status(401).json({ error: 'User ID required' })
+    }
+
     const { claudeApiKey, zerodhaApiKey, zerodhaApiSecret } = req.body
+    const ipAddress = req.ip || req.connection.remoteAddress
 
     // Validate at least one key is provided
     if (!claudeApiKey && !zerodhaApiKey && !zerodhaApiSecret) {
@@ -63,8 +58,24 @@ router.post('/', requireAuth, async (req: Request, res: Response) => {
     // Store Claude key if provided
     if (claudeApiKey) {
       try {
-        const encryptedClaude = apiKeyVaultService.encrypt(claudeApiKey)
-        // TODO: Save to database with: userId, keyType: 'claude', encryptedValue, iv
+        const { encrypted, iv } = apiKeyVaultService.encryptForStorage(claudeApiKey)
+        
+        // Insert into database
+        await pool.query(
+          `INSERT INTO user_api_keys (user_id, key_type, encrypted_value, iv)
+           VALUES ($1, $2, $3, $4)
+           ON CONFLICT (user_id, key_type) WHERE deleted_at IS NULL
+           DO UPDATE SET encrypted_value = $3, iv = $4, updated_at = CURRENT_TIMESTAMP`,
+          [userId, 'claude', encrypted, iv],
+        )
+
+        // Log audit
+        await pool.query(
+          `INSERT INTO api_key_audit_log (user_id, action, key_type, ip_address, status)
+           VALUES ($1, $2, $3, $4, $5)`,
+          [userId, 'stored', 'claude', ipAddress, 'success'],
+        )
+
         results.claude = { stored: true, timestamp: new Date().toISOString() }
 
         logger.info({
@@ -85,9 +96,27 @@ router.post('/', requireAuth, async (req: Request, res: Response) => {
     // Store Zerodha keys if provided
     if (zerodhaApiKey && zerodhaApiSecret) {
       try {
-        const encryptedKey = apiKeyVaultService.encrypt(zerodhaApiKey)
-        const encryptedSecret = apiKeyVaultService.encrypt(zerodhaApiSecret)
-        // TODO: Save to database with encrypted values
+        const { encrypted: keyEncrypted, iv: keyIv } = apiKeyVaultService.encryptForStorage(zerodhaApiKey)
+        const { encrypted: secretEncrypted, iv: secretIv } = apiKeyVaultService.encryptForStorage(zerodhaApiSecret)
+
+        // Store as combined Zerodha entry (for simplicity)
+        const combined = JSON.stringify({ key: keyEncrypted, keyIv, secret: secretEncrypted, secretIv })
+        
+        await pool.query(
+          `INSERT INTO user_api_keys (user_id, key_type, encrypted_value, iv)
+           VALUES ($1, $2, $3, $4)
+           ON CONFLICT (user_id, key_type) WHERE deleted_at IS NULL
+           DO UPDATE SET encrypted_value = $3, iv = $4, updated_at = CURRENT_TIMESTAMP`,
+          [userId, 'zerodha', combined, 'combined'],
+        )
+
+        // Log audit
+        await pool.query(
+          `INSERT INTO api_key_audit_log (user_id, action, key_type, ip_address, status)
+           VALUES ($1, $2, $3, $4, $5)`,
+          [userId, 'stored', 'zerodha', ipAddress, 'success'],
+        )
+
         results.zerodha = { stored: true, timestamp: new Date().toISOString() }
 
         logger.info({
@@ -117,7 +146,6 @@ router.post('/', requireAuth, async (req: Request, res: Response) => {
     })
     res.status(500).json({
       error: 'Failed to store API keys',
-      details: error instanceof Error ? error.message : String(error),
     })
   }
 })
@@ -126,25 +154,35 @@ router.post('/', requireAuth, async (req: Request, res: Response) => {
  * GET /api/v1/user/api-keys/status
  * Check which API keys are configured (without returning the keys)
  */
-router.get('/status', requireAuth, async (req: Request, res: Response) => {
+router.get('/status', async (req: Request, res: Response) => {
   try {
-    const userId = req.user!.id
+    const userId = getUserId(req)
+    if (!userId) {
+      return res.status(401).json({ error: 'User ID required' })
+    }
 
-    // TODO: Query database to check which keys exist for this user
-    // For now, return mock data
-    const hasClaudeKey = false // TODO: Check in database
-    const hasZerodhaKey = false // TODO: Check in database
+    const result = await pool.query(
+      `SELECT key_type, updated_at FROM user_api_keys
+       WHERE user_id = $1 AND deleted_at IS NULL`,
+      [userId],
+    )
+
+    const hasClaudeKey = result.rows.some((row) => row.key_type === 'claude')
+    const hasZerodhaKey = result.rows.some((row) => row.key_type === 'zerodha')
+
+    const claudeRow = result.rows.find((row) => row.key_type === 'claude')
+    const zerodhaRow = result.rows.find((row) => row.key_type === 'zerodha')
 
     res.json({
       status: 'success',
       data: {
         claude: {
           configured: hasClaudeKey,
-          updatedAt: hasClaudeKey ? new Date().toISOString() : null,
+          updatedAt: claudeRow?.updated_at || null,
         },
         zerodha: {
           configured: hasZerodhaKey,
-          updatedAt: hasZerodhaKey ? new Date().toISOString() : null,
+          updatedAt: zerodhaRow?.updated_at || null,
         },
       },
     })
@@ -163,10 +201,15 @@ router.get('/status', requireAuth, async (req: Request, res: Response) => {
  * DELETE /api/v1/user/api-keys/:keyType
  * Delete a specific API key for the current user
  */
-router.delete('/:keyType', requireAuth, async (req: Request, res: Response) => {
+router.delete('/:keyType', async (req: Request, res: Response) => {
   try {
-    const userId = req.user!.id
+    const userId = getUserId(req)
+    if (!userId) {
+      return res.status(401).json({ error: 'User ID required' })
+    }
+
     const { keyType } = req.params
+    const ipAddress = req.ip || req.connection.remoteAddress
 
     // Validate keyType
     if (!['claude', 'zerodha'].includes(keyType)) {
@@ -175,7 +218,27 @@ router.delete('/:keyType', requireAuth, async (req: Request, res: Response) => {
       })
     }
 
-    // TODO: Delete from database
+    // Soft delete
+    const result = await pool.query(
+      `UPDATE user_api_keys SET deleted_at = CURRENT_TIMESTAMP
+       WHERE user_id = $1 AND key_type = $2 AND deleted_at IS NULL
+       RETURNING id`,
+      [userId, keyType],
+    )
+
+    if (result.rows.length === 0) {
+      return res.status(404).json({
+        error: `${keyType} API key not found`,
+      })
+    }
+
+    // Log audit
+    await pool.query(
+      `INSERT INTO api_key_audit_log (user_id, action, key_type, ip_address, status)
+       VALUES ($1, $2, $3, $4, $5)`,
+      [userId, 'deleted', keyType, ipAddress, 'success'],
+    )
+
     logger.info({
       type: 'api_key_deleted',
       userId,
@@ -218,16 +281,49 @@ router.post('/internal/get', async (req: Request, res: Response) => {
       })
     }
 
-    // TODO: Fetch from database, decrypt, and return
-    logger.info({
-      type: 'api_key_internal_access',
-      userId,
-      keyType,
-    })
+    const result = await pool.query(
+      `SELECT encrypted_value, iv FROM user_api_keys
+       WHERE user_id = $1 AND key_type = $2 AND deleted_at IS NULL`,
+      [userId, keyType],
+    )
+
+    if (result.rows.length === 0) {
+      return res.status(404).json({
+        error: `${keyType} key not found`,
+      })
+    }
+
+    const { encrypted_value, iv } = result.rows[0]
+
+    // Decrypt the key
+    let decrypted
+    if (keyType === 'zerodha') {
+      // Handle combined Zerodha key
+      const combined = JSON.parse(encrypted_value)
+      const key = apiKeyVaultService.decryptFromStorage(combined.key, combined.keyIv)
+      const secret = apiKeyVaultService.decryptFromStorage(combined.secret, combined.secretIv)
+      decrypted = { key, secret }
+    } else {
+      decrypted = apiKeyVaultService.decryptFromStorage(encrypted_value, iv)
+    }
+
+    // Log access
+    await pool.query(
+      `INSERT INTO api_key_audit_log (user_id, action, key_type, status)
+       VALUES ($1, $2, $3, $4)`,
+      [userId, 'accessed', keyType, 'success'],
+    )
+
+    // Update last_used_at
+    await pool.query(
+      `UPDATE user_api_keys SET last_used_at = CURRENT_TIMESTAMP
+       WHERE user_id = $1 AND key_type = $2`,
+      [userId, keyType],
+    )
 
     res.json({
       status: 'success',
-      data: null, // Placeholder
+      data: decrypted,
     })
   } catch (error) {
     logger.error({

@@ -1,25 +1,24 @@
 /**
  * API Key Settings Component
  *
- * Allows users to configure their Claude and Zerodha API keys.
- * Keys are stored securely in browser localStorage.
- * Supports partial entry - users can configure Claude only, Zerodha only, or both.
+ * Allows users to configure their Claude and Zerodha API keys via secure backend.
+ * - Keys are encrypted server-side
+ * - Never stored locally
+ * - Supports partial key configuration
  */
 
 import { useState, useEffect } from 'react'
-import { Box, Card, TextField, Button, Alert, Chip, Typography } from '@mui/material'
-import { CheckCircle, HighlightOff } from '@mui/icons-material'
+import { Box, Card, TextField, Button, Alert, Chip, Typography, CircularProgress } from '@mui/material'
+import { CheckCircle, HighlightOff, Refresh } from '@mui/icons-material'
+import { apiKeyService } from '../services/api-key-service'
 import { THEME_PRO, SPACING_PRO, RADIUS_PRO, SHADOWS_PRO } from '../theme-pro'
 
 interface Props {
-  onKeysUpdated?: (keys: {
-    claudeApiKey: string
-    zerodhaApiKey: string
-    zerodhaApiSecret: string
-  }) => void
+  onKeysUpdated?: (keys: { configured: boolean }) => void
+  userId?: string
 }
 
-export const ApiKeySettings = ({ onKeysUpdated }: Props) => {
+export const ApiKeySettings = ({ onKeysUpdated, userId = 'default-user' }: Props) => {
   const [claudeKey, setClaudeKey] = useState('')
   const [zerodhaKey, setZerodhaKey] = useState('')
   const [zerodhaSecret, setZerodhaSecret] = useState('')
@@ -27,63 +26,100 @@ export const ApiKeySettings = ({ onKeysUpdated }: Props) => {
   const [showZerodha, setShowZerodha] = useState(false)
   const [message, setMessage] = useState('')
   const [messageType, setMessageType] = useState<'success' | 'error'>('success')
+  const [loading, setLoading] = useState(false)
+  const [checking, setChecking] = useState(true)
 
+  const [hasClaudeKey, setHasClaudeKey] = useState(false)
+  const [hasZerodhaKey, setHasZerodhaKey] = useState(false)
+
+  // Load initial status
   useEffect(() => {
-    // Load keys from localStorage
-    const savedClaude = localStorage.getItem('claudeApiKey') || ''
-    const savedZerodha = localStorage.getItem('zerodhaApiKey') || ''
-    const savedSecret = localStorage.getItem('zerodhaApiSecret') || ''
-
-    setClaudeKey(savedClaude)
-    setZerodhaKey(savedZerodha)
-    setZerodhaSecret(savedSecret)
+    checkStatus()
   }, [])
 
-  const handleSaveKeys = () => {
-    // Allow saving if at least one key is provided
+  const checkStatus = async () => {
+    setChecking(true)
+    try {
+      const status = await apiKeyService.getStatus(userId)
+      setHasClaudeKey(status.claude)
+      setHasZerodhaKey(status.zerodha)
+    } catch (error) {
+      console.error('Error checking status:', error)
+    } finally {
+      setChecking(false)
+    }
+  }
+
+  const handleSaveKeys = async () => {
+    // Validate at least one key is provided
     if (!claudeKey && !zerodhaKey && !zerodhaSecret) {
       setMessage('⚠️ Please provide at least one API key')
       setMessageType('error')
       return
     }
 
-    // If Zerodha key is provided, secret is also required (and vice versa)
+    // Validate Zerodha pair
     if ((zerodhaKey && !zerodhaSecret) || (!zerodhaKey && zerodhaSecret)) {
       setMessage('⚠️ Both Zerodha key and secret are required together')
       setMessageType('error')
       return
     }
 
-    // Save to localStorage
-    if (claudeKey) localStorage.setItem('claudeApiKey', claudeKey)
-    if (zerodhaKey) localStorage.setItem('zerodhaApiKey', zerodhaKey)
-    if (zerodhaSecret) localStorage.setItem('zerodhaApiSecret', zerodhaSecret)
+    setLoading(true)
+    try {
+      await apiKeyService.saveKeys(claudeKey, zerodhaKey, zerodhaSecret, userId)
 
-    setMessage('✅ API keys saved successfully!')
-    setMessageType('success')
-    setTimeout(() => setMessage(''), 3000)
+      setMessage('✅ API keys saved securely!')
+      setMessageType('success')
 
-    if (onKeysUpdated) {
-      onKeysUpdated({
-        claudeApiKey: claudeKey,
-        zerodhaApiKey: zerodhaKey,
-        zerodhaApiSecret: zerodhaSecret,
-      })
-    }
-  }
-
-  const handleClearAll = () => {
-    if (window.confirm('Are you sure you want to clear all API keys?')) {
-      localStorage.removeItem('claudeApiKey')
-      localStorage.removeItem('zerodhaApiKey')
-      localStorage.removeItem('zerodhaApiSecret')
+      // Clear form
       setClaudeKey('')
       setZerodhaKey('')
       setZerodhaSecret('')
-      setMessage('🗑️ All API keys cleared')
-      setMessageType('success')
+
+      // Check status
+      await checkStatus()
+
+      if (onKeysUpdated) {
+        onKeysUpdated({ configured: true })
+      }
+
       setTimeout(() => setMessage(''), 3000)
+    } catch (error) {
+      setMessage(`❌ ${error instanceof Error ? error.message : 'Failed to save keys'}`)
+      setMessageType('error')
+    } finally {
+      setLoading(false)
     }
+  }
+
+  const handleClearAll = async () => {
+    if (window.confirm('Are you sure you want to clear all API keys?')) {
+      setLoading(true)
+      try {
+        await apiKeyService.deleteAllKeys(userId)
+        setMessage('🗑️ All API keys cleared')
+        setMessageType('success')
+        setClaudeKey('')
+        setZerodhaKey('')
+        setZerodhaSecret('')
+        await checkStatus()
+        setTimeout(() => setMessage(''), 3000)
+      } catch (error) {
+        setMessage('❌ Failed to clear keys')
+        setMessageType('error')
+      } finally {
+        setLoading(false)
+      }
+    }
+  }
+
+  if (checking) {
+    return (
+      <Box sx={{ display: 'flex', justifyContent: 'center', py: SPACING_PRO.xxxl }}>
+        <CircularProgress />
+      </Box>
+    )
   }
 
   return (
@@ -101,7 +137,7 @@ export const ApiKeySettings = ({ onKeysUpdated }: Props) => {
           <Typography sx={{ fontSize: '18px', fontWeight: 700, color: THEME_PRO.textPrimary }}>
             🤖 Claude API Key
           </Typography>
-          {claudeKey && (
+          {hasClaudeKey && (
             <Chip
               icon={<CheckCircle />}
               label="Configured"
@@ -112,7 +148,7 @@ export const ApiKeySettings = ({ onKeysUpdated }: Props) => {
               }}
             />
           )}
-          {!claudeKey && (
+          {!hasClaudeKey && (
             <Chip
               icon={<HighlightOff />}
               label="Not Set"
@@ -145,6 +181,7 @@ export const ApiKeySettings = ({ onKeysUpdated }: Props) => {
           onChange={(e) => setClaudeKey(e.target.value)}
           placeholder="sk-ant-xxxxxxxxxxxxx"
           margin="normal"
+          disabled={loading}
           sx={{
             '& .MuiOutlinedInput-root': {
               backgroundColor: THEME_PRO.bgTertiary,
@@ -155,6 +192,7 @@ export const ApiKeySettings = ({ onKeysUpdated }: Props) => {
         <Button
           size="small"
           onClick={() => setShowClaude(!showClaude)}
+          disabled={loading}
           sx={{
             mt: SPACING_PRO.sm,
             color: THEME_PRO.primary,
@@ -178,7 +216,7 @@ export const ApiKeySettings = ({ onKeysUpdated }: Props) => {
           <Typography sx={{ fontSize: '18px', fontWeight: 700, color: THEME_PRO.textPrimary }}>
             📈 Zerodha API Keys
           </Typography>
-          {zerodhaKey && zerodhaSecret && (
+          {hasZerodhaKey && (
             <Chip
               icon={<CheckCircle />}
               label="Configured"
@@ -189,7 +227,7 @@ export const ApiKeySettings = ({ onKeysUpdated }: Props) => {
               }}
             />
           )}
-          {(!zerodhaKey || !zerodhaSecret) && (
+          {!hasZerodhaKey && (
             <Chip
               icon={<HighlightOff />}
               label="Not Set"
@@ -222,6 +260,7 @@ export const ApiKeySettings = ({ onKeysUpdated }: Props) => {
           onChange={(e) => setZerodhaKey(e.target.value)}
           placeholder="Your API Key"
           margin="normal"
+          disabled={loading}
           sx={{
             '& .MuiOutlinedInput-root': {
               backgroundColor: THEME_PRO.bgTertiary,
@@ -237,6 +276,7 @@ export const ApiKeySettings = ({ onKeysUpdated }: Props) => {
           onChange={(e) => setZerodhaSecret(e.target.value)}
           placeholder="Your API Secret"
           margin="normal"
+          disabled={loading}
           sx={{
             '& .MuiOutlinedInput-root': {
               backgroundColor: THEME_PRO.bgTertiary,
@@ -247,6 +287,7 @@ export const ApiKeySettings = ({ onKeysUpdated }: Props) => {
         <Button
           size="small"
           onClick={() => setShowZerodha(!showZerodha)}
+          disabled={loading}
           sx={{
             mt: SPACING_PRO.sm,
             color: THEME_PRO.primary,
@@ -258,11 +299,13 @@ export const ApiKeySettings = ({ onKeysUpdated }: Props) => {
       </Card>
 
       {/* Full Width Actions */}
-      <Box sx={{ gridColumn: { xs: '1fr', md: '1 / -1' }, display: 'grid', gridTemplateColumns: '1fr 1fr', gap: SPACING_PRO.lg }}>
+      <Box sx={{ gridColumn: { xs: '1fr', md: '1 / -1' }, display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: SPACING_PRO.lg }}>
         <Button
           fullWidth
           variant="contained"
           onClick={handleSaveKeys}
+          disabled={loading}
+          startIcon={loading ? <CircularProgress size={20} /> : undefined}
           sx={{
             backgroundColor: THEME_PRO.success,
             color: '#fff',
@@ -274,6 +317,9 @@ export const ApiKeySettings = ({ onKeysUpdated }: Props) => {
               backgroundColor: THEME_PRO.success,
               opacity: 0.9,
             },
+            '&:disabled': {
+              backgroundColor: THEME_PRO.textTertiary,
+            },
           }}
         >
           💾 Save API Keys
@@ -282,7 +328,26 @@ export const ApiKeySettings = ({ onKeysUpdated }: Props) => {
         <Button
           fullWidth
           variant="outlined"
+          onClick={checkStatus}
+          disabled={loading}
+          startIcon={<Refresh />}
+          sx={{
+            borderColor: THEME_PRO.primary,
+            color: THEME_PRO.primary,
+            textTransform: 'none',
+            fontWeight: 600,
+            py: SPACING_PRO.md,
+            fontSize: '15px',
+          }}
+        >
+          🔄 Refresh
+        </Button>
+
+        <Button
+          fullWidth
+          variant="outlined"
           onClick={handleClearAll}
+          disabled={loading || (!hasClaudeKey && !hasZerodhaKey)}
           sx={{
             borderColor: THEME_PRO.error,
             color: THEME_PRO.error,
@@ -320,8 +385,7 @@ export const ApiKeySettings = ({ onKeysUpdated }: Props) => {
           fontSize: '13px',
         }}
       >
-        🔐 <strong>Security Notice:</strong> Your API keys are stored locally in your browser (localStorage) only. They are never sent to our servers
-        unless you make an actual API call. You can clear them anytime in your browser settings.
+        🔐 <strong>Security:</strong> Your API keys are encrypted and stored securely on our server. They are never stored in your browser. Only you can manage your keys.
       </Alert>
     </Box>
   )

@@ -19,6 +19,7 @@ import tradingRouter from './routes/trading.ts'
 import credentialsRouter from './routes/credentials.ts'
 // import testingRouter from './routes/testing.ts'  // TODO: Check imports
 import configRouter, { attachUserApiKeys } from './routes/config.ts'
+import apiKeysRouter from './routes/api-keys.ts'
 import {
   cacheResponseMiddleware,
   performanceTrackingMiddleware,
@@ -73,6 +74,9 @@ export function createApp() {
 
   // Configuration routes (comes first - needed by other routes)
   v1.use('/config', configRouter)
+
+  // User API Keys routes (secure storage)
+  v1.use('/user/api-keys', apiKeysRouter)
 
   // Authentication routes
   v1.use('/auth', authRouter)
