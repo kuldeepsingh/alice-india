@@ -1,4 +1,5 @@
-import axios, { AxiosInstance } from 'axios'
+import axios, { AxiosInstance, AxiosError } from 'axios'
+import { frontendLogger } from './logging-client'
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000/api/v1'
 
@@ -9,14 +10,47 @@ const apiClient: AxiosInstance = axios.create({
   },
 })
 
-// Add auth token to requests
+// Add auth token to requests + logging
 apiClient.interceptors.request.use((config) => {
   const token = localStorage.getItem('authToken')
   if (token) {
     config.headers.Authorization = `Bearer ${token}`
   }
+
+  // Log request
+  frontendLogger.debug('API', `${config.method?.toUpperCase()} ${config.url}`, {
+    method: config.method,
+    path: config.url,
+    hasAuth: !!token,
+  })
+
   return config
 })
+
+// Log responses
+apiClient.interceptors.response.use(
+  (response) => {
+    frontendLogger.debug('API', `${response.config.method?.toUpperCase()} ${response.config.url} - SUCCESS`, {
+      method: response.config.method,
+      path: response.config.url,
+      status: response.status,
+    })
+    return response
+  },
+  (error: AxiosError) => {
+    const message = `${error.config?.method?.toUpperCase()} ${error.config?.url} - FAILED`
+
+    frontendLogger.error('API', message, error as Error, {
+      method: error.config?.method,
+      path: error.config?.url,
+      status: error.response?.status,
+      errorMessage: error.message,
+      response: error.response?.data,
+    })
+
+    return Promise.reject(error)
+  }
+)
 
 export const authAPI = {
   login: (email: string, password: string) =>

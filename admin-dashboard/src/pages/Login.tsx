@@ -2,6 +2,7 @@ import React, { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useAuthStore } from '../state/store'
 import { authAPI } from '../services/api'
+import { frontendLogger } from '../services/logging-client'
 
 export function Login() {
   const navigate = useNavigate()
@@ -17,15 +18,35 @@ export function Login() {
     setLoading(true)
     setError('')
 
+    frontendLogger.debug('Auth', 'Login attempt started', { email })
+
     try {
+      frontendLogger.debug('Auth', 'Sending login request', { email })
       const response = await authAPI.login(email, password)
       const { token, user } = response.data
+
+      frontendLogger.info('Auth', 'Login successful', {
+        userId: user.id,
+        email: user.email,
+        role: user.role,
+      })
 
       setToken(token)
       setUser(user)
       navigate('/')
     } catch (err: any) {
-      setError(err.response?.data?.error || 'Login failed')
+      const errorMessage = err.response?.data?.error || 'Login failed'
+      frontendLogger.error(
+        'Auth',
+        'Login failed',
+        new Error(errorMessage),
+        {
+          email,
+          status: err.response?.status,
+          error: errorMessage,
+        }
+      )
+      setError(errorMessage)
     } finally {
       setLoading(false)
     }

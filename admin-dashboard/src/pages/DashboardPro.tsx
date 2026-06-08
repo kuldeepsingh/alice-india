@@ -5,6 +5,7 @@ import { TrendingUp, TrendingDown, Visibility, VisibilityOff } from '@mui/icons-
 import { LineChart, Line, AreaChart, Area, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, PieChart, Pie, Cell } from 'recharts'
 import { useAuthStore } from '../state/store'
 import { formatCurrency, getCurrencyByCode } from '../content/currencies'
+import { frontendLogger } from '../services/logging-client'
 import { THEME_PRO, SPACING_PRO, RADIUS_PRO, SHADOWS_PRO, TRANSITIONS_PRO } from '../theme-pro'
 
 interface StatCard {
@@ -28,20 +29,38 @@ export function DashboardPro() {
   const currencyInfo = getCurrencyByCode(currency)
 
   const handleWithdrawal = () => {
+    frontendLogger.debug('Withdrawal', 'Withdrawal attempt started', { amount: withdrawalAmount })
+
     if (!withdrawalAmount || parseFloat(withdrawalAmount) <= 0) {
+      frontendLogger.error('Withdrawal', 'Invalid amount', new Error('Invalid amount'), {
+        amount: withdrawalAmount,
+      })
       setWithdrawalMessage('❌ Please enter a valid amount')
       return
     }
 
     const amount = parseFloat(withdrawalAmount)
     if (amount > accountBalance) {
+      frontendLogger.error('Withdrawal', 'Insufficient balance', new Error('Insufficient balance'), {
+        amount,
+        balance: accountBalance,
+      })
       setWithdrawalMessage('❌ Insufficient balance for this withdrawal')
       return
     }
 
+    frontendLogger.info('Withdrawal', 'Withdrawal submitted', {
+      amount: formatCurrency(amount, currency),
+      currency,
+    })
+
     setWithdrawalMessage(`✅ Withdrawal request of ${formatCurrency(amount, currency)} submitted! Processing...`)
     setTimeout(() => {
       setAccountBalance(accountBalance - amount)
+      frontendLogger.info('Withdrawal', 'Withdrawal processed', {
+        amount: formatCurrency(amount, currency),
+        newBalance: formatCurrency(accountBalance - amount, currency),
+      })
       setWithdrawalOpen(false)
       setWithdrawalAmount('')
       setWithdrawalMessage('')
@@ -49,15 +68,29 @@ export function DashboardPro() {
   }
 
   const handleDeposit = () => {
+    frontendLogger.debug('Deposit', 'Deposit attempt started', { amount: depositAmount })
+
     if (!depositAmount || parseFloat(depositAmount) <= 0) {
+      frontendLogger.error('Deposit', 'Invalid amount', new Error('Invalid amount'), {
+        amount: depositAmount,
+      })
       setDepositMessage('❌ Please enter a valid amount')
       return
     }
 
     const amount = parseFloat(depositAmount)
+    frontendLogger.info('Deposit', 'Deposit submitted', {
+      amount: formatCurrency(amount, currency),
+      currency,
+    })
+
     setDepositMessage(`✅ Deposit of ${formatCurrency(amount, currency)} submitted! Processing...`)
     setTimeout(() => {
       setAccountBalance(accountBalance + amount)
+      frontendLogger.info('Deposit', 'Deposit processed', {
+        amount: formatCurrency(amount, currency),
+        newBalance: formatCurrency(accountBalance + amount, currency),
+      })
       setDepositOpen(false)
       setDepositAmount('')
       setDepositMessage('')

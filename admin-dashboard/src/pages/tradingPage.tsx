@@ -2,6 +2,7 @@ import React, { useState } from 'react'
 import { LayoutPro } from '../components/LayoutPro'
 import { Box, Card, Typography, TextField, Button, Chip, Alert, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Dialog, DialogTitle, DialogContent, DialogActions } from '@mui/material'
 import { SendToMobile, CheckCircle } from '@mui/icons-material'
+import { frontendLogger } from '../services/logging-client'
 import { THEME_PRO, SPACING_PRO, RADIUS_PRO, SHADOWS_PRO } from '../theme-pro'
 
 interface ExecutedOrder {
@@ -25,8 +26,20 @@ export function tradingPage() {
   const [confirmDialogOpen, setConfirmDialogOpen] = useState(false)
 
   const handlePlaceOrder = () => {
+    frontendLogger.debug('Trading', 'Order placement started', {
+      symbol,
+      quantity,
+      price,
+      type: orderType,
+    })
+
     // Validation
     if (!symbol || !quantity || !price) {
+      frontendLogger.error('Trading', 'Order validation failed - missing fields', new Error('Missing fields'), {
+        symbol,
+        quantity,
+        price,
+      })
       setOrderMessage('❌ Please fill all fields')
       return
     }
@@ -35,9 +48,20 @@ export function tradingPage() {
     const prc = parseFloat(price)
 
     if (qty <= 0 || prc <= 0) {
+      frontendLogger.error('Trading', 'Order validation failed - invalid amounts', new Error('Invalid amounts'), {
+        quantity: qty,
+        price: prc,
+      })
       setOrderMessage('❌ Quantity and price must be greater than 0')
       return
     }
+
+    frontendLogger.debug('Trading', 'Order validation passed, opening confirmation', {
+      symbol,
+      quantity: qty,
+      price: prc,
+      type: orderType,
+    })
 
     setConfirmDialogOpen(true)
   }
@@ -46,6 +70,14 @@ export function tradingPage() {
     const qty = parseFloat(quantity)
     const prc = parseFloat(price)
     const total = qty * prc
+
+    frontendLogger.debug('Trading', 'Order confirmation started', {
+      symbol,
+      type: orderType,
+      quantity: qty,
+      price: prc,
+      total,
+    })
 
     const newOrder: ExecutedOrder = {
       id: `ORD${Date.now()}`,
@@ -59,6 +91,16 @@ export function tradingPage() {
     }
 
     setExecutedOrders([newOrder, ...executedOrders])
+
+    frontendLogger.info('Trading', 'Order executed successfully', {
+      orderId: newOrder.id,
+      symbol: newOrder.symbol,
+      type: orderType,
+      quantity: qty,
+      price: prc,
+      total,
+    })
+
     setOrderMessage(`✅ ${orderType} order for ${qty} ${symbol.toUpperCase()} @ ${prc} executed successfully!`)
     setConfirmDialogOpen(false)
     setSymbol('INFY')
