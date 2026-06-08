@@ -179,6 +179,13 @@ export function cacheInvalidationMiddleware() {
           )
         }
 
+        if (path.includes('/team/members')) {
+          // Invalidate team members cache when users are added, updated, or deleted
+          CacheService.invalidatePattern('http:GET:/api/v1/team/members*').catch((err) =>
+            console.error('Cache invalidation error:', err)
+          )
+        }
+
         if (path.includes('/stats')) {
           CacheService.invalidateStats().catch((err) =>
             console.error('Cache invalidation error:', err)

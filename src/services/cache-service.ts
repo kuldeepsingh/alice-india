@@ -149,6 +149,44 @@ class CacheService {
   static getStats() {
     return cacheService.getStats()
   }
+
+  /**
+   * Invalidate cache entries matching a pattern
+   */
+  async invalidatePattern(pattern: string): Promise<void> {
+    const regex = new RegExp(pattern.replace('*', '.*'))
+    for (const key of this.cache.keys()) {
+      if (regex.test(key)) {
+        this.cache.delete(key)
+      }
+    }
+  }
+
+  /**
+   * Stub methods for cache invalidation
+   */
+  async invalidateIncidents(): Promise<void> {
+    await this.invalidatePattern('http:GET:/api/v1/incidents*')
+  }
+
+  async invalidateNotifications(userId: string): Promise<void> {
+    await this.invalidatePattern(`http:GET:/api/v1/notifications.*${userId}*`)
+  }
+
+  async invalidateTeamSchedule(): Promise<void> {
+    await this.invalidatePattern('http:GET:/api/v1/team/on-call*')
+  }
+
+  async invalidateStats(): Promise<void> {
+    await this.invalidatePattern('http:GET:/api/v1/stats*')
+  }
+
+  /**
+   * Static wrapper for invalidatePattern
+   */
+  static async invalidatePattern(pattern: string): Promise<void> {
+    return cacheService.invalidatePattern(pattern)
+  }
 }
 
 export { CacheService }; export const cacheService = new CacheService()
