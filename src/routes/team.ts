@@ -154,4 +154,51 @@ router.get('/metrics', requireDeveloper, async (req: Request, res: Response) => 
   }
 })
 
+/**
+ * DELETE /api/v1/team/members/:id
+ * Delete a user by ID
+ * Auth: Admin only
+ */
+router.delete('/members/:id', requireAdmin, async (req: Request, res: Response) => {
+  try {
+    const { id } = req.params
+
+    if (!id) {
+      return res.status(400).json({
+        status: 'error',
+        message: 'User ID is required',
+        correlationId: (req as any).correlationId,
+      })
+    }
+
+    // Delete the user from database
+    const deleteResult = await query(
+      'DELETE FROM users WHERE id = $1 RETURNING id, email',
+      [id]
+    )
+
+    if (deleteResult.rows.length === 0) {
+      return res.status(404).json({
+        status: 'error',
+        message: 'User not found',
+        correlationId: (req as any).correlationId,
+      })
+    }
+
+    res.status(200).json({
+      status: 'success',
+      message: 'User deleted successfully',
+      data: deleteResult.rows[0],
+      correlationId: (req as any).correlationId,
+    })
+  } catch (error: any) {
+    console.error('Error deleting user:', error)
+    res.status(500).json({
+      status: 'error',
+      message: error.message || 'Failed to delete user',
+      correlationId: (req as any).correlationId,
+    })
+  }
+})
+
 export default router

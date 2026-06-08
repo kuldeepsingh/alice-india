@@ -194,17 +194,17 @@ export const authAPI = {
  */
 export const usersAPI = {
   /**
-   * GET /users
+   * GET /team/members
    * Retrieve all users (admin only)
-   * 
+   *
    * @returns Promise with array of users
    */
-  getAll: () => apiClient.get('/users'),
+  getAll: () => apiClient.get('/team/members'),
 
   /**
    * GET /users/:id
    * Retrieve specific user by ID
-   * 
+   *
    * @param id - User ID
    * @returns Promise with user object
    */
@@ -213,11 +213,20 @@ export const usersAPI = {
   /**
    * POST /users
    * Create new user (admin only)
-   * 
+   *
    * @param data - User data { name, email, role }
    * @returns Promise with created user
    */
   create: (data: any) => apiClient.post('/users', data),
+
+  /**
+   * DELETE /team/members/:id
+   * Delete user by ID (admin only)
+   *
+   * @param id - User ID
+   * @returns Promise with deletion confirmation
+   */
+  delete: (id: string) => apiClient.delete(`/team/members/${id}`),
 }
 
 /**
