@@ -13,6 +13,7 @@ import { Box, Card, TextField, Button, Alert, Chip, Typography, CircularProgress
 import { CheckCircle, HighlightOff, Save, Edit, Delete, X } from '@mui/icons-material'
 import { useAuthStore } from '../state/store'
 import { apiKeyService } from '../services/api-key-service'
+import apiClient from '../services/api'
 import { THEME_PRO, SPACING_PRO, RADIUS_PRO, SHADOWS_PRO } from '../theme-pro'
 
 interface Props {
@@ -54,12 +55,8 @@ export const ApiKeySettings = ({ onKeysUpdated }: Props) => {
   const checkStatus = async () => {
     setChecking(true)
     try {
-      const result = await fetch(`http://localhost:3000/api/v1/user/api-keys/status`, {
-        headers: {
-          'X-User-ID': userId,
-        },
-      })
-      const data = await result.json()
+      const response = await apiClient.get('/user/api-keys/status')
+      const data = response.data
 
       if (data.status === 'success') {
         setHasClaudeKey(data.data.claude.configured)
@@ -83,22 +80,12 @@ export const ApiKeySettings = ({ onKeysUpdated }: Props) => {
 
     setClaudeLoading(true)
     try {
-      const response = await fetch(`http://localhost:3000/api/v1/user/api-keys`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'X-User-ID': userId,
-        },
-        body: JSON.stringify({
-          claudeApiKey: claudeKey,
-        }),
+      const response = await apiClient.post('/user/api-keys', {
+        claudeApiKey: claudeKey,
       })
 
-      const data = await response.json()
-      if (!response.ok) throw new Error(data.error)
-
-      // Verify save was successful
-      if (data.results?.claude?.stored !== true) {
+      const data = response.data
+      if (!data.results?.claude?.stored) {
         throw new Error('Key was not stored - please try again')
       }
 
@@ -135,23 +122,13 @@ export const ApiKeySettings = ({ onKeysUpdated }: Props) => {
 
     setZerodhaLoading(true)
     try {
-      const response = await fetch(`http://localhost:3000/api/v1/user/api-keys`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'X-User-ID': userId,
-        },
-        body: JSON.stringify({
-          zerodhaApiKey: zerodhaKey,
-          zerodhaApiSecret: zerodhaSecret,
-        }),
+      const response = await apiClient.post('/user/api-keys', {
+        zerodhaApiKey: zerodhaKey,
+        zerodhaApiSecret: zerodhaSecret,
       })
 
-      const data = await response.json()
-      if (!response.ok) throw new Error(data.error)
-
-      // Verify save was successful
-      if (data.results?.zerodha?.stored !== true) {
+      const data = response.data
+      if (!data.results?.zerodha?.stored) {
         throw new Error('Keys were not stored - please try again')
       }
 
@@ -184,14 +161,7 @@ export const ApiKeySettings = ({ onKeysUpdated }: Props) => {
     if (window.confirm('Are you sure you want to delete your Claude API key?')) {
       setClaudeLoading(true)
       try {
-        const response = await fetch(`http://localhost:3000/api/v1/user/api-keys/claude`, {
-          method: 'DELETE',
-          headers: {
-            'X-User-ID': userId,
-          },
-        })
-
-        if (!response.ok) throw new Error('Failed to delete')
+        await apiClient.delete('/user/api-keys/claude')
 
         setMessage('🗑️ Claude API key deleted')
         setMessageType('success')
@@ -212,14 +182,7 @@ export const ApiKeySettings = ({ onKeysUpdated }: Props) => {
     if (window.confirm('Are you sure you want to delete your Zerodha API keys?')) {
       setZerodhaLoading(true)
       try {
-        const response = await fetch(`http://localhost:3000/api/v1/user/api-keys/zerodha`, {
-          method: 'DELETE',
-          headers: {
-            'X-User-ID': userId,
-          },
-        })
-
-        if (!response.ok) throw new Error('Failed to delete')
+        await apiClient.delete('/user/api-keys/zerodha')
 
         setMessage('🗑️ Zerodha API keys deleted')
         setMessageType('success')
