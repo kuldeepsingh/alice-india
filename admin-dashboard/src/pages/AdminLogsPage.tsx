@@ -73,12 +73,17 @@ export function AdminLogsPage() {
       if (searchTerm) params.append('search', searchTerm)
 
       const response = await fetch(`/api/v1/admin/logs?${params}`)
+      if (!response.ok) {
+        throw new Error(`Failed to fetch logs: ${response.status}`)
+      }
       const data = await response.json()
 
-      setLogs(data.logs)
-      setTotalLogs(data.total)
+      setLogs(data.logs || [])
+      setTotalLogs(data.total || 0)
     } catch (error) {
       console.error('Failed to fetch logs:', error)
+      setLogs([])
+      setTotalLogs(0)
     } finally {
       setLoading(false)
     }
@@ -87,10 +92,14 @@ export function AdminLogsPage() {
   const fetchLogStats = async () => {
     try {
       const response = await fetch('/api/v1/admin/logs/stats')
+      if (!response.ok) {
+        throw new Error(`Failed to fetch log stats: ${response.status}`)
+      }
       const data = await response.json()
-      setLogFiles(data.files)
+      setLogFiles(data.files || [])
     } catch (error) {
       console.error('Failed to fetch log stats:', error)
+      setLogFiles([])
     }
   }
 
