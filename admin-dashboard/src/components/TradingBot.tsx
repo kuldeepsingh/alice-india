@@ -9,7 +9,10 @@
  */
 
 import { useState, useEffect } from 'react'
+import { Box, Tabs, Tab, Card, Typography, TextField, Button, Alert, Chip, CircularProgress, Dialog, DialogTitle, DialogContent, DialogActions } from '@mui/material'
+import { CheckCircle, HighlightOff, SendToMobile, SmartToy } from '@mui/icons-material'
 import { ApiKeySettings } from './ApiKeySettings'
+import { THEME_PRO, SPACING_PRO, RADIUS_PRO, SHADOWS_PRO } from '../theme-pro'
 
 interface ApiKeys {
   claudeApiKey: string
@@ -19,17 +22,19 @@ interface ApiKeys {
 
 export const TradingBot = () => {
   const [backendStatus, setBackendStatus] = useState('checking...')
+  const [backendConnected, setBackendConnected] = useState(false)
   const [apiKeys, setApiKeys] = useState<ApiKeys>({
     claudeApiKey: localStorage.getItem('claudeApiKey') || '',
     zerodhaApiKey: localStorage.getItem('zerodhaApiKey') || '',
     zerodhaApiSecret: localStorage.getItem('zerodhaApiSecret') || '',
   })
-  const [activeTab, setActiveTab] = useState<'config' | 'trading'>('config')
+  const [tabIndex, setTabIndex] = useState(0)
   const [symbol, setSymbol] = useState('RELIANCE')
   const [quantity, setQuantity] = useState('10')
   const [price, setPrice] = useState('2850')
   const [loading, setLoading] = useState(false)
   const [result, setResult] = useState<any>(null)
+  const [resultDialog, setResultDialog] = useState(false)
 
   // Check backend health
   useEffect(() => {
@@ -37,12 +42,15 @@ export const TradingBot = () => {
       try {
         const response = await fetch('http://localhost:3000/health/live')
         if (response.ok) {
-          setBackendStatus('✅ Connected')
+          setBackendStatus('Connected')
+          setBackendConnected(true)
         } else {
-          setBackendStatus('❌ Cannot reach backend')
+          setBackendStatus('Cannot reach backend')
+          setBackendConnected(false)
         }
       } catch (error) {
-        setBackendStatus('❌ Cannot reach backend')
+        setBackendStatus('Cannot reach backend')
+        setBackendConnected(false)
       }
     }
     checkHealth()
@@ -54,7 +62,11 @@ export const TradingBot = () => {
 
   const handleCreateOrder = async () => {
     if (!apiKeys.zerodhaApiKey) {
-      alert('❌ Please configure Zerodha API keys in Settings tab first')
+      setResult({
+        status: 'error',
+        data: { error: 'Zerodha API key not configured. Please configure in Settings tab.' },
+      })
+      setResultDialog(true)
       return
     }
 
@@ -79,11 +91,13 @@ export const TradingBot = () => {
         status: response.ok ? 'success' : 'error',
         data,
       })
+      setResultDialog(true)
     } catch (error) {
       setResult({
         status: 'error',
-        data: error instanceof Error ? error.message : 'Unknown error',
+        data: { error: error instanceof Error ? error.message : 'Unknown error' },
       })
+      setResultDialog(true)
     } finally {
       setLoading(false)
     }
@@ -91,7 +105,11 @@ export const TradingBot = () => {
 
   const handleTestClaude = async () => {
     if (!apiKeys.claudeApiKey) {
-      alert('❌ Please configure Claude API key in Settings tab first')
+      setResult({
+        status: 'error',
+        data: { error: 'Claude API key not configured. Please configure in Settings tab.' },
+      })
+      setResultDialog(true)
       return
     }
 
@@ -114,161 +132,321 @@ export const TradingBot = () => {
         status: response.ok ? 'success' : 'error',
         data,
       })
+      setResultDialog(true)
     } catch (error) {
       setResult({
         status: 'error',
-        data: error instanceof Error ? error.message : 'Unknown error',
+        data: { error: error instanceof Error ? error.message : 'Unknown error' },
       })
+      setResultDialog(true)
     } finally {
       setLoading(false)
     }
   }
 
   return (
-    <div className="p-6 max-w-4xl mx-auto">
-      {/* Header */}
-      <div className="mb-6">
-        <h1 className="text-3xl font-bold text-gray-900 mb-2">🤖 Autonomous Trading Bot</h1>
-        <div className={`inline-block px-3 py-1 rounded-full text-sm font-medium ${
-          backendStatus.includes('Connected')
-            ? 'bg-green-100 text-green-800'
-            : 'bg-red-100 text-red-800'
-        }`}>
-          Backend Status: {backendStatus}
-        </div>
-      </div>
+    <Box sx={{ display: 'flex', flexDirection: 'column', gap: SPACING_PRO.lg }}>
+      {/* Status Bar */}
+      <Card
+        sx={{
+          p: SPACING_PRO.lg,
+          borderRadius: RADIUS_PRO.lg,
+          border: `1px solid ${THEME_PRO.border}`,
+          boxShadow: SHADOWS_PRO.sm,
+          backgroundColor: backendConnected ? THEME_PRO.successLight : THEME_PRO.errorLight,
+        }}
+      >
+        <Box sx={{ display: 'flex', alignItems: 'center', gap: SPACING_PRO.md }}>
+          {backendConnected ? (
+            <CheckCircle sx={{ color: THEME_PRO.success, fontSize: '20px' }} />
+          ) : (
+            <HighlightOff sx={{ color: THEME_PRO.error, fontSize: '20px' }} />
+          )}
+          <Box>
+            <Typography sx={{ fontWeight: 600, color: backendConnected ? THEME_PRO.success : THEME_PRO.error }}>
+              Backend Status: {backendStatus}
+            </Typography>
+            <Typography sx={{ fontSize: '12px', color: backendConnected ? THEME_PRO.success : THEME_PRO.error }}>
+              {backendConnected
+                ? 'All systems connected and ready'
+                : 'Unable to connect to backend. Make sure the backend server is running on port 3000.'}
+            </Typography>
+          </Box>
+        </Box>
+      </Card>
 
       {/* Tabs */}
-      <div className="flex gap-4 mb-6 border-b">
-        <button
-          onClick={() => setActiveTab('config')}
-          className={`px-4 py-2 font-semibold ${
-            activeTab === 'config'
-              ? 'text-blue-600 border-b-2 border-blue-600'
-              : 'text-gray-600 hover:text-gray-900'
-          }`}
+      <Card
+        sx={{
+          borderRadius: RADIUS_PRO.lg,
+          border: `1px solid ${THEME_PRO.border}`,
+          overflow: 'hidden',
+          boxShadow: SHADOWS_PRO.md,
+        }}
+      >
+        <Tabs
+          value={tabIndex}
+          onChange={(e, newValue) => setTabIndex(newValue)}
+          sx={{
+            backgroundColor: THEME_PRO.bgTertiary,
+            borderBottom: `1px solid ${THEME_PRO.border}`,
+            '& .MuiTab-root': {
+              textTransform: 'none',
+              fontWeight: 600,
+              fontSize: '15px',
+              color: THEME_PRO.textSecondary,
+              '&.Mui-selected': {
+                color: THEME_PRO.primary,
+              },
+            },
+            '& .MuiTabs-indicator': {
+              backgroundColor: THEME_PRO.primary,
+              height: '3px',
+            },
+          }}
         >
-          ⚙️ Settings
-        </button>
-        <button
-          onClick={() => setActiveTab('trading')}
-          className={`px-4 py-2 font-semibold ${
-            activeTab === 'trading'
-              ? 'text-blue-600 border-b-2 border-blue-600'
-              : 'text-gray-600 hover:text-gray-900'
-          }`}
-        >
-          📊 Trading
-        </button>
-      </div>
+          <Tab label="⚙️ Settings" />
+          <Tab label="📊 Trading" />
+        </Tabs>
 
-      {/* Tab Content */}
-      <div className="bg-white rounded-lg shadow-lg p-6">
-        {activeTab === 'config' && (
-          <ApiKeySettings onKeysUpdated={handleKeysUpdated} />
-        )}
+        <Box sx={{ p: SPACING_PRO.xxl }}>
+          {/* Settings Tab */}
+          {tabIndex === 0 && (
+            <Box sx={{ display: 'flex', flexDirection: 'column', gap: SPACING_PRO.lg }}>
+              <Box>
+                <Typography sx={{ fontSize: '20px', fontWeight: 700, color: THEME_PRO.textPrimary, mb: SPACING_PRO.sm }}>
+                  Configure API Keys
+                </Typography>
+                <Typography sx={{ fontSize: '14px', color: THEME_PRO.textSecondary }}>
+                  Set up your Claude and Zerodha API credentials. You can configure one or both keys as needed.
+                </Typography>
+              </Box>
+              <ApiKeySettings onKeysUpdated={handleKeysUpdated} />
+            </Box>
+          )}
 
-        {activeTab === 'trading' && (
-          <div className="space-y-6">
-            {/* API Status */}
-            <div className="grid grid-cols-2 gap-4">
-              <div className="border rounded-lg p-4">
-                <h3 className="font-semibold text-gray-900 mb-2">🤖 Claude</h3>
-                <p className={`text-sm ${apiKeys.claudeApiKey ? 'text-green-600' : 'text-red-600'}`}>
-                  {apiKeys.claudeApiKey ? '✅ Ready' : '❌ Not configured'}
-                </p>
-              </div>
-              <div className="border rounded-lg p-4">
-                <h3 className="font-semibold text-gray-900 mb-2">📈 Zerodha</h3>
-                <p className={`text-sm ${apiKeys.zerodhaApiKey && apiKeys.zerodhaSecret ? 'text-green-600' : 'text-red-600'}`}>
-                  {apiKeys.zerodhaApiKey && apiKeys.zerodhaSecret ? '✅ Ready' : '❌ Not configured'}
-                </p>
-              </div>
-            </div>
+          {/* Trading Tab */}
+          {tabIndex === 1 && (
+            <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', md: '1fr 1fr' }, gap: SPACING_PRO.xxl }}>
+              {/* Order Creation */}
+              <Box>
+                <Card
+                  sx={{
+                    p: SPACING_PRO.xxl,
+                    borderRadius: RADIUS_PRO.lg,
+                    border: `1px solid ${THEME_PRO.border}`,
+                    boxShadow: SHADOWS_PRO.md,
+                  }}
+                >
+                  <Typography sx={{ fontSize: '18px', fontWeight: 700, color: THEME_PRO.textPrimary, mb: SPACING_PRO.lg }}>
+                    📝 Create Order
+                  </Typography>
 
-            {/* Order Creation */}
-            <div className="border rounded-lg p-4 bg-gray-50">
-              <h3 className="font-semibold text-gray-900 mb-4">📝 Create Test Order</h3>
-              <div className="grid grid-cols-3 gap-4 mb-4">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Symbol</label>
-                  <input
-                    type="text"
+                  {!apiKeys.zerodhaApiKey && (
+                    <Alert
+                      sx={{
+                        mb: SPACING_PRO.lg,
+                        backgroundColor: THEME_PRO.warningLight,
+                        color: THEME_PRO.warning,
+                        border: `1px solid ${THEME_PRO.warning}`,
+                      }}
+                    >
+                      ⚠️ Zerodha API key not configured. Go to Settings tab to configure.
+                    </Alert>
+                  )}
+
+                  <TextField
+                    fullWidth
+                    label="Symbol"
                     value={symbol}
-                    onChange={(e) => setSymbol(e.target.value)}
-                    className="w-full px-3 py-2 border rounded-md text-sm"
+                    onChange={(e) => setSymbol(e.target.value.toUpperCase())}
+                    placeholder="RELIANCE"
+                    margin="normal"
+                    sx={{
+                      '& .MuiOutlinedInput-root': {
+                        backgroundColor: THEME_PRO.bgTertiary,
+                      },
+                    }}
                   />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Quantity</label>
-                  <input
-                    type="number"
+
+                  <TextField
+                    fullWidth
+                    label="Quantity"
                     value={quantity}
                     onChange={(e) => setQuantity(e.target.value)}
-                    className="w-full px-3 py-2 border rounded-md text-sm"
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Price</label>
-                  <input
                     type="number"
+                    margin="normal"
+                    sx={{
+                      '& .MuiOutlinedInput-root': {
+                        backgroundColor: THEME_PRO.bgTertiary,
+                      },
+                    }}
+                  />
+
+                  <TextField
+                    fullWidth
+                    label="Price"
                     value={price}
                     onChange={(e) => setPrice(e.target.value)}
-                    className="w-full px-3 py-2 border rounded-md text-sm"
+                    type="number"
+                    margin="normal"
+                    sx={{
+                      '& .MuiOutlinedInput-root': {
+                        backgroundColor: THEME_PRO.bgTertiary,
+                      },
+                    }}
                   />
-                </div>
-              </div>
-              <button
-                onClick={handleCreateOrder}
-                disabled={loading || !apiKeys.zerodhaApiKey}
-                className={`w-full py-2 px-4 rounded-lg font-semibold transition ${
-                  apiKeys.zerodhaApiKey
-                    ? 'bg-blue-600 hover:bg-blue-700 text-white'
-                    : 'bg-gray-300 text-gray-500 cursor-not-allowed'
-                }`}
-              >
-                {loading ? '⏳ Creating...' : '📝 Create Order'}
-              </button>
-            </div>
 
-            {/* Claude Test */}
-            <button
-              onClick={handleTestClaude}
-              disabled={loading || !apiKeys.claudeApiKey}
-              className={`w-full py-3 px-4 rounded-lg font-semibold transition ${
-                apiKeys.claudeApiKey
-                  ? 'bg-purple-600 hover:bg-purple-700 text-white'
-                  : 'bg-gray-300 text-gray-500 cursor-not-allowed'
-              }`}
-            >
-              {loading ? '⏳ Testing...' : '🧠 Test Claude AI'}
-            </button>
+                  {/* Order Summary */}
+                  <Box sx={{ mt: SPACING_PRO.lg, p: SPACING_PRO.lg, backgroundColor: THEME_PRO.bgTertiary, borderRadius: RADIUS_PRO.md }}>
+                    <Typography sx={{ fontSize: '12px', fontWeight: 600, color: THEME_PRO.textSecondary, mb: SPACING_PRO.sm }}>
+                      💰 Order Summary
+                    </Typography>
+                    <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
+                      <Typography sx={{ fontSize: '13px', color: THEME_PRO.textSecondary }}>Total Value:</Typography>
+                      <Typography sx={{ fontSize: '13px', fontWeight: 600, color: THEME_PRO.primary }}>
+                        ₹{quantity && price ? (parseFloat(quantity) * parseFloat(price)).toLocaleString('en-IN') : '0'}
+                      </Typography>
+                    </Box>
+                  </Box>
 
-            {/* Results */}
-            {result && (
-              <div className={`border rounded-lg p-4 ${
-                result.status === 'success'
-                  ? 'bg-green-50 border-green-200'
-                  : 'bg-red-50 border-red-200'
-              }`}>
-                <h3 className="font-semibold mb-2">
-                  {result.status === 'success' ? '✅ Success' : '❌ Error'}
-                </h3>
-                <pre className="text-sm overflow-auto max-h-64 text-gray-700">
-                  {JSON.stringify(result.data, null, 2)}
-                </pre>
-              </div>
-            )}
+                  <Button
+                    fullWidth
+                    variant="contained"
+                    startIcon={loading ? <CircularProgress size={20} color="inherit" /> : <SendToMobile />}
+                    onClick={handleCreateOrder}
+                    disabled={loading || !apiKeys.zerodhaApiKey || !backendConnected}
+                    sx={{
+                      mt: SPACING_PRO.lg,
+                      backgroundColor: apiKeys.zerodhaApiKey ? THEME_PRO.success : THEME_PRO.textTertiary,
+                      color: '#fff',
+                      textTransform: 'none',
+                      fontWeight: 600,
+                      py: SPACING_PRO.md,
+                    }}
+                  >
+                    {loading ? 'Creating Order...' : 'Create Order'}
+                  </Button>
+                </Card>
+              </Box>
 
-            {/* Help Text */}
-            <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
-              <p className="text-sm text-gray-700">
-                💡 To enable trading features, configure your API keys in the Settings tab first.
-              </p>
-            </div>
-          </div>
-        )}
-      </div>
-    </div>
+              {/* Claude AI Test */}
+              <Box>
+                <Card
+                  sx={{
+                    p: SPACING_PRO.xxl,
+                    borderRadius: RADIUS_PRO.lg,
+                    border: `1px solid ${THEME_PRO.border}`,
+                    boxShadow: SHADOWS_PRO.md,
+                  }}
+                >
+                  <Typography sx={{ fontSize: '18px', fontWeight: 700, color: THEME_PRO.textPrimary, mb: SPACING_PRO.lg }}>
+                    🧠 Claude AI Analysis
+                  </Typography>
+
+                  {!apiKeys.claudeApiKey && (
+                    <Alert
+                      sx={{
+                        mb: SPACING_PRO.lg,
+                        backgroundColor: THEME_PRO.warningLight,
+                        color: THEME_PRO.warning,
+                        border: `1px solid ${THEME_PRO.warning}`,
+                      }}
+                    >
+                      ⚠️ Claude API key not configured. Go to Settings tab to configure.
+                    </Alert>
+                  )}
+
+                  <Box sx={{ p: SPACING_PRO.lg, backgroundColor: THEME_PRO.bgTertiary, borderRadius: RADIUS_PRO.md, mb: SPACING_PRO.lg }}>
+                    <Typography sx={{ fontSize: '13px', color: THEME_PRO.textSecondary }}>
+                      📊 Analyzing: <strong>{symbol}</strong>
+                    </Typography>
+                    <Typography sx={{ fontSize: '12px', color: THEME_PRO.textSecondary, mt: SPACING_PRO.sm }}>
+                      Test Claude AI's market analysis, sentiment detection, and risk assessment capabilities.
+                    </Typography>
+                  </Box>
+
+                  <Button
+                    fullWidth
+                    variant="contained"
+                    startIcon={loading ? <CircularProgress size={20} color="inherit" /> : <SmartToy />}
+                    onClick={handleTestClaude}
+                    disabled={loading || !apiKeys.claudeApiKey || !backendConnected}
+                    sx={{
+                      backgroundColor: apiKeys.claudeApiKey ? THEME_PRO.primary : THEME_PRO.textTertiary,
+                      color: '#fff',
+                      textTransform: 'none',
+                      fontWeight: 600,
+                      py: SPACING_PRO.md,
+                    }}
+                  >
+                    {loading ? 'Analyzing...' : 'Analyze with Claude'}
+                  </Button>
+
+                  {/* API Key Status */}
+                  <Box sx={{ mt: SPACING_PRO.lg, pt: SPACING_PRO.lg, borderTop: `1px solid ${THEME_PRO.border}` }}>
+                    <Typography sx={{ fontSize: '12px', fontWeight: 600, color: THEME_PRO.textSecondary, mb: SPACING_PRO.md }}>
+                      🔑 API Status
+                    </Typography>
+                    <Box sx={{ display: 'flex', gap: SPACING_PRO.sm }}>
+                      <Chip
+                        icon={apiKeys.claudeApiKey ? <CheckCircle /> : <HighlightOff />}
+                        label="Claude"
+                        size="small"
+                        sx={{
+                          backgroundColor: apiKeys.claudeApiKey ? THEME_PRO.successLight : THEME_PRO.errorLight,
+                          color: apiKeys.claudeApiKey ? THEME_PRO.success : THEME_PRO.error,
+                          fontWeight: 600,
+                        }}
+                      />
+                      <Chip
+                        icon={apiKeys.zerodhaApiKey ? <CheckCircle /> : <HighlightOff />}
+                        label="Zerodha"
+                        size="small"
+                        sx={{
+                          backgroundColor: apiKeys.zerodhaApiKey ? THEME_PRO.successLight : THEME_PRO.errorLight,
+                          color: apiKeys.zerodhaApiKey ? THEME_PRO.success : THEME_PRO.error,
+                          fontWeight: 600,
+                        }}
+                      />
+                    </Box>
+                  </Box>
+                </Card>
+              </Box>
+            </Box>
+          )}
+        </Box>
+      </Card>
+
+      {/* Result Dialog */}
+      <Dialog
+        open={resultDialog}
+        onClose={() => setResultDialog(false)}
+        maxWidth="sm"
+        fullWidth
+        PaperProps={{
+          sx: {
+            borderRadius: RADIUS_PRO.lg,
+            backgroundColor: THEME_PRO.bgPrimary,
+          },
+        }}
+      >
+        <DialogTitle sx={{ fontWeight: 700, color: result?.status === 'success' ? THEME_PRO.success : THEME_PRO.error }}>
+          {result?.status === 'success' ? '✅ Success' : '❌ Error'}
+        </DialogTitle>
+        <DialogContent>
+          <Box sx={{ mt: SPACING_PRO.lg, p: SPACING_PRO.lg, backgroundColor: THEME_PRO.bgTertiary, borderRadius: RADIUS_PRO.md }}>
+            <Typography component="pre" sx={{ fontSize: '12px', color: THEME_PRO.textSecondary, overflow: 'auto', maxHeight: '300px' }}>
+              {JSON.stringify(result?.data, null, 2)}
+            </Typography>
+          </Box>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setResultDialog(false)} variant="contained" sx={{ backgroundColor: THEME_PRO.primary }}>
+            Close
+          </Button>
+        </DialogActions>
+      </Dialog>
+    </Box>
   )
 }

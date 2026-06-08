@@ -3,10 +3,13 @@
  *
  * Allows users to configure their Claude and Zerodha API keys.
  * Keys are stored securely in browser localStorage.
- * This component is part of the TradingBot feature.
+ * Supports partial entry - users can configure Claude only, Zerodha only, or both.
  */
 
 import { useState, useEffect } from 'react'
+import { Box, Card, TextField, Button, Alert, Chip, Typography } from '@mui/material'
+import { CheckCircle, HighlightOff } from '@mui/icons-material'
+import { THEME_PRO, SPACING_PRO, RADIUS_PRO, SHADOWS_PRO } from '../theme-pro'
 
 interface Props {
   onKeysUpdated?: (keys: {
@@ -23,6 +26,7 @@ export const ApiKeySettings = ({ onKeysUpdated }: Props) => {
   const [showClaude, setShowClaude] = useState(false)
   const [showZerodha, setShowZerodha] = useState(false)
   const [message, setMessage] = useState('')
+  const [messageType, setMessageType] = useState<'success' | 'error'>('success')
 
   useEffect(() => {
     // Load keys from localStorage
@@ -36,16 +40,27 @@ export const ApiKeySettings = ({ onKeysUpdated }: Props) => {
   }, [])
 
   const handleSaveKeys = () => {
-    if (!claudeKey || !zerodhaKey || !zerodhaSecret) {
-      setMessage('⚠️ Please fill in all API keys')
+    // Allow saving if at least one key is provided
+    if (!claudeKey && !zerodhaKey && !zerodhaSecret) {
+      setMessage('⚠️ Please provide at least one API key')
+      setMessageType('error')
       return
     }
 
-    localStorage.setItem('claudeApiKey', claudeKey)
-    localStorage.setItem('zerodhaApiKey', zerodhaKey)
-    localStorage.setItem('zerodhaApiSecret', zerodhaSecret)
+    // If Zerodha key is provided, secret is also required (and vice versa)
+    if ((zerodhaKey && !zerodhaSecret) || (!zerodhaKey && zerodhaSecret)) {
+      setMessage('⚠️ Both Zerodha key and secret are required together')
+      setMessageType('error')
+      return
+    }
+
+    // Save to localStorage
+    if (claudeKey) localStorage.setItem('claudeApiKey', claudeKey)
+    if (zerodhaKey) localStorage.setItem('zerodhaApiKey', zerodhaKey)
+    if (zerodhaSecret) localStorage.setItem('zerodhaApiSecret', zerodhaSecret)
 
     setMessage('✅ API keys saved successfully!')
+    setMessageType('success')
     setTimeout(() => setMessage(''), 3000)
 
     if (onKeysUpdated) {
@@ -57,120 +72,257 @@ export const ApiKeySettings = ({ onKeysUpdated }: Props) => {
     }
   }
 
+  const handleClearAll = () => {
+    if (window.confirm('Are you sure you want to clear all API keys?')) {
+      localStorage.removeItem('claudeApiKey')
+      localStorage.removeItem('zerodhaApiKey')
+      localStorage.removeItem('zerodhaApiSecret')
+      setClaudeKey('')
+      setZerodhaKey('')
+      setZerodhaSecret('')
+      setMessage('🗑️ All API keys cleared')
+      setMessageType('success')
+      setTimeout(() => setMessage(''), 3000)
+    }
+  }
+
   return (
-    <div className="space-y-6">
-      <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
-        <p className="text-sm text-gray-700">
-          🔒 Configure your API keys to enable trading features. Keys are stored locally in your browser.
-        </p>
-      </div>
-
+    <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', md: '1fr 1fr' }, gap: SPACING_PRO.xxl }}>
       {/* Claude API Key */}
-      <div className="border rounded-lg p-4">
-        <div className="flex justify-between items-center mb-3">
-          <div>
-            <h3 className="font-semibold text-gray-900">🤖 Claude API Key</h3>
-            <a
-              href="https://console.anthropic.com/account/keys"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="text-sm text-blue-600 hover:underline"
-            >
-              Get your key at console.anthropic.com
-            </a>
-          </div>
+      <Card
+        sx={{
+          p: SPACING_PRO.xxl,
+          borderRadius: RADIUS_PRO.lg,
+          border: `1px solid ${THEME_PRO.border}`,
+          boxShadow: SHADOWS_PRO.md,
+        }}
+      >
+        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: SPACING_PRO.lg }}>
+          <Typography sx={{ fontSize: '18px', fontWeight: 700, color: THEME_PRO.textPrimary }}>
+            🤖 Claude API Key
+          </Typography>
           {claudeKey && (
-            <span className="text-xs bg-green-100 text-green-800 px-2 py-1 rounded">
-              ✓ Configured
-            </span>
+            <Chip
+              icon={<CheckCircle />}
+              label="Configured"
+              sx={{
+                backgroundColor: THEME_PRO.successLight,
+                color: THEME_PRO.success,
+                fontWeight: 600,
+              }}
+            />
           )}
-        </div>
+          {!claudeKey && (
+            <Chip
+              icon={<HighlightOff />}
+              label="Not Set"
+              sx={{
+                backgroundColor: THEME_PRO.errorLight,
+                color: THEME_PRO.error,
+                fontWeight: 600,
+              }}
+            />
+          )}
+        </Box>
 
-        <div className="space-y-2">
-          <input
-            type={showClaude ? 'text' : 'password'}
-            value={claudeKey}
-            onChange={(e) => setClaudeKey(e.target.value)}
-            placeholder="sk-ant-xxxxxxxxxxxxx"
-            className="w-full px-3 py-2 border rounded-md text-sm"
-          />
-          <button
-            type="button"
-            onClick={() => setShowClaude(!showClaude)}
-            className="text-sm text-blue-600 hover:underline"
+        <Typography sx={{ fontSize: '12px', color: THEME_PRO.textSecondary, mb: SPACING_PRO.md }}>
+          Get your API key from:{' '}
+          <a
+            href="https://console.anthropic.com/account/keys"
+            target="_blank"
+            rel="noopener noreferrer"
+            style={{ color: THEME_PRO.primary, textDecoration: 'none' }}
           >
-            {showClaude ? 'Hide' : 'Show'}
-          </button>
-        </div>
-      </div>
+            console.anthropic.com/account/keys
+          </a>
+        </Typography>
+
+        <TextField
+          fullWidth
+          label="Claude API Key"
+          type={showClaude ? 'text' : 'password'}
+          value={claudeKey}
+          onChange={(e) => setClaudeKey(e.target.value)}
+          placeholder="sk-ant-xxxxxxxxxxxxx"
+          margin="normal"
+          sx={{
+            '& .MuiOutlinedInput-root': {
+              backgroundColor: THEME_PRO.bgTertiary,
+            },
+          }}
+        />
+
+        <Button
+          size="small"
+          onClick={() => setShowClaude(!showClaude)}
+          sx={{
+            mt: SPACING_PRO.sm,
+            color: THEME_PRO.primary,
+            textTransform: 'none',
+          }}
+        >
+          {showClaude ? '🙈 Hide' : '👁️ Show'}
+        </Button>
+      </Card>
 
       {/* Zerodha API Keys */}
-      <div className="border rounded-lg p-4">
-        <div className="flex justify-between items-center mb-3">
-          <div>
-            <h3 className="font-semibold text-gray-900">📈 Zerodha API Keys</h3>
-            <a
-              href="https://kite.zerodha.com"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="text-sm text-blue-600 hover:underline"
-            >
-              Get your keys at kite.zerodha.com
-            </a>
-          </div>
-          {zerodhaKey && zerodhaSecret && (
-            <span className="text-xs bg-green-100 text-green-800 px-2 py-1 rounded">
-              ✓ Configured
-            </span>
-          )}
-        </div>
-
-        <div className="space-y-2">
-          <input
-            type={showZerodha ? 'text' : 'password'}
-            value={zerodhaKey}
-            onChange={(e) => setZerodhaKey(e.target.value)}
-            placeholder="API Key"
-            className="w-full px-3 py-2 border rounded-md text-sm"
-          />
-          <input
-            type={showZerodha ? 'text' : 'password'}
-            value={zerodhaSecret}
-            onChange={(e) => setZerodhaSecret(e.target.value)}
-            placeholder="API Secret"
-            className="w-full px-3 py-2 border rounded-md text-sm"
-          />
-          <button
-            type="button"
-            onClick={() => setShowZerodha(!showZerodha)}
-            className="text-sm text-blue-600 hover:underline"
-          >
-            {showZerodha ? 'Hide' : 'Show'}
-          </button>
-        </div>
-      </div>
-
-      {/* Save Button */}
-      <button
-        onClick={handleSaveKeys}
-        className="w-full bg-green-600 hover:bg-green-700 text-white font-semibold py-2 px-4 rounded-lg"
+      <Card
+        sx={{
+          p: SPACING_PRO.xxl,
+          borderRadius: RADIUS_PRO.lg,
+          border: `1px solid ${THEME_PRO.border}`,
+          boxShadow: SHADOWS_PRO.md,
+        }}
       >
-        💾 Save API Keys
-      </button>
+        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: SPACING_PRO.lg }}>
+          <Typography sx={{ fontSize: '18px', fontWeight: 700, color: THEME_PRO.textPrimary }}>
+            📈 Zerodha API Keys
+          </Typography>
+          {zerodhaKey && zerodhaSecret && (
+            <Chip
+              icon={<CheckCircle />}
+              label="Configured"
+              sx={{
+                backgroundColor: THEME_PRO.successLight,
+                color: THEME_PRO.success,
+                fontWeight: 600,
+              }}
+            />
+          )}
+          {(!zerodhaKey || !zerodhaSecret) && (
+            <Chip
+              icon={<HighlightOff />}
+              label="Not Set"
+              sx={{
+                backgroundColor: THEME_PRO.errorLight,
+                color: THEME_PRO.error,
+                fontWeight: 600,
+              }}
+            />
+          )}
+        </Box>
+
+        <Typography sx={{ fontSize: '12px', color: THEME_PRO.textSecondary, mb: SPACING_PRO.md }}>
+          Get your credentials from:{' '}
+          <a
+            href="https://kite.zerodha.com"
+            target="_blank"
+            rel="noopener noreferrer"
+            style={{ color: THEME_PRO.primary, textDecoration: 'none' }}
+          >
+            kite.zerodha.com
+          </a>
+        </Typography>
+
+        <TextField
+          fullWidth
+          label="Zerodha API Key"
+          type={showZerodha ? 'text' : 'password'}
+          value={zerodhaKey}
+          onChange={(e) => setZerodhaKey(e.target.value)}
+          placeholder="Your API Key"
+          margin="normal"
+          sx={{
+            '& .MuiOutlinedInput-root': {
+              backgroundColor: THEME_PRO.bgTertiary,
+            },
+          }}
+        />
+
+        <TextField
+          fullWidth
+          label="Zerodha API Secret"
+          type={showZerodha ? 'text' : 'password'}
+          value={zerodhaSecret}
+          onChange={(e) => setZerodhaSecret(e.target.value)}
+          placeholder="Your API Secret"
+          margin="normal"
+          sx={{
+            '& .MuiOutlinedInput-root': {
+              backgroundColor: THEME_PRO.bgTertiary,
+            },
+          }}
+        />
+
+        <Button
+          size="small"
+          onClick={() => setShowZerodha(!showZerodha)}
+          sx={{
+            mt: SPACING_PRO.sm,
+            color: THEME_PRO.primary,
+            textTransform: 'none',
+          }}
+        >
+          {showZerodha ? '🙈 Hide' : '👁️ Show'}
+        </Button>
+      </Card>
+
+      {/* Full Width Actions */}
+      <Box sx={{ gridColumn: { xs: '1fr', md: '1 / -1' }, display: 'grid', gridTemplateColumns: '1fr 1fr', gap: SPACING_PRO.lg }}>
+        <Button
+          fullWidth
+          variant="contained"
+          onClick={handleSaveKeys}
+          sx={{
+            backgroundColor: THEME_PRO.success,
+            color: '#fff',
+            textTransform: 'none',
+            fontWeight: 600,
+            py: SPACING_PRO.md,
+            fontSize: '15px',
+            '&:hover': {
+              backgroundColor: THEME_PRO.success,
+              opacity: 0.9,
+            },
+          }}
+        >
+          💾 Save API Keys
+        </Button>
+
+        <Button
+          fullWidth
+          variant="outlined"
+          onClick={handleClearAll}
+          sx={{
+            borderColor: THEME_PRO.error,
+            color: THEME_PRO.error,
+            textTransform: 'none',
+            fontWeight: 600,
+            py: SPACING_PRO.md,
+            fontSize: '15px',
+          }}
+        >
+          🗑️ Clear All
+        </Button>
+      </Box>
 
       {/* Message */}
       {message && (
-        <div className="text-sm p-3 rounded-lg bg-gray-100 text-center">
+        <Alert
+          sx={{
+            gridColumn: { xs: '1fr', md: '1 / -1' },
+            backgroundColor: messageType === 'success' ? THEME_PRO.successLight : THEME_PRO.errorLight,
+            color: messageType === 'success' ? THEME_PRO.success : THEME_PRO.error,
+            border: `1px solid ${messageType === 'success' ? THEME_PRO.success : THEME_PRO.error}`,
+          }}
+        >
           {message}
-        </div>
+        </Alert>
       )}
 
       {/* Security Notice */}
-      <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-3">
-        <p className="text-xs text-gray-600">
-          🔐 <strong>Security:</strong> API keys are stored locally in your browser (localStorage). They are never sent to our servers unless you make an API call. You can clear them anytime by clearing your browser data.
-        </p>
-      </div>
-    </div>
+      <Alert
+        sx={{
+          gridColumn: { xs: '1fr', md: '1 / -1' },
+          backgroundColor: THEME_PRO.warningLight,
+          color: THEME_PRO.warning,
+          border: `1px solid ${THEME_PRO.warning}`,
+          fontSize: '13px',
+        }}
+      >
+        🔐 <strong>Security Notice:</strong> Your API keys are stored locally in your browser (localStorage) only. They are never sent to our servers
+        unless you make an actual API call. You can clear them anytime in your browser settings.
+      </Alert>
+    </Box>
   )
 }
