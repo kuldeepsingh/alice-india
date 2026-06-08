@@ -1,10 +1,11 @@
 import { Router } from 'express'
-import { orderService } from '../services/order-service.ts'
+import { OrderService } from '../services/order-service.ts'
 import { accountService } from '../services/account-service.ts'
 import { authMiddleware, AuthRequest } from '../middleware/auth.ts'
 import { logger } from '../services/logger.ts'
 
 const router = Router()
+const orderService = new OrderService()
 
 // All order routes require authentication
 router.use(authMiddleware)
