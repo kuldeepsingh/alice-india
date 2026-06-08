@@ -35,12 +35,22 @@ BEFORE UPDATE ON user_trading_credentials
 FOR EACH ROW
 EXECUTE FUNCTION update_timestamp();
 
+-- Function to validate credentials are not empty
+CREATE OR REPLACE FUNCTION validate_trading_credentials()
+RETURNS TRIGGER AS $$
+BEGIN
+  IF NEW.api_key_encrypted IS NULL OR NEW.api_secret_encrypted IS NULL THEN
+    RAISE EXCEPTION 'API key and secret are required';
+  END IF;
+  RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
 -- Trigger to prevent NULL credentials
 CREATE TRIGGER check_trading_credentials_not_empty
 BEFORE INSERT OR UPDATE ON user_trading_credentials
 FOR EACH ROW
-WHEN (NEW.api_key_encrypted IS NULL OR NEW.api_secret_encrypted IS NULL)
-EXECUTE FUNCTION raise_error('API key and secret are required');
+EXECUTE FUNCTION validate_trading_credentials();
 
 COMMENT ON TABLE user_trading_credentials IS 'Encrypted Zerodha API credentials per user';
 COMMENT ON COLUMN user_trading_credentials.api_key_encrypted IS 'Encrypted Zerodha API key';
