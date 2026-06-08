@@ -5,11 +5,12 @@
  * - Keys are encrypted server-side
  * - Never stored locally
  * - Supports partial key configuration
+ * - Each key has its own individual Save button
  */
 
 import { useState, useEffect } from 'react'
 import { Box, Card, TextField, Button, Alert, Chip, Typography, CircularProgress } from '@mui/material'
-import { CheckCircle, HighlightOff, Refresh } from '@mui/icons-material'
+import { CheckCircle, HighlightOff, Refresh, Save } from '@mui/icons-material'
 import { useAuthStore } from '../state/store'
 import { apiKeyService } from '../services/api-key-service'
 import { THEME_PRO, SPACING_PRO, RADIUS_PRO, SHADOWS_PRO } from '../theme-pro'
@@ -29,6 +30,8 @@ export const ApiKeySettings = ({ onKeysUpdated }: Props) => {
   const [message, setMessage] = useState('')
   const [messageType, setMessageType] = useState<'success' | 'error'>('success')
   const [loading, setLoading] = useState(false)
+  const [claudeLoading, setClaudeLoading] = useState(false)
+  const [zerodhaLoading, setZerodhaLoading] = useState(false)
   const [checking, setChecking] = useState(true)
 
   const [hasClaudeKey, setHasClaudeKey] = useState(false)
@@ -52,34 +55,20 @@ export const ApiKeySettings = ({ onKeysUpdated }: Props) => {
     }
   }
 
-  const handleSaveKeys = async () => {
-    // Validate at least one key is provided
-    if (!claudeKey && !zerodhaKey && !zerodhaSecret) {
-      setMessage('⚠️ Please provide at least one API key')
+  const handleSaveClaudeKey = async () => {
+    if (!claudeKey) {
+      setMessage('⚠️ Please enter your Claude API key')
       setMessageType('error')
       return
     }
 
-    // Validate Zerodha pair
-    if ((zerodhaKey && !zerodhaSecret) || (!zerodhaKey && zerodhaSecret)) {
-      setMessage('⚠️ Both Zerodha key and secret are required together')
-      setMessageType('error')
-      return
-    }
-
-    setLoading(true)
+    setClaudeLoading(true)
     try {
-      await apiKeyService.saveKeys(claudeKey, zerodhaKey, zerodhaSecret, userId)
+      await apiKeyService.saveKeys(claudeKey, undefined, undefined, userId)
 
-      setMessage('✅ API keys saved securely!')
+      setMessage('✅ Claude API key saved securely!')
       setMessageType('success')
-
-      // Clear form
       setClaudeKey('')
-      setZerodhaKey('')
-      setZerodhaSecret('')
-
-      // Check status
       await checkStatus()
 
       if (onKeysUpdated) {
@@ -88,10 +77,40 @@ export const ApiKeySettings = ({ onKeysUpdated }: Props) => {
 
       setTimeout(() => setMessage(''), 3000)
     } catch (error) {
-      setMessage(`❌ ${error instanceof Error ? error.message : 'Failed to save keys'}`)
+      setMessage(`❌ ${error instanceof Error ? error.message : 'Failed to save Claude key'}`)
       setMessageType('error')
     } finally {
-      setLoading(false)
+      setClaudeLoading(false)
+    }
+  }
+
+  const handleSaveZerodhaKeys = async () => {
+    if (!zerodhaKey || !zerodhaSecret) {
+      setMessage('⚠️ Both Zerodha key and secret are required')
+      setMessageType('error')
+      return
+    }
+
+    setZerodhaLoading(true)
+    try {
+      await apiKeyService.saveKeys(undefined, zerodhaKey, zerodhaSecret, userId)
+
+      setMessage('✅ Zerodha API keys saved securely!')
+      setMessageType('success')
+      setZerodhaKey('')
+      setZerodhaSecret('')
+      await checkStatus()
+
+      if (onKeysUpdated) {
+        onKeysUpdated({ configured: true })
+      }
+
+      setTimeout(() => setMessage(''), 3000)
+    } catch (error) {
+      setMessage(`❌ ${error instanceof Error ? error.message : 'Failed to save Zerodha keys'}`)
+      setMessageType('error')
+    } finally {
+      setZerodhaLoading(false)
     }
   }
 
@@ -133,6 +152,8 @@ export const ApiKeySettings = ({ onKeysUpdated }: Props) => {
           borderRadius: RADIUS_PRO.lg,
           border: `1px solid ${THEME_PRO.border}`,
           boxShadow: SHADOWS_PRO.md,
+          display: 'flex',
+          flexDirection: 'column',
         }}
       >
         <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: SPACING_PRO.lg }}>
@@ -183,7 +204,7 @@ export const ApiKeySettings = ({ onKeysUpdated }: Props) => {
           onChange={(e) => setClaudeKey(e.target.value)}
           placeholder="sk-ant-xxxxxxxxxxxxx"
           margin="normal"
-          disabled={loading}
+          disabled={claudeLoading}
           sx={{
             '& .MuiOutlinedInput-root': {
               backgroundColor: THEME_PRO.bgTertiary,
@@ -194,14 +215,40 @@ export const ApiKeySettings = ({ onKeysUpdated }: Props) => {
         <Button
           size="small"
           onClick={() => setShowClaude(!showClaude)}
-          disabled={loading}
+          disabled={claudeLoading}
           sx={{
             mt: SPACING_PRO.sm,
+            mb: SPACING_PRO.lg,
             color: THEME_PRO.primary,
             textTransform: 'none',
           }}
         >
           {showClaude ? '🙈 Hide' : '👁️ Show'}
+        </Button>
+
+        <Button
+          fullWidth
+          variant="contained"
+          onClick={handleSaveClaudeKey}
+          disabled={claudeLoading || !claudeKey}
+          startIcon={claudeLoading ? <CircularProgress size={20} color="inherit" /> : <Save />}
+          sx={{
+            backgroundColor: THEME_PRO.success,
+            color: '#fff',
+            textTransform: 'none',
+            fontWeight: 600,
+            py: SPACING_PRO.md,
+            fontSize: '14px',
+            '&:hover': {
+              backgroundColor: THEME_PRO.success,
+              opacity: 0.9,
+            },
+            '&:disabled': {
+              backgroundColor: THEME_PRO.textTertiary,
+            },
+          }}
+        >
+          {claudeLoading ? 'Saving...' : '💾 Save Key'}
         </Button>
       </Card>
 
@@ -212,6 +259,8 @@ export const ApiKeySettings = ({ onKeysUpdated }: Props) => {
           borderRadius: RADIUS_PRO.lg,
           border: `1px solid ${THEME_PRO.border}`,
           boxShadow: SHADOWS_PRO.md,
+          display: 'flex',
+          flexDirection: 'column',
         }}
       >
         <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: SPACING_PRO.lg }}>
@@ -262,7 +311,7 @@ export const ApiKeySettings = ({ onKeysUpdated }: Props) => {
           onChange={(e) => setZerodhaKey(e.target.value)}
           placeholder="Your API Key"
           margin="normal"
-          disabled={loading}
+          disabled={zerodhaLoading}
           sx={{
             '& .MuiOutlinedInput-root': {
               backgroundColor: THEME_PRO.bgTertiary,
@@ -278,7 +327,7 @@ export const ApiKeySettings = ({ onKeysUpdated }: Props) => {
           onChange={(e) => setZerodhaSecret(e.target.value)}
           placeholder="Your API Secret"
           margin="normal"
-          disabled={loading}
+          disabled={zerodhaLoading}
           sx={{
             '& .MuiOutlinedInput-root': {
               backgroundColor: THEME_PRO.bgTertiary,
@@ -289,32 +338,30 @@ export const ApiKeySettings = ({ onKeysUpdated }: Props) => {
         <Button
           size="small"
           onClick={() => setShowZerodha(!showZerodha)}
-          disabled={loading}
+          disabled={zerodhaLoading}
           sx={{
             mt: SPACING_PRO.sm,
+            mb: SPACING_PRO.lg,
             color: THEME_PRO.primary,
             textTransform: 'none',
           }}
         >
           {showZerodha ? '🙈 Hide' : '👁️ Show'}
         </Button>
-      </Card>
 
-      {/* Full Width Actions */}
-      <Box sx={{ gridColumn: { xs: '1fr', md: '1 / -1' }, display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: SPACING_PRO.lg }}>
         <Button
           fullWidth
           variant="contained"
-          onClick={handleSaveKeys}
-          disabled={loading}
-          startIcon={loading ? <CircularProgress size={20} /> : undefined}
+          onClick={handleSaveZerodhaKeys}
+          disabled={zerodhaLoading || !zerodhaKey || !zerodhaSecret}
+          startIcon={zerodhaLoading ? <CircularProgress size={20} color="inherit" /> : <Save />}
           sx={{
             backgroundColor: THEME_PRO.success,
             color: '#fff',
             textTransform: 'none',
             fontWeight: 600,
             py: SPACING_PRO.md,
-            fontSize: '15px',
+            fontSize: '14px',
             '&:hover': {
               backgroundColor: THEME_PRO.success,
               opacity: 0.9,
@@ -324,9 +371,12 @@ export const ApiKeySettings = ({ onKeysUpdated }: Props) => {
             },
           }}
         >
-          💾 Save API Keys
+          {zerodhaLoading ? 'Saving...' : '💾 Save Keys'}
         </Button>
+      </Card>
 
+      {/* Actions */}
+      <Box sx={{ gridColumn: { xs: '1fr', md: '1 / -1' }, display: 'grid', gridTemplateColumns: '1fr 1fr', gap: SPACING_PRO.lg }}>
         <Button
           fullWidth
           variant="outlined"
@@ -339,10 +389,10 @@ export const ApiKeySettings = ({ onKeysUpdated }: Props) => {
             textTransform: 'none',
             fontWeight: 600,
             py: SPACING_PRO.md,
-            fontSize: '15px',
+            fontSize: '14px',
           }}
         >
-          🔄 Refresh
+          🔄 Refresh Status
         </Button>
 
         <Button
@@ -356,7 +406,7 @@ export const ApiKeySettings = ({ onKeysUpdated }: Props) => {
             textTransform: 'none',
             fontWeight: 600,
             py: SPACING_PRO.md,
-            fontSize: '15px',
+            fontSize: '14px',
           }}
         >
           🗑️ Clear All
