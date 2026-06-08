@@ -10,7 +10,7 @@ import {
   LinearProgress,
   Chip,
 } from '@mui/material'
-import { TrendingUp, Users, ShoppingCart, Activity } from '@mui/icons-material'
+import { TrendingUp, ShoppingCart, AssignmentInd, Trending } from '@mui/icons-material'
 import { COLORS, SPACING, BORDER_RADIUS, SHADOWS, TRANSITIONS } from '../theme'
 
 interface StatItem {
@@ -28,7 +28,7 @@ export function Dashboard() {
       title: 'Total Users',
       value: 2450,
       subtitle: 'All registered users',
-      icon: <Users sx={{ fontSize: 40 }} />,
+      icon: <AssignmentInd sx={{ fontSize: 40 }} />,
       gradient: `linear-gradient(135deg, #667eea 0%, #764ba2 100%)`,
       change: 12,
     },
@@ -52,7 +52,7 @@ export function Dashboard() {
       title: 'Active Traders',
       value: 1203,
       subtitle: 'Trading this month',
-      icon: <Activity sx={{ fontSize: 40 }} />,
+      icon: <Trending sx={{ fontSize: 40 }} />,
       gradient: `linear-gradient(135deg, #43e97b 0%, #38f9d7 100%)`,
       change: 15,
     },

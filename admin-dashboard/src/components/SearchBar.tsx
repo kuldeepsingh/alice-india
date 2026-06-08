@@ -11,7 +11,7 @@ import {
   useTheme,
   useMediaQuery,
 } from '@mui/material'
-import { Search as SearchIcon, Dashboard, Settings, Diagnostics } from '@mui/icons-material'
+import { Search as SearchIcon, Dashboard, Settings } from '@mui/icons-material'
 import { COLORS, SPACING, TRANSITIONS } from '../theme'
 
 interface PageResult {

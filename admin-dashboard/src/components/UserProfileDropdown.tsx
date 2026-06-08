@@ -81,19 +81,21 @@ export function UserProfileDropdown() {
         anchorEl={anchorEl}
         open={Boolean(anchorEl)}
         onClose={handleMenuClose}
-        PaperProps={{
-          sx: {
-            backgroundColor: COLORS.bgMedium,
-            border: `1px solid ${COLORS.primary}`,
-            borderRadius: '8px',
-            minWidth: '220px',
+        slotProps={{
+          paper: {
+            sx: {
+              backgroundColor: COLORS.bgMedium,
+              border: `1px solid ${COLORS.primary}`,
+              borderRadius: '8px',
+              minWidth: '220px',
+            },
           },
         }}
       >
         {/* User Info Header */}
         <MenuItem disabled sx={{ flexDirection: 'column', alignItems: 'flex-start', py: SPACING.lg }}>
           <Typography variant="subtitle2" sx={{ color: COLORS.primary, fontWeight: 'bold' }}>
-            {user?.name || 'User'}
+            {user?.email?.split('@')[0] || 'User'}
           </Typography>
           <Typography variant="caption" sx={{ color: COLORS.textTertiary, mt: SPACING.xs }}>
             {userEmail}
