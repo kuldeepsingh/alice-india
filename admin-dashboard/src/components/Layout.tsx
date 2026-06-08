@@ -1,6 +1,7 @@
 import React from 'react'
-import { Header } from './Header'
+import { Navbar } from './Navbar'
 import { Sidebar } from './Sidebar'
+import { Box } from '@mui/material'
 
 interface LayoutProps {
   children: React.ReactNode
@@ -8,12 +9,14 @@ interface LayoutProps {
 
 export function Layout({ children }: LayoutProps) {
   return (
-    <div>
-      <Header />
-      <div className="flex">
+    <Box sx={{ display: 'flex', flexDirection: 'column', minHeight: '100vh' }}>
+      <Navbar />
+      <Box sx={{ display: 'flex', flex: 1 }}>
         <Sidebar />
-        <main className="flex-1 p-8">{children}</main>
-      </div>
-    </div>
+        <Box sx={{ flex: 1, overflow: 'auto', p: 2 }}>
+          {children}
+        </Box>
+      </Box>
+    </Box>
   )
 }

@@ -1,9 +1,6 @@
 import React from 'react'
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom'
 import { useAuthStore } from './state/store'
-import { Navbar } from './components/Navbar'
-import { Sidebar } from './components/Sidebar'
-import { Box } from '@mui/material'
 import { Login } from './pages/Login'
 import { Dashboard } from './pages/Dashboard'
 import { Users } from './pages/Users'
@@ -23,19 +20,7 @@ import Diagnostics from './pages/Diagnostics'
 
 function ProtectedRoute({ children }: { children: React.ReactNode }) {
   const { isAuthenticated } = useAuthStore()
-  return isAuthenticated ? (
-    <Box sx={{ display: 'flex', flexDirection: 'column', minHeight: '100vh' }}>
-      <Navbar />
-      <Box sx={{ display: 'flex', flex: 1 }}>
-        <Sidebar />
-        <Box sx={{ flex: 1, overflow: 'auto' }}>
-          {children}
-        </Box>
-      </Box>
-    </Box>
-  ) : (
-    <Navigate to="/login" />
-  )
+  return isAuthenticated ? <>{children}</> : <Navigate to="/login" />
 }
 
 export function App() {
