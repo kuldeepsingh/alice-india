@@ -142,6 +142,13 @@ class CacheService {
   static async delete(key: string): Promise<void> {
     return cacheService.delete(key)
   }
+
+  /**
+   * Static getStats wrapper
+   */
+  static getStats() {
+    return cacheService.getStats()
+  }
 }
 
 export { CacheService }; export const cacheService = new CacheService()
