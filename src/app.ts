@@ -17,6 +17,7 @@ import teamRouter from './routes/team.ts'
 import metricsRouter from './routes/metrics.ts'
 import tradingRouter from './routes/trading.ts'
 import credentialsRouter from './routes/credentials.ts'
+import testingRouter from './routes/testing.ts'
 import { logCaptureMiddleware, errorLoggingMiddleware } from './middleware/log-capture.ts'
 import {
   cacheResponseMiddleware,
@@ -98,6 +99,9 @@ export function createApp() {
 
   // Credentials routes
   v1.use('/credentials', credentialsRouter)
+
+  // Testing routes
+  v1.use('/testing', testingRouter)
 
   // Mount v1 API
   app.use('/api/v1', v1)

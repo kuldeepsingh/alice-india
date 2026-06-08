@@ -16,6 +16,7 @@ import TeamCoordination from './pages/TeamCoordination'
 import Performance from './pages/Performance'
 import Trading from './pages/Trading'
 import Settings from './pages/Settings'
+import Diagnostics from './pages/Diagnostics'
 
 function ProtectedRoute({ children }: { children: React.ReactNode }) {
   const { isAuthenticated } = useAuthStore()
@@ -138,6 +139,14 @@ export function App() {
           element={
             <ProtectedRoute>
               <Settings />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/diagnostics"
+          element={
+            <ProtectedRoute>
+              <Diagnostics />
             </ProtectedRoute>
           }
         />
