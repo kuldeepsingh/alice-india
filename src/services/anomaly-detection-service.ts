@@ -149,7 +149,7 @@ class AnomalyDetectionService {
       mean,
       stdDev,
       volumeMultiple,
-      isPrice Anomaly: Math.abs(zScore) > 2,
+      isPriceAnomaly: Math.abs(zScore) > 2,
       isVolumeAnomaly: volumeMultiple > 2.5,
     }
   }

@@ -118,8 +118,9 @@ export const optionalClaude = async (req: Request, res: Response, next: NextFunc
       return next()
     }
 
-    const { allowed } = await premiumFeatureService.canUseClaude(userId)
-    (req as any).claudeAvailable = allowed
+    const result = await premiumFeatureService.canUseClaude(userId)
+    const available = result && result.allowed ? true : false
+    (req as any).claudeAvailable = available
 
     next()
   } catch (error) {
