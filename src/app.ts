@@ -15,6 +15,7 @@ import incidentsRouter from './routes/incidents.ts'
 import notificationsRouter from './routes/notifications.ts'
 import teamRouter from './routes/team.ts'
 import metricsRouter from './routes/metrics.ts'
+import tradingRouter from './routes/trading.ts'
 import { logCaptureMiddleware, errorLoggingMiddleware } from './middleware/log-capture.ts'
 import {
   cacheResponseMiddleware,
@@ -90,6 +91,9 @@ export function createApp() {
 
   // Metrics & Monitoring routes
   v1.use('/metrics', metricsRouter)
+
+  // Trading routes
+  v1.use('/trading', tradingRouter)
 
   // Mount v1 API
   app.use('/api/v1', v1)

@@ -1,137 +1,295 @@
-import { v4 as uuidv4 } from 'uuid'
-import { logger } from './logger.ts'
+/**
+ * Order Service
+ * Order management, validation, and risk controls
+ */
+
 import { query } from './database.ts'
+import { NotificationService } from './notification-service.ts'
+import { AuditService } from './audit-service.ts'
+import { ZerodhaService } from './zerodha-service.ts'
+import {
+  Order,
+  OrderRequest,
+  OrderStatus,
+  RiskLimits,
+  RiskCheck,
+} from '../models/trading.ts'
 
-export interface Order {
-  id: string
-  user_id: string
-  account_id: string
-  symbol: string
-  side: 'BUY' | 'SELL'
-  quantity: number
-  price: number
-  status: string
-  filled_quantity: number
-  avg_fill_price: number
-  broker_order_id?: string
-  created_at: string
-  updated_at: string
-}
+export class OrderService {
+  private zerodhaService: ZerodhaService | null = null
+  private defaultRiskLimits: RiskLimits = {
+    dailyLossLimit: -50000,
+    positionSizeLimit: 1000000,
+    maxQuantityPerOrder: 5000,
+    maxMarginUtilization: 0.8,
+    stopLossPercent: 0.05,
+  }
 
-export interface CreateOrderRequest {
-  accountId: string
-  symbol: string
-  side: 'BUY' | 'SELL'
-  quantity: number
-  price: number
-}
+  constructor(zerodhaService?: ZerodhaService) {
+    this.zerodhaService = zerodhaService || null
+  }
 
-export interface UpdateOrderRequest {
-  quantity?: number
-  price?: number
-  status?: string
-  filledQuantity?: number
-  avgFillPrice?: number
-}
+  /**
+   * Create and place an order
+   */
+  async createOrder(
+    userId: string,
+    orderRequest: OrderRequest
+  ): Promise<Order> {
+    try {
+      // Validate order
+      const validation = await this.validateOrder(orderRequest)
+      if (!validation.isValid) {
+        throw new Error(validation.reason || 'Order validation failed')
+      }
 
-export const orderService = {
-  async createOrder(userId: string, request: CreateOrderRequest): Promise<Order> {
-    if (!request.accountId || !request.symbol || !request.side || !request.quantity || request.price === undefined) {
-      throw new Error('Missing required fields')
+      // Check risk limits
+      const riskCheck = await this.checkRiskLimits(userId, orderRequest)
+      if (!riskCheck.isValid) {
+        throw new Error(riskCheck.reason || 'Risk limits exceeded')
+      }
+
+      // Place order with Zerodha
+      if (!this.zerodhaService) {
+        throw new Error('Zerodha service not configured')
+      }
+
+      const order = await this.zerodhaService.placeOrder(orderRequest)
+
+      // Store in database
+      const sqlInsert = `
+        INSERT INTO trading_orders (
+          user_id, zerodha_order_id, symbol, quantity, price,
+          order_type, transaction_type, status
+        ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
+        RETURNING *
+      `
+
+      const result = await query(sqlInsert, [
+        userId,
+        order.orderId,
+        order.tradingSymbol,
+        order.quantity,
+        order.price,
+        order.orderType,
+        order.transactionType,
+        order.status,
+      ])
+
+      const storedOrder = result.rows[0]
+
+      // Notify order placed
+      await this.notifyOrderPlaced(storedOrder)
+
+      // Audit log
+      await AuditService.createAuditLog({
+        userId,
+        action: 'ORDER_PLACED',
+        resource: 'order',
+        resourceId: storedOrder.id,
+        details: {
+          symbol: order.tradingSymbol,
+          quantity: order.quantity,
+          price: order.price,
+          type: order.orderType,
+        },
+      })
+
+      return storedOrder
+    } catch (error: any) {
+      console.error('Order creation error:', error)
+
+      await AuditService.createAuditLog({
+        userId,
+        action: 'ORDER_PLACE_FAILED',
+        resource: 'order',
+        details: {
+          error: error.message,
+          orderRequest,
+        },
+      })
+
+      throw error
     }
+  }
 
-    if (!['BUY', 'SELL'].includes(request.side)) {
-      throw new Error('Invalid side')
+  /**
+   * Get user orders
+   */
+  async getOrders(
+    userId: string,
+    filters?: {
+      symbol?: string
+      status?: OrderStatus
+      limit?: number
+      offset?: number
     }
+  ): Promise<Order[]> {
+    try {
+      let sql = 'SELECT * FROM trading_orders WHERE user_id = $1'
+      const params: any[] = [userId]
+      let paramCount = 2
 
-    if (request.quantity <= 0 || request.price <= 0) {
-      throw new Error('Quantity and price must be positive')
+      if (filters?.symbol) {
+        sql += ` AND symbol = $${paramCount++}`
+        params.push(filters.symbol)
+      }
+
+      if (filters?.status) {
+        sql += ` AND status = $${paramCount++}`
+        params.push(filters.status)
+      }
+
+      sql += ` ORDER BY created_at DESC`
+
+      if (filters?.limit) {
+        sql += ` LIMIT $${paramCount++}`
+        params.push(filters.limit)
+      }
+
+      if (filters?.offset) {
+        sql += ` OFFSET $${paramCount++}`
+        params.push(filters.offset)
+      }
+
+      const result = await query(sql, params)
+      return result.rows
+    } catch (error) {
+      console.error('Get orders error:', error)
+      throw error
     }
+  }
 
-    const id = uuidv4()
-    const now = new Date().toISOString()
+  /**
+   * Validate order before placement
+   */
+  async validateOrder(order: OrderRequest): Promise<{ isValid: boolean; reason?: string }> {
+    try {
+      if (!order.tradingSymbol || !order.quantity || !order.price) {
+        return { isValid: false, reason: 'Missing required fields' }
+      }
 
-    const result = await query(
-      'INSERT INTO orders (id, user_id, account_id, symbol, side, quantity, price, status, filled_quantity, avg_fill_price, created_at, updated_at) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12) RETURNING *',
-      [id, userId, request.accountId, request.symbol, request.side, request.quantity, request.price, 'PENDING', 0, 0, now, now]
-    )
+      if (order.quantity <= 0 || order.price <= 0) {
+        return { isValid: false, reason: 'Quantity and price must be positive' }
+      }
 
-    logger.info({
-      type: 'order_created',
-      orderId: id,
-      userId,
-      symbol: request.symbol,
-    })
+      if (order.quantity > this.defaultRiskLimits.maxQuantityPerOrder) {
+        return {
+          isValid: false,
+          reason: `Quantity exceeds limit of ${this.defaultRiskLimits.maxQuantityPerOrder}`,
+        }
+      }
 
-    return result.rows[0]
-  },
+      if (!['BUY', 'SELL'].includes(order.transactionType)) {
+        return { isValid: false, reason: 'Invalid transaction type' }
+      }
 
-  async getOrderById(id: string): Promise<Order | null> {
-    const result = await query(
-      'SELECT * FROM orders WHERE id = $1',
-      [id]
-    )
-    return result.rows[0] || null
-  },
+      if (!['REGULAR', 'BRACKET', 'COVER'].includes(order.orderType)) {
+        return { isValid: false, reason: 'Invalid order type' }
+      }
 
-  async getUserOrders(userId: string): Promise<Order[]> {
-    const result = await query(
-      'SELECT * FROM orders WHERE user_id = $1 ORDER BY created_at DESC',
-      [userId]
-    )
-    return result.rows
-  },
+      if (!['DAY', 'IOC'].includes(order.validity)) {
+        return { isValid: false, reason: 'Invalid validity' }
+      }
 
-  async getAccountOrders(accountId: string): Promise<Order[]> {
-    const result = await query(
-      'SELECT * FROM orders WHERE account_id = $1 ORDER BY created_at DESC',
-      [accountId]
-    )
-    return result.rows
-  },
+      if (!['MIS', 'CNC', 'NRML'].includes(order.product)) {
+        return { isValid: false, reason: 'Invalid product' }
+      }
 
-  async updateOrder(id: string, request: UpdateOrderRequest): Promise<Order | null> {
-    const now = new Date().toISOString()
-
-    const result = await query(
-      'UPDATE orders SET quantity = COALESCE($1, quantity), price = COALESCE($2, price), status = COALESCE($3, status), filled_quantity = COALESCE($4, filled_quantity), avg_fill_price = COALESCE($5, avg_fill_price), updated_at = $6 WHERE id = $7 RETURNING *',
-      [request.quantity, request.price, request.status, request.filledQuantity, request.avgFillPrice, now, id]
-    )
-
-    if (result.rows.length === 0) {
-      return null
+      return { isValid: true }
+    } catch (error) {
+      console.error('Validation error:', error)
+      return { isValid: false, reason: 'Validation error' }
     }
+  }
 
-    logger.info({
-      type: 'order_updated',
-      orderId: id,
-    })
+  /**
+   * Check risk limits before order
+   */
+  async checkRiskLimits(
+    userId: string,
+    order: OrderRequest
+  ): Promise<RiskCheck> {
+    try {
+      if (!this.zerodhaService) {
+        return { isValid: true }
+      }
 
-    return result.rows[0]
-  },
+      const portfolio = await this.zerodhaService.getPortfolio()
+      const requiredMargin = order.price * order.quantity * 0.20
+      const availableMargin = portfolio.margin.available
 
-  async cancelOrder(id: string): Promise<Order | null> {
-    const order = await this.getOrderById(id)
-    if (!order) {
-      return null
+      if (requiredMargin > availableMargin) {
+        return {
+          isValid: false,
+          reason: 'Insufficient margin',
+          requiredMargin,
+          availableMargin,
+        }
+      }
+
+      const newUtilization = (portfolio.margin.used + requiredMargin) / portfolio.margin.total
+
+      if (newUtilization > this.defaultRiskLimits.maxMarginUtilization) {
+        return {
+          isValid: false,
+          reason: 'Margin utilization limit exceeded',
+          currentMargin: portfolio.margin.used,
+          availableMargin,
+        }
+      }
+
+      const dayPnL = portfolio.positions.reduce((sum, p) => sum + p.m2m, 0)
+
+      if (dayPnL < this.defaultRiskLimits.dailyLossLimit) {
+        return {
+          isValid: false,
+          reason: 'Daily loss limit exceeded',
+        }
+      }
+
+      return { isValid: true }
+    } catch (error) {
+      console.error('Risk check error:', error)
+      return { isValid: true }
     }
+  }
 
-    if (!['PENDING', 'OPEN'].includes(order.status)) {
-      throw new Error(`Cannot cancel order with status ${order.status}`)
+  /**
+   * Order placed notification
+   */
+  async notifyOrderPlaced(order: any): Promise<void> {
+    try {
+      await NotificationService.sendNotification({
+        userId: order.user_id,
+        type: 'order_placed' as any,
+        title: `Order Placed: ${order.symbol}`,
+        message: `${order.transaction_type} ${order.quantity} ${order.symbol} @ ₹${order.price}`,
+      })
+    } catch (error) {
+      console.error('Notification error:', error)
     }
+  }
 
-    const now = new Date().toISOString()
+  /**
+   * Get order statistics
+   */
+  async getOrderStats(userId: string): Promise<any> {
+    try {
+      const sql = `
+        SELECT
+          COUNT(*) as total_orders,
+          COUNT(*) FILTER (WHERE status = 'COMPLETED') as completed_orders,
+          COUNT(*) FILTER (WHERE status = 'CANCELLED') as cancelled_orders
+        FROM trading_orders
+        WHERE user_id = $1 AND DATE(created_at) = CURRENT_DATE
+      `
 
-    const result = await query(
-      'UPDATE orders SET status = $1, updated_at = $2 WHERE id = $3 RETURNING *',
-      ['CANCELLED', now, id]
-    )
-
-    logger.info({
-      type: 'order_cancelled',
-      orderId: id,
-    })
-
-    return result.rows[0]
-  },
+      const result = await query(sql, [userId])
+      return result.rows[0] || {}
+    } catch (error) {
+      console.error('Order stats error:', error)
+      throw error
+    }
+  }
 }
