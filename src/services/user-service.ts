@@ -7,9 +7,9 @@ export interface User {
   id: string
   email: string
   password_hash: string
+  name?: string
   role: 'admin' | 'trader' | 'viewer'
   created_at: string
-  updated_at: string
 }
 
 export interface CreateUserRequest {
@@ -41,8 +41,8 @@ export const userService = {
     const now = new Date().toISOString()
 
     const result = await query(
-      'INSERT INTO users (id, email, password_hash, role, created_at, updated_at) VALUES ($1, $2, $3, $4, $5, $6) RETURNING id, email, role, created_at, updated_at',
-      [id, request.email, passwordHash, role, now, now]
+      'INSERT INTO users (id, email, password_hash, role, created_at) VALUES ($1, $2, $3, $4, $5) RETURNING id, email, role, created_at',
+      [id, request.email, passwordHash, role, now]
     )
 
     logger.info({
@@ -56,7 +56,7 @@ export const userService = {
 
   async getUserByEmail(email: string): Promise<User | null> {
     const result = await query(
-      'SELECT id, email, password_hash, role, created_at, updated_at FROM users WHERE email = $1',
+      'SELECT id, email, password_hash, name, role, created_at FROM users WHERE email = $1',
       [email]
     )
 
@@ -65,7 +65,7 @@ export const userService = {
 
   async getUserById(id: string): Promise<User | null> {
     const result = await query(
-      'SELECT id, email, password_hash, role, created_at, updated_at FROM users WHERE id = $1',
+      'SELECT id, email, password_hash, name, role, created_at FROM users WHERE id = $1',
       [id]
     )
 
