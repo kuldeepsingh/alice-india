@@ -13,7 +13,7 @@ import marketDataRouter from './routes/market-data.ts'
 // import debugRouter from './routes/debug.ts'  // TODO: Fix DebugService import
 // import incidentsRouter from './routes/incidents.ts'  // TODO: Fix IncidentService import
 // import notificationsRouter from './routes/notifications.ts'  // TODO: Fix imports
-// import teamRouter from './routes/team.ts'  // TODO: Check imports
+import teamRouter from './routes/team.ts'
 // import metricsRouter from './routes/metrics.ts'  // TODO: Check imports
 import tradingRouter from './routes/trading.ts'
 import credentialsRouter from './routes/credentials.ts'
@@ -100,7 +100,7 @@ export function createApp() {
   // Team Coordination routes (protected)
   // v1.use('/incidents', incidentsRouter)  // TODO: Fix imports
   // v1.use('/notifications', notificationsRouter)  // TODO: Fix imports
-  // v1.use('/team', teamRouter)  // TODO: Fix imports
+  v1.use('/team', teamRouter)
 
   // Metrics & Monitoring routes
   // v1.use('/metrics', metricsRouter)  // TODO: Fix imports
