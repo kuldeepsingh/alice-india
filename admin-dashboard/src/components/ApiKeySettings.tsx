@@ -10,15 +10,17 @@
 import { useState, useEffect } from 'react'
 import { Box, Card, TextField, Button, Alert, Chip, Typography, CircularProgress } from '@mui/material'
 import { CheckCircle, HighlightOff, Refresh } from '@mui/icons-material'
+import { useAuthStore } from '../state/store'
 import { apiKeyService } from '../services/api-key-service'
 import { THEME_PRO, SPACING_PRO, RADIUS_PRO, SHADOWS_PRO } from '../theme-pro'
 
 interface Props {
   onKeysUpdated?: (keys: { configured: boolean }) => void
-  userId?: string
 }
 
-export const ApiKeySettings = ({ onKeysUpdated, userId = 'default-user' }: Props) => {
+export const ApiKeySettings = ({ onKeysUpdated }: Props) => {
+  const { user } = useAuthStore()
+  const userId = user?.id || 'default-user'
   const [claudeKey, setClaudeKey] = useState('')
   const [zerodhaKey, setZerodhaKey] = useState('')
   const [zerodhaSecret, setZerodhaSecret] = useState('')

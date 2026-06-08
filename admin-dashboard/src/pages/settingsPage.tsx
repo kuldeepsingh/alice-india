@@ -172,7 +172,7 @@ export function settingsPage() {
           <Typography sx={{ color: THEME_PRO.textSecondary, mb: SPACING_PRO.xl }}>
             Configure your Claude and Zerodha API keys for trading and AI features
           </Typography>
-          <ApiKeySettings userId="default-user" />
+          <ApiKeySettings />
         </Box>
 
         {/* Account & Security */}
