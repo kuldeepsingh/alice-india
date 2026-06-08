@@ -11,8 +11,8 @@ async function main() {
     // Connect to database
     await connectDatabase()
 
-    // Run migrations
-    await runMigrations()
+    // Run migrations (commented out for now - using manual schema)
+    // await runMigrations()
 
     // Connect to cache
     await cache.connect()

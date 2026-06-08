@@ -113,6 +113,35 @@ class CacheService {
       console.log(`[CacheService] Cleaned ${deletedCount} expired entries`)
     }
   }
+
+  /**
+   * Generate debug cache key
+   */
+  static getDebugKey(key: string): string {
+    return `debug:${key}`
+  }
+
+  /**
+   * Static get wrapper
+   */
+  static async get<T>(key: string): Promise<T | null> {
+    return cacheService.get<T>(key)
+  }
+
+  /**
+   * Static set wrapper
+   */
+  static async set<T>(key: string, value: T, options?: { ttl?: number }): Promise<void> {
+    const ttl = options?.ttl || 300 // Default 5 minutes
+    return cacheService.set<T>(key, value, ttl)
+  }
+
+  /**
+   * Static delete wrapper
+   */
+  static async delete(key: string): Promise<void> {
+    return cacheService.delete(key)
+  }
 }
 
-export const cacheService = new CacheService()
+export { CacheService }; export const cacheService = new CacheService()

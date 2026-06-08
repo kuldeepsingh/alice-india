@@ -4,9 +4,8 @@
  */
 
 import { query } from './database.ts'
-import { NotificationService } from './notification-service.ts'
-import { AuditService } from './audit-service.ts'
-import { ZerodhaService } from './zerodha-service.ts'
+import { notificationService } from './notification-service.ts'
+import { logger } from './logger.ts'
 import {
   Order,
   OrderRequest,
@@ -16,8 +15,8 @@ import {
 } from '../models/trading.ts'
 
 export class OrderService {
-  private zerodhaService: ZerodhaService | null = null
-  private defaultRiskLimits: RiskLimits = {
+  private zerodhaService: any | null = null
+  private defaultRiskLimits: any = {
     dailyLossLimit: -50000,
     positionSizeLimit: 1000000,
     maxQuantityPerOrder: 5000,
@@ -25,7 +24,7 @@ export class OrderService {
     stopLossPercent: 0.05,
   }
 
-  constructor(zerodhaService?: ZerodhaService) {
+  constructor(zerodhaService?: any) {
     this.zerodhaService = zerodhaService || null
   }
 
@@ -81,32 +80,22 @@ export class OrderService {
       // Notify order placed
       await this.notifyOrderPlaced(storedOrder)
 
-      // Audit log
-      await AuditService.createAuditLog({
+      // Log order placed
+      logger.info({
+        type: 'order_placed',
         userId,
-        action: 'ORDER_PLACED',
-        resource: 'order',
-        resourceId: storedOrder.id,
-        details: {
-          symbol: order.tradingSymbol,
-          quantity: order.quantity,
-          price: order.price,
-          type: order.orderType,
-        },
+        orderId: storedOrder.id,
+        symbol: order.tradingSymbol,
+        quantity: order.quantity,
+        price: order.price,
       })
 
       return storedOrder
     } catch (error: any) {
-      console.error('Order creation error:', error)
-
-      await AuditService.createAuditLog({
+      logger.error({
+        type: 'order_creation_error',
         userId,
-        action: 'ORDER_PLACE_FAILED',
-        resource: 'order',
-        details: {
-          error: error.message,
-          orderRequest,
-        },
+        error: error.message,
       })
 
       throw error

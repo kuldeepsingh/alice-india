@@ -257,4 +257,4 @@ class LoggingService {
   }
 }
 
-export const loggingService = new LoggingService()
+export { LoggingService }; export const loggingService = new LoggingService()
