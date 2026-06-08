@@ -7,17 +7,21 @@ import { Router, Request, Response } from 'express'
 import { v4 as uuidv4 } from 'uuid'
 import { OnCallService } from '../services/on-call-service.ts'
 import { IncidentService } from '../services/incident-service.ts'
+import { authMiddleware, AuthRequest } from '../middleware/auth.ts'
 import { requireDeveloper, requireAdmin } from '../middleware/rbac.ts'
 import { query } from '../services/database.ts'
 
 const router = Router()
+
+// Apply auth middleware to all routes
+router.use(authMiddleware)
 
 /**
  * GET /api/v1/team/members
  * Get all team members
  * Auth: Developer+
  */
-router.get('/members', requireAdmin(), async (req: Request, res: Response) => {
+router.get('/members', requireAdmin(), async (req: AuthRequest, res: Response) => {
   try {
     const sql = `
       SELECT
@@ -52,7 +56,7 @@ router.get('/members', requireAdmin(), async (req: Request, res: Response) => {
  * Auth: Developer+
  * Query params: startDate, endDate
  */
-router.get('/on-call', requireDeveloper(), async (req: Request, res: Response) => {
+router.get('/on-call', requireDeveloper(), async (req: AuthRequest, res: Response) => {
   try {
     const { startDate, endDate } = req.query
 
@@ -85,7 +89,7 @@ router.get('/on-call', requireDeveloper(), async (req: Request, res: Response) =
  * Create on-call schedule
  * Auth: Admin only
  */
-router.post('/on-call', requireAdmin(), async (req: Request, res: Response) => {
+router.post('/on-call', requireAdmin(), async (req: AuthRequest, res: Response) => {
   try {
     const { userId, startDate, endDate, shiftType, notes } = req.body
 
@@ -131,7 +135,7 @@ router.post('/on-call', requireAdmin(), async (req: Request, res: Response) => {
  * Get team metrics and statistics
  * Auth: Developer+
  */
-router.get('/metrics', requireDeveloper(), async (req: Request, res: Response) => {
+router.get('/metrics', requireDeveloper(), async (req: AuthRequest, res: Response) => {
   try {
     const onCallMetrics = await OnCallService.getTeamMetrics()
     const incidentStats = await IncidentService.getIncidentStats()
@@ -159,7 +163,7 @@ router.get('/metrics', requireDeveloper(), async (req: Request, res: Response) =
  * Delete a user by ID
  * Auth: Admin only
  */
-router.delete('/members/:id', requireAdmin(), async (req: Request, res: Response) => {
+router.delete('/members/:id', requireAdmin(), async (req: AuthRequest, res: Response) => {
   try {
     const { id } = req.params
 
