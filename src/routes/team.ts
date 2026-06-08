@@ -17,7 +17,7 @@ const router = Router()
  * Get all team members
  * Auth: Developer+
  */
-router.get('/members', requireDeveloper, async (req: Request, res: Response) => {
+router.get('/members', requireAdmin(), async (req: Request, res: Response) => {
   try {
     const sql = `
       SELECT
@@ -52,7 +52,7 @@ router.get('/members', requireDeveloper, async (req: Request, res: Response) => 
  * Auth: Developer+
  * Query params: startDate, endDate
  */
-router.get('/on-call', requireDeveloper, async (req: Request, res: Response) => {
+router.get('/on-call', requireDeveloper(), async (req: Request, res: Response) => {
   try {
     const { startDate, endDate } = req.query
 
@@ -85,7 +85,7 @@ router.get('/on-call', requireDeveloper, async (req: Request, res: Response) => 
  * Create on-call schedule
  * Auth: Admin only
  */
-router.post('/on-call', requireAdmin, async (req: Request, res: Response) => {
+router.post('/on-call', requireAdmin(), async (req: Request, res: Response) => {
   try {
     const { userId, startDate, endDate, shiftType, notes } = req.body
 
@@ -131,7 +131,7 @@ router.post('/on-call', requireAdmin, async (req: Request, res: Response) => {
  * Get team metrics and statistics
  * Auth: Developer+
  */
-router.get('/metrics', requireDeveloper, async (req: Request, res: Response) => {
+router.get('/metrics', requireDeveloper(), async (req: Request, res: Response) => {
   try {
     const onCallMetrics = await OnCallService.getTeamMetrics()
     const incidentStats = await IncidentService.getIncidentStats()
@@ -159,7 +159,7 @@ router.get('/metrics', requireDeveloper, async (req: Request, res: Response) => 
  * Delete a user by ID
  * Auth: Admin only
  */
-router.delete('/members/:id', requireAdmin, async (req: Request, res: Response) => {
+router.delete('/members/:id', requireAdmin(), async (req: Request, res: Response) => {
   try {
     const { id } = req.params
 
