@@ -9,6 +9,7 @@ export function Sidebar() {
     { label: 'Accounts', path: '/accounts', icon: '💼' },
     { label: 'Orders', path: '/orders', icon: '📈' },
     { label: 'Analytics', path: '/analytics', icon: '📉' },
+    { label: 'Settings', path: '/settings', icon: '⚙️' },
   ]
 
   const debuggingItems = [
