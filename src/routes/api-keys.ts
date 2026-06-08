@@ -20,9 +20,9 @@ const pool = new pg.Pool({
   connectionString: process.env.DATABASE_URL,
 })
 
-// Middleware: Extract user ID from header
+// Middleware: Extract user ID from JWT or header
 const getUserId = (req: Request): string | null => {
-  return (req.headers['x-user-id'] as string) || (req.user as any)?.id || null
+  return (req.user as any)?.userId || (req.user as any)?.id || (req.headers['x-user-id'] as string) || null
 }
 
 /**
