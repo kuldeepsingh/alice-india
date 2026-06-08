@@ -1,16 +1,20 @@
 import React, { useState, useEffect } from 'react'
 import { LayoutPro } from '../components/LayoutPro'
-import { Box, Card, Typography, Button, TextField, Switch, FormControlLabel, Divider, Alert } from '@mui/material'
+import { Box, Card, Typography, Button, TextField, Switch, FormControlLabel, Divider, Alert, Select, MenuItem } from '@mui/material'
 import { Save, Visibility, VisibilityOff } from '@mui/icons-material'
+import { useAuthStore } from '../state/store'
 import { THEME_PRO, SPACING_PRO, RADIUS_PRO, SHADOWS_PRO } from '../theme-pro'
+import { SUPPORTED_CURRENCIES, DEFAULT_CURRENCY } from '../content/currencies'
 
 export function settingsPage() {
+  const { currency, setCurrency } = useAuthStore()
   const [apiKey, setApiKey] = useState('')
   const [showApiKey, setShowApiKey] = useState(false)
   const [savedMessage, setSavedMessage] = useState('')
   const [darkMode, setDarkMode] = useState(false)
   const [notifications, setNotifications] = useState(true)
   const [autoRefresh, setAutoRefresh] = useState(true)
+  const [selectedCurrency, setSelectedCurrency] = useState(currency)
 
   // Load settings from localStorage
   useEffect(() => {
@@ -30,9 +34,11 @@ export function settingsPage() {
       darkMode,
       notifications,
       autoRefresh,
+      currency: selectedCurrency,
       savedAt: new Date().toISOString(),
     }
     localStorage.setItem('appSettings', JSON.stringify(settings))
+    setCurrency(selectedCurrency)
     setSavedMessage('✅ Settings saved successfully!')
     setTimeout(() => setSavedMessage(''), 3000)
   }
@@ -48,6 +54,8 @@ export function settingsPage() {
     setDarkMode(false)
     setNotifications(true)
     setAutoRefresh(true)
+    setSelectedCurrency(DEFAULT_CURRENCY.code)
+    setCurrency(DEFAULT_CURRENCY.code)
     localStorage.removeItem('appSettings')
     setSavedMessage('🔄 Settings reset to defaults')
     setTimeout(() => setSavedMessage(''), 2000)
@@ -206,6 +214,56 @@ export function settingsPage() {
                 }
                 sx={{ width: '100%', m: 0 }}
               />
+            </Box>
+          </Card>
+
+          {/* Currency Settings */}
+          <Card sx={{ p: SPACING_PRO.xxl, borderRadius: RADIUS_PRO.lg, border: `1px solid ${THEME_PRO.border}`, boxShadow: SHADOWS_PRO.md }}>
+            <Typography sx={{ fontSize: '18px', fontWeight: 700, color: THEME_PRO.textPrimary, mb: SPACING_PRO.lg }}>
+              💱 Currency Settings
+            </Typography>
+
+            <Box>
+              <Typography sx={{ fontSize: '12px', fontWeight: 600, color: THEME_PRO.textTertiary, mb: SPACING_PRO.sm, textTransform: 'uppercase' }}>
+                Default Currency
+              </Typography>
+              <Typography sx={{ color: THEME_PRO.textSecondary, fontSize: '13px', mb: SPACING_PRO.md }}>
+                Select your preferred currency for displaying prices and values
+              </Typography>
+
+              <Select
+                fullWidth
+                value={selectedCurrency}
+                onChange={(e) => setSelectedCurrency(e.target.value)}
+                sx={{
+                  backgroundColor: THEME_PRO.bgTertiary,
+                  color: THEME_PRO.textPrimary,
+                  borderRadius: RADIUS_PRO.md,
+                  '& .MuiOutlinedInput-notchedOutline': {
+                    borderColor: THEME_PRO.border,
+                  },
+                  '&:hover .MuiOutlinedInput-notchedOutline': {
+                    borderColor: THEME_PRO.primary,
+                  },
+                  '& .MuiSvgIcon-root': {
+                    color: THEME_PRO.textSecondary,
+                  },
+                }}
+              >
+                {SUPPORTED_CURRENCIES.map((curr) => (
+                  <MenuItem key={curr.code} value={curr.code}>
+                    <Box sx={{ display: 'flex', gap: 1, alignItems: 'center' }}>
+                      <span>{curr.symbol}</span>
+                      <span>{curr.code}</span>
+                      <span sx={{ fontSize: '12px', color: 'gray' }}>- {curr.name}</span>
+                    </Box>
+                  </MenuItem>
+                ))}
+              </Select>
+
+              <Typography sx={{ fontSize: '12px', color: THEME_PRO.textSecondary, mt: SPACING_PRO.md }}>
+                Current selection: {SUPPORTED_CURRENCIES.find(c => c.code === selectedCurrency)?.symbol} {selectedCurrency}
+              </Typography>
             </Box>
           </Card>
         </Box>
