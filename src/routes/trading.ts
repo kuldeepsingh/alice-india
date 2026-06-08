@@ -301,3 +301,155 @@ router.get('/orders', requireDeveloper, async (req: Request, res: Response) => {
 })
 
 export default router
+
+/**
+ * Portfolio Endpoints
+ */
+
+import { PortfolioService } from '../services/portfolio-service.ts'
+
+/**
+ * GET /api/v1/trading/portfolio/pnl
+ * Get day P&L
+ */
+router.get('/portfolio/pnl', requireDeveloper, async (req: Request, res: Response) => {
+  try {
+    const zerodhaService = new ZerodhaService(
+      process.env.ZERODHA_API_KEY || '',
+      process.env.ZERODHA_API_SECRET || '',
+      (req as any).zerodhaToken
+    )
+
+    const portfolioService = new PortfolioService(zerodhaService)
+    const dayPnL = await portfolioService.getDayPnL()
+
+    res.json({
+      status: 'success',
+      data: dayPnL,
+      timestamp: new Date().toISOString(),
+    })
+  } catch (error: any) {
+    res.status(500).json({
+      status: 'error',
+      message: error.message,
+    })
+  }
+})
+
+/**
+ * GET /api/v1/trading/portfolio/net-pnl
+ * Get net P&L
+ */
+router.get('/portfolio/net-pnl', requireDeveloper, async (req: Request, res: Response) => {
+  try {
+    const zerodhaService = new ZerodhaService(
+      process.env.ZERODHA_API_KEY || '',
+      process.env.ZERODHA_API_SECRET || '',
+      (req as any).zerodhaToken
+    )
+
+    const portfolioService = new PortfolioService(zerodhaService)
+    const netPnL = await portfolioService.getNetPnL()
+
+    res.json({
+      status: 'success',
+      data: netPnL,
+      timestamp: new Date().toISOString(),
+    })
+  } catch (error: any) {
+    res.status(500).json({
+      status: 'error',
+      message: error.message,
+    })
+  }
+})
+
+/**
+ * GET /api/v1/trading/portfolio/stats
+ * Get portfolio statistics
+ */
+router.get('/portfolio/stats', requireDeveloper, async (req: Request, res: Response) => {
+  try {
+    const zerodhaService = new ZerodhaService(
+      process.env.ZERODHA_API_KEY || '',
+      process.env.ZERODHA_API_SECRET || '',
+      (req as any).zerodhaToken
+    )
+
+    const portfolioService = new PortfolioService(zerodhaService)
+    const stats = await portfolioService.getPortfolioStats()
+
+    res.json({
+      status: 'success',
+      data: stats,
+      timestamp: new Date().toISOString(),
+    })
+  } catch (error: any) {
+    res.status(500).json({
+      status: 'error',
+      message: error.message,
+    })
+  }
+})
+
+/**
+ * GET /api/v1/trading/portfolio/gainers
+ * Get top gainers
+ */
+router.get('/portfolio/gainers', requireDeveloper, async (req: Request, res: Response) => {
+  try {
+    const limit = parseInt(req.query.limit as string) || 5
+
+    const zerodhaService = new ZerodhaService(
+      process.env.ZERODHA_API_KEY || '',
+      process.env.ZERODHA_API_SECRET || '',
+      (req as any).zerodhaToken
+    )
+
+    const portfolioService = new PortfolioService(zerodhaService)
+    const gainers = await portfolioService.getTopGainers(limit)
+
+    res.json({
+      status: 'success',
+      data: gainers,
+      count: gainers.length,
+    })
+  } catch (error: any) {
+    res.status(500).json({
+      status: 'error',
+      message: error.message,
+    })
+  }
+})
+
+/**
+ * GET /api/v1/trading/portfolio/losers
+ * Get top losers
+ */
+router.get('/portfolio/losers', requireDeveloper, async (req: Request, res: Response) => {
+  try {
+    const limit = parseInt(req.query.limit as string) || 5
+
+    const zerodhaService = new ZerodhaService(
+      process.env.ZERODHA_API_KEY || '',
+      process.env.ZERODHA_API_SECRET || '',
+      (req as any).zerodhaToken
+    )
+
+    const portfolioService = new PortfolioService(zerodhaService)
+    const losers = await portfolioService.getTopLosers(limit)
+
+    res.json({
+      status: 'success',
+      data: losers,
+      count: losers.length,
+    })
+  } catch (error: any) {
+    res.status(500).json({
+      status: 'error',
+      message: error.message,
+    })
+  }
+})
+
+export default router
