@@ -252,10 +252,12 @@ export function settingsPage() {
               >
                 {SUPPORTED_CURRENCIES.map((curr) => (
                   <MenuItem key={curr.code} value={curr.code}>
-                    <Box sx={{ display: 'flex', gap: 1, alignItems: 'center' }}>
-                      <span>{curr.symbol}</span>
-                      <span>{curr.code}</span>
-                      <span sx={{ fontSize: '12px', color: 'gray' }}>- {curr.name}</span>
+                    <Box sx={{ display: 'flex', gap: 1, alignItems: 'center', width: '100%' }}>
+                      <Typography sx={{ fontWeight: 600 }}>{curr.symbol}</Typography>
+                      <Typography sx={{ fontWeight: 600 }}>{curr.code}</Typography>
+                      <Typography sx={{ fontSize: '12px', color: THEME_PRO.textSecondary, ml: 'auto' }}>
+                        {curr.name}
+                      </Typography>
                     </Box>
                   </MenuItem>
                 ))}
