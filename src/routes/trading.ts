@@ -300,8 +300,6 @@ router.get('/orders', requireDeveloper, async (req: Request, res: Response) => {
   }
 })
 
-export default router
-
 /**
  * Portfolio Endpoints
  */
