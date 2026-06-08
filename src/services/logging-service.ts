@@ -1,6 +1,5 @@
 import fs from 'fs'
 import path from 'path'
-import { format } from 'date-fns'
 
 const LOG_DIR = path.join(process.cwd(), 'logs')
 const MAX_LOG_SIZE = 10 * 1024 * 1024 // 10MB per file
@@ -23,6 +22,23 @@ export interface LogEntry {
   stack?: string
 }
 
+function formatDate(date: Date): string {
+  const year = date.getFullYear()
+  const month = String(date.getMonth() + 1).padStart(2, '0')
+  const day = String(date.getDate()).padStart(2, '0')
+  return `${year}-${month}-${day}`
+}
+
+function formatDateTime(date: Date): string {
+  const year = date.getFullYear()
+  const month = String(date.getMonth() + 1).padStart(2, '0')
+  const day = String(date.getDate()).padStart(2, '0')
+  const hours = String(date.getHours()).padStart(2, '0')
+  const minutes = String(date.getMinutes()).padStart(2, '0')
+  const seconds = String(date.getSeconds()).padStart(2, '0')
+  return `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`
+}
+
 class LoggingService {
   private currentLogFile: string
 
@@ -32,7 +48,7 @@ class LoggingService {
   }
 
   private getLogFilePath(): string {
-    const date = format(new Date(), 'yyyy-MM-dd')
+    const date = formatDate(new Date())
     return path.join(LOG_DIR, `application-${date}.log`)
   }
 
@@ -181,7 +197,7 @@ class LoggingService {
         return {
           name: f,
           size: stat.size,
-          modified: format(stat.mtime, 'yyyy-MM-dd HH:mm:ss'),
+          modified: formatDateTime(stat.mtime),
         }
       })
 
