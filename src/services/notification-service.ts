@@ -1,209 +1,281 @@
 /**
  * Notification Service
- * Manages notifications for team coordination and alerts
+ *
+ * Manages real-time notifications for:
+ * - Trade alerts (anomalies, risk warnings)
+ * - System alerts (API errors, quota warnings)
+ * - Performance alerts (slow responses, high costs)
+ * - User notifications (order confirmation, analysis ready)
  */
 
-import { v4 as uuidv4 } from 'uuid'
-import { query } from './database.ts'
-import {
-  Notification,
-  NotificationWithDetails,
-  CreateNotificationInput,
-  NotificationFilter,
-  NotificationQueryResult,
-  NotificationType,
-} from '../models/notification.ts'
+import { EventEmitter } from 'events'
+import { logger } from './logger'
 
-export class NotificationService {
-  /**
-   * Send a notification to a user
-   */
-  static async sendNotification(input: CreateNotificationInput): Promise<Notification> {
-    const id = uuidv4()
-    const now = new Date()
+export type NotificationType = 'order' | 'alert' | 'system' | 'warning' | 'success'
+export type NotificationSeverity = 'info' | 'warning' | 'error' | 'critical'
 
-    const sql = `
-      INSERT INTO notifications (
-        id, user_id, type, title, message,
-        related_incident_id, related_error_id, created_at
-      )
-      VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
-      RETURNING *
-    `
+export interface Notification {
+  id: string
+  userId: string
+  type: NotificationType
+  severity: NotificationSeverity
+  title: string
+  message: string
+  metadata?: Record<string, any>
+  timestamp: Date
+  read: boolean
+  actionUrl?: string
+}
 
-    const values = [
-      id,
-      input.userId,
-      input.type,
-      input.title,
-      input.message || null,
-      input.relatedIncidentId || null,
-      input.relatedErrorId || null,
-      now,
-    ]
-
-    const result = await query(sql, values)
-    return result.rows[0]
-  }
+class NotificationService extends EventEmitter {
+  private notifications: Map<string, Notification[]> = new Map()
+  private maxNotificationsPerUser = 100
 
   /**
-   * Broadcast notification to multiple users
+   * Send notification to user
    */
-  static async broadcastToTeam(
-    message: string,
+  sendNotification(
+    userId: string,
     type: NotificationType,
-    userIds: string[]
-  ): Promise<Notification[]> {
-    const notifications: Notification[] = []
-
-    for (const userId of userIds) {
-      const notif = await this.sendNotification({
-        userId,
-        type,
-        title: message,
-        message,
-      })
-      notifications.push(notif)
+    severity: NotificationSeverity,
+    title: string,
+    message: string,
+    metadata?: Record<string, any>
+  ): Notification {
+    const notification: Notification = {
+      id: `notif-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+      userId,
+      type,
+      severity,
+      title,
+      message,
+      metadata,
+      timestamp: new Date(),
+      read: false,
     }
 
-    return notifications
+    // Store notification
+    if (!this.notifications.has(userId)) {
+      this.notifications.set(userId, [])
+    }
+
+    const userNotifications = this.notifications.get(userId)!
+    userNotifications.push(notification)
+
+    // Keep only recent notifications
+    if (userNotifications.length > this.maxNotificationsPerUser) {
+      userNotifications.shift()
+    }
+
+    // Emit event for real-time delivery
+    this.emit('notification', notification)
+
+    logger.info({
+      type: 'notification_sent',
+      userId,
+      notificationType: type,
+      severity,
+      title,
+    })
+
+    return notification
   }
 
   /**
-   * Get notifications for a user
+   * Send order notification
    */
-  static async getNotifications(userId: string, filter: NotificationFilter): Promise<NotificationQueryResult> {
-    let sql = `
-      SELECT
-        n.*,
-        json_build_object(
-          'id', i.id,
-          'title', i.title,
-          'status', i.status,
-          'severity', i.severity
-        ) as incident,
-        json_build_object(
-          'id', e.id,
-          'title', e.title
-        ) as error
-      FROM notifications n
-      LEFT JOIN incidents i ON n.related_incident_id = i.id
-      LEFT JOIN errors e ON n.related_error_id = e.id
-      WHERE n.user_id = $1
-    `
-
-    const values: any[] = [userId]
-    let paramCount = 2
-
-    // Apply type filter
-    if (filter.type) {
-      sql += ` AND n.type = $${paramCount++}`
-      values.push(filter.type)
-    }
-
-    // Apply read filter
-    if (filter.read !== undefined) {
-      sql += ` AND n.read = $${paramCount++}`
-      values.push(filter.read)
-    }
-
-    // Count total
-    const countSql = `SELECT COUNT(*) as count FROM notifications WHERE user_id = $1` +
-      (filter.type ? ` AND type = $2` : '') +
-      (filter.read !== undefined ? ` AND read = ${filter.type ? '$3' : '$2'}` : '')
-
-    const countValues = [userId]
-    if (filter.type) countValues.push(filter.type)
-    if (filter.read !== undefined) countValues.push(filter.read)
-
-    const countResult = await query(countSql, countValues)
-    const total = parseInt(countResult.rows[0].count)
-
-    // Pagination
-    const limit = filter.limit || 50
-    const offset = filter.offset || 0
-    sql += ` ORDER BY n.created_at DESC LIMIT $${paramCount++} OFFSET $${paramCount++}`
-    values.push(limit, offset)
-
-    const result = await query(sql, values)
-    const unreadCount = result.rows.filter((n: any) => !n.read).length
-
-    return {
-      data: result.rows,
-      total,
-      unreadCount,
-      page: Math.floor(offset / limit) + 1,
-      pageSize: limit,
-    }
+  sendOrderNotification(userId: string, orderId: string, status: string) {
+    return this.sendNotification(
+      userId,
+      'order',
+      'success',
+      `Order ${status}`,
+      `Order ${orderId} has been ${status}`,
+      { orderId, status }
+    )
   }
 
   /**
-   * Get unread count for a user
+   * Send anomaly alert
    */
-  static async getUnreadCount(userId: string): Promise<number> {
-    const sql = `SELECT COUNT(*) as count FROM notifications WHERE user_id = $1 AND read = false`
-    const result = await query(sql, [userId])
-    return parseInt(result.rows[0].count)
+  sendAnomalyAlert(
+    userId: string,
+    symbol: string,
+    anomalyType: string,
+    severity: NotificationSeverity
+  ) {
+    return this.sendNotification(
+      userId,
+      'alert',
+      severity,
+      `Anomaly Detected: ${symbol}`,
+      `${anomalyType} detected in ${symbol}. Review immediately.`,
+      { symbol, anomalyType }
+    )
+  }
+
+  /**
+   * Send risk warning
+   */
+  sendRiskWarning(userId: string, issue: string, recommendation: string) {
+    return this.sendNotification(
+      userId,
+      'warning',
+      'warning',
+      'Risk Warning',
+      issue,
+      { recommendation }
+    )
+  }
+
+  /**
+   * Send system alert
+   */
+  sendSystemAlert(title: string, message: string, severity: NotificationSeverity = 'warning') {
+    // Notify all users
+    const notification: Notification = {
+      id: `sys-${Date.now()}`,
+      userId: 'system',
+      type: 'system',
+      severity,
+      title,
+      message,
+      timestamp: new Date(),
+      read: false,
+    }
+
+    this.emit('system_alert', notification)
+
+    logger.warn({
+      type: 'system_alert',
+      title,
+      message,
+      severity,
+    })
+
+    return notification
+  }
+
+  /**
+   * Send analysis ready notification
+   */
+  sendAnalysisReady(userId: string, analysisType: string, resultId: string) {
+    return this.sendNotification(
+      userId,
+      'success',
+      'info',
+      `${analysisType} Analysis Ready`,
+      `Your ${analysisType} analysis is ready to review`,
+      { analysisType, resultId },
+      resultId // Include action URL
+    )
+  }
+
+  /**
+   * Get unread notifications for user
+   */
+  getUnreadNotifications(userId: string): Notification[] {
+    const userNotifications = this.notifications.get(userId) || []
+    return userNotifications.filter(n => !n.read)
+  }
+
+  /**
+   * Get all notifications for user
+   */
+  getUserNotifications(userId: string, limit: number = 50): Notification[] {
+    const userNotifications = this.notifications.get(userId) || []
+    return userNotifications.slice(-limit)
   }
 
   /**
    * Mark notification as read
    */
-  static async markAsRead(notificationId: string): Promise<void> {
-    const sql = `UPDATE notifications SET read = true, read_at = $1 WHERE id = $2`
-    await query(sql, [new Date(), notificationId])
-  }
+  markAsRead(userId: string, notificationId: string): boolean {
+    const userNotifications = this.notifications.get(userId)
+    if (!userNotifications) return false
 
-  /**
-   * Mark all notifications as read for a user
-   */
-  static async markAllAsRead(userId: string): Promise<void> {
-    const sql = `UPDATE notifications SET read = true, read_at = $1 WHERE user_id = $2 AND read = false`
-    await query(sql, [new Date(), userId])
-  }
-
-  /**
-   * Delete a notification
-   */
-  static async deleteNotification(notificationId: string): Promise<void> {
-    const sql = `DELETE FROM notifications WHERE id = $1`
-    await query(sql, [notificationId])
-  }
-
-  /**
-   * Delete old notifications (cleanup job)
-   */
-  static async deleteOldNotifications(daysOld: number = 30): Promise<number> {
-    const sql = `DELETE FROM notifications WHERE created_at < NOW() - INTERVAL '${daysOld} days'`
-    const result = await query(sql)
-    return result.rowCount || 0
-  }
-
-  /**
-   * Send incident creation notification
-   */
-  static async notifyIncidentCreated(incidentId: string, userIds: string[]): Promise<void> {
-    for (const userId of userIds) {
-      await this.sendNotification({
-        userId,
-        type: 'incident',
-        title: 'New Incident Created',
-        message: 'A new incident has been created. Please review.',
-        relatedIncidentId: incidentId,
-      })
+    const notification = userNotifications.find(n => n.id === notificationId)
+    if (notification) {
+      notification.read = true
+      return true
     }
+
+    return false
   }
 
   /**
-   * Send incident assignment notification
+   * Mark all notifications as read
    */
-  static async notifyIncidentAssigned(incidentId: string, assignedUserId: string, incidentTitle: string): Promise<void> {
-    await this.sendNotification({
-      userId: assignedUserId,
-      type: 'assignment',
-      title: 'Incident Assigned to You',
-      message: `You have been assigned to: ${incidentTitle}`,
-      relatedIncidentId: incidentId,
-    })
+  markAllAsRead(userId: string): number {
+    const userNotifications = this.notifications.get(userId) || []
+    let count = 0
+
+    for (const notification of userNotifications) {
+      if (!notification.read) {
+        notification.read = true
+        count++
+      }
+    }
+
+    return count
+  }
+
+  /**
+   * Delete notification
+   */
+  deleteNotification(userId: string, notificationId: string): boolean {
+    const userNotifications = this.notifications.get(userId)
+    if (!userNotifications) return false
+
+    const index = userNotifications.findIndex(n => n.id === notificationId)
+    if (index !== -1) {
+      userNotifications.splice(index, 1)
+      return true
+    }
+
+    return false
+  }
+
+  /**
+   * Get notification count
+   */
+  getUnreadCount(userId: string): number {
+    return this.getUnreadNotifications(userId).length
+  }
+
+  /**
+   * Send premium feature reminder
+   */
+  sendPremiumReminder(userId: string, feature: string) {
+    return this.sendNotification(
+      userId,
+      'system',
+      'info',
+      `Upgrade for ${feature}`,
+      `Premium members get access to ${feature}. Consider upgrading!`,
+      { feature }
+    )
+  }
+
+  /**
+   * Send usage warning
+   */
+  sendUsageWarning(userId: string, creditsRemaining: number, monthlyLimit: number) {
+    const percentRemaining = (creditsRemaining / monthlyLimit) * 100
+
+    let severity: NotificationSeverity = 'info'
+    if (percentRemaining < 10) severity = 'critical'
+    else if (percentRemaining < 25) severity = 'warning'
+
+    return this.sendNotification(
+      userId,
+      'warning',
+      severity,
+      'Claude API Usage Warning',
+      `Only ${creditsRemaining}/${monthlyLimit} Claude requests remaining this month`,
+      { creditsRemaining, monthlyLimit }
+    )
   }
 }
+
+export const notificationService = new NotificationService()
