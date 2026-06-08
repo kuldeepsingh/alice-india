@@ -227,6 +227,16 @@ export const usersAPI = {
    * @returns Promise with deletion confirmation
    */
   delete: (id: string) => apiClient.delete(`/team/members/${id}`),
+
+  /**
+   * PUT /team/members/:id/role
+   * Update user role (admin only)
+   *
+   * @param id - User ID
+   * @param role - New role (trader, admin, etc)
+   * @returns Promise with updated user
+   */
+  updateRole: (id: string, role: string) => apiClient.put(`/team/members/${id}/role`, { role }),
 }
 
 /**

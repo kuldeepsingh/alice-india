@@ -34,6 +34,10 @@ export function UsersPage() {
   const [openDialog, setOpenDialog] = useState(false)
   const [editingUser, setEditingUser] = useState<UserDisplay | null>(null)
   const [formData, setFormData] = useState({ name: '', email: '', role: 'trader' })
+  const [roleChangeUser, setRoleChangeUser] = useState<UserDisplay | null>(null)
+  const [newRole, setNewRole] = useState('')
+  const [openRoleDialog, setOpenRoleDialog] = useState(false)
+  const [roleLoading, setRoleLoading] = useState(false)
 
   // Load users from API on component mount
   useEffect(() => {
@@ -145,6 +149,49 @@ export function UsersPage() {
     setFormData({ name: '', email: '', role: 'trader' })
   }
 
+  const handleChangeRole = async () => {
+    if (!roleChangeUser || !newRole) {
+      alert('Please select a role')
+      return
+    }
+
+    setRoleLoading(true)
+    try {
+      await usersAPI.updateRole(roleChangeUser.id, newRole)
+
+      frontendLogger.info('Users', 'User role updated', {
+        userId: roleChangeUser.id,
+        email: roleChangeUser.email,
+        newRole: newRole,
+      })
+
+      // Update local state
+      setUsers(users.map(u =>
+        u.id === roleChangeUser.id ? { ...u, role: newRole } : u
+      ))
+
+      setOpenRoleDialog(false)
+      setRoleChangeUser(null)
+      setNewRole('')
+      setError('')
+    } catch (err: any) {
+      const errorMsg = err.response?.data?.message || 'Failed to update user role'
+      setError(errorMsg)
+      frontendLogger.error('Users', 'Failed to update user role', err, {
+        userId: roleChangeUser.id,
+        error: errorMsg,
+      })
+    } finally {
+      setRoleLoading(false)
+    }
+  }
+
+  const openRoleChangeDialog = (user: UserDisplay) => {
+    setRoleChangeUser(user)
+    setNewRole(user.role)
+    setOpenRoleDialog(true)
+  }
+
   const handleCloseDialog = () => {
     setOpenDialog(false)
     setFormData({ name: '', email: '', role: 'Trader' })
@@ -232,7 +279,16 @@ export function UsersPage() {
                   <TableRow key={user.id} sx={{ '&:hover': { backgroundColor: THEME_PRO.bgTertiary }, borderBottom: `1px solid ${THEME_PRO.border}` }}>
                     <TableCell sx={{ color: THEME_PRO.textSecondary }}>{user.email}</TableCell>
                     <TableCell>
-                      <Chip label={user.role} sx={{ backgroundColor: getRoleColor(user.role), color: '#fff', fontWeight: 600 }} />
+                      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                        <Chip label={user.role} sx={{ backgroundColor: getRoleColor(user.role), color: '#fff', fontWeight: 600 }} />
+                        <Button
+                          size="small"
+                          onClick={() => openRoleChangeDialog(user)}
+                          sx={{ color: THEME_PRO.primary, fontSize: '11px', textTransform: 'none' }}
+                        >
+                          Edit
+                        </Button>
+                      </Box>
                     </TableCell>
                     <TableCell sx={{ color: THEME_PRO.textSecondary }}>{user.joinDate}</TableCell>
                     <TableCell align="right">
@@ -249,6 +305,63 @@ export function UsersPage() {
 
           </>
         )}
+
+        {/* Role Change Dialog */}
+        <Dialog open={openRoleDialog} onClose={() => setOpenRoleDialog(false)} maxWidth="sm" fullWidth>
+          <DialogTitle sx={{ color: THEME_PRO.textPrimary, backgroundColor: THEME_PRO.bgTertiary }}>
+            Change User Role
+          </DialogTitle>
+          <DialogContent sx={{ backgroundColor: THEME_PRO.bgPrimary, pt: 3 }}>
+            {roleChangeUser && (
+              <>
+                <Typography sx={{ mb: 2, color: THEME_PRO.textSecondary, fontSize: '14px' }}>
+                  User: <strong>{roleChangeUser.email}</strong>
+                </Typography>
+                <FormControl fullWidth>
+                  <InputLabel sx={{ color: THEME_PRO.textSecondary }}>Select Role</InputLabel>
+                  <Select
+                    value={newRole}
+                    onChange={(e) => setNewRole(e.target.value)}
+                    label="Select Role"
+                    sx={{
+                      backgroundColor: THEME_PRO.bgTertiary,
+                      color: THEME_PRO.textPrimary,
+                      '& .MuiOutlinedInput-notchedOutline': {
+                        borderColor: THEME_PRO.border,
+                      },
+                    }}
+                  >
+                    <MenuItem value="trader">
+                      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                        <Chip label="trader" size="small" sx={{ backgroundColor: '#00BCD4', color: '#fff' }} />
+                        Trader
+                      </Box>
+                    </MenuItem>
+                    <MenuItem value="admin">
+                      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                        <Chip label="admin" size="small" sx={{ backgroundColor: THEME_PRO.primary, color: '#fff' }} />
+                        Admin
+                      </Box>
+                    </MenuItem>
+                  </Select>
+                </FormControl>
+              </>
+            )}
+          </DialogContent>
+          <DialogActions sx={{ backgroundColor: THEME_PRO.bgTertiary, p: 2, gap: 1 }}>
+            <Button onClick={() => setOpenRoleDialog(false)} sx={{ color: THEME_PRO.textSecondary }}>
+              Cancel
+            </Button>
+            <Button
+              onClick={handleChangeRole}
+              disabled={roleLoading}
+              variant="contained"
+              sx={{ backgroundColor: THEME_PRO.primary, color: '#fff' }}
+            >
+              {roleLoading ? <CircularProgress size={20} /> : 'Update Role'}
+            </Button>
+          </DialogActions>
+        </Dialog>
       </Box>
     </LayoutPro>
   )

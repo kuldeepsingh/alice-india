@@ -205,4 +205,70 @@ router.delete('/members/:id', requireAdmin(), async (req: AuthRequest, res: Resp
   }
 })
 
+/**
+ * PUT /api/v1/team/members/:id/role
+ * Update user role
+ * Auth: Admin only
+ */
+router.put('/members/:id/role', requireAdmin(), async (req: AuthRequest, res: Response) => {
+  try {
+    const { id } = req.params
+    const { role } = req.body
+
+    if (!id) {
+      return res.status(400).json({
+        status: 'error',
+        message: 'User ID is required',
+        correlationId: (req as any).correlationId,
+      })
+    }
+
+    if (!role) {
+      return res.status(400).json({
+        status: 'error',
+        message: 'Role is required',
+        correlationId: (req as any).correlationId,
+      })
+    }
+
+    // Valid roles
+    const validRoles = ['trader', 'admin', 'analyst', 'viewer']
+    if (!validRoles.includes(role)) {
+      return res.status(400).json({
+        status: 'error',
+        message: `Invalid role. Must be one of: ${validRoles.join(', ')}`,
+        correlationId: (req as any).correlationId,
+      })
+    }
+
+    // Update user role in database
+    const result = await query(
+      'UPDATE users SET role = $1, updated_at = CURRENT_TIMESTAMP WHERE id = $2 RETURNING id, email, role, created_at',
+      [role, id]
+    )
+
+    if (result.rows.length === 0) {
+      return res.status(404).json({
+        status: 'error',
+        message: 'User not found',
+        correlationId: (req as any).correlationId,
+      })
+    }
+
+    res.status(200).json({
+      status: 'success',
+      message: 'User role updated successfully',
+      data: result.rows[0],
+      correlationId: (req as any).correlationId,
+    })
+  } catch (error: any) {
+    console.error('Error updating user role:', error)
+    res.status(500).json({
+      status: 'error',
+      message: error.message || 'Failed to update user role',
+      correlationId: (req as any).correlationId,
+    })
+  }
+})
+
 export default router
