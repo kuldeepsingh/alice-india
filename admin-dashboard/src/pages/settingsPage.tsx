@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react'
 import { LayoutPro } from '../components/LayoutPro'
-import { Box, Card, Typography, Button, TextField, Switch, FormControlLabel, Divider, Alert, Select, MenuItem } from '@mui/material'
-import { Save, Visibility, VisibilityOff } from '@mui/icons-material'
+import { Box, Card, Typography, Button, Switch, FormControlLabel, Divider, Alert, Select, MenuItem } from '@mui/material'
+import { Save } from '@mui/icons-material'
 import { useAuthStore } from '../state/store'
 import { THEME_PRO, getTheme, SPACING_PRO, RADIUS_PRO, SHADOWS_PRO } from '../theme-pro'
 import { SUPPORTED_CURRENCIES, DEFAULT_CURRENCY } from '../content/currencies'
@@ -10,8 +10,6 @@ import { ApiKeySettings } from '../components/ApiKeySettings'
 export function settingsPage() {
   const { currency, setCurrency, darkMode, setDarkMode } = useAuthStore()
   const theme = getTheme(darkMode)
-  const [apiKey, setApiKey] = useState('')
-  const [showApiKey, setShowApiKey] = useState(false)
   const [savedMessage, setSavedMessage] = useState('')
   const [notifications, setNotifications] = useState(true)
   const [autoRefresh, setAutoRefresh] = useState(true)
@@ -22,7 +20,6 @@ export function settingsPage() {
     const saved = localStorage.getItem('appSettings')
     if (saved) {
       const settings = JSON.parse(saved)
-      setApiKey(settings.apiKey || '')
       setNotifications(settings.notifications !== false)
       setAutoRefresh(settings.autoRefresh !== false)
     }
@@ -30,7 +27,6 @@ export function settingsPage() {
 
   const handleSaveSettings = () => {
     const settings = {
-      apiKey,
       notifications,
       autoRefresh,
       currency: selectedCurrency,
@@ -46,14 +42,7 @@ export function settingsPage() {
     setDarkMode(enabled)
   }
 
-  const handleCopyApiKey = () => {
-    navigator.clipboard.writeText(apiKey)
-    setSavedMessage('📋 API Key copied to clipboard!')
-    setTimeout(() => setSavedMessage(''), 2000)
-  }
-
   const handleResetSettings = () => {
-    setApiKey('')
     setNotifications(true)
     setAutoRefresh(true)
     setSelectedCurrency(DEFAULT_CURRENCY.code)
@@ -85,82 +74,6 @@ export function settingsPage() {
 
         {/* Settings Sections */}
         <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', lg: '1fr 1fr' }, gap: 3, mb: SPACING_PRO.xxxl }}>
-          {/* API Configuration */}
-          <Card sx={{ p: SPACING_PRO.xxl, borderRadius: RADIUS_PRO.lg, border: `1px solid ${THEME_PRO.border}`, boxShadow: SHADOWS_PRO.md }}>
-            <Typography sx={{ fontSize: '18px', fontWeight: 700, color: THEME_PRO.textPrimary, mb: SPACING_PRO.lg }}>
-              🔑 API Configuration
-            </Typography>
-            <Typography sx={{ color: THEME_PRO.textSecondary, fontSize: '13px', mb: SPACING_PRO.lg }}>
-              Add your Zerodha or trading API key for automated trading
-            </Typography>
-
-            <Box sx={{ mb: SPACING_PRO.lg }}>
-              <Typography sx={{ fontSize: '12px', fontWeight: 600, color: THEME_PRO.textTertiary, mb: SPACING_PRO.sm, textTransform: 'uppercase' }}>
-                API Key
-              </Typography>
-              <Box sx={{ display: 'flex', gap: SPACING_PRO.sm }}>
-                <TextField
-                  fullWidth
-                  type={showApiKey ? 'text' : 'password'}
-                  value={apiKey}
-                  onChange={(e) => setApiKey(e.target.value)}
-                  placeholder="Enter your API key"
-                  sx={{
-                    '& .MuiOutlinedInput-root': {
-                      backgroundColor: THEME_PRO.bgTertiary,
-                      '& fieldset': { borderColor: THEME_PRO.border },
-                      '&:hover fieldset': { borderColor: THEME_PRO.primary },
-                    },
-                  }}
-                  size="small"
-                />
-                <Button
-                  onClick={() => setShowApiKey(!showApiKey)}
-                  sx={{
-                    minWidth: '44px',
-                    color: THEME_PRO.primary,
-                    border: `1px solid ${THEME_PRO.border}`,
-                    borderRadius: RADIUS_PRO.md,
-                  }}
-                >
-                  {showApiKey ? <VisibilityOff /> : <Visibility />}
-                </Button>
-              </Box>
-            </Box>
-
-            <Box sx={{ display: 'flex', gap: SPACING_PRO.sm }}>
-              <Button
-                onClick={handleCopyApiKey}
-                disabled={!apiKey}
-                variant="outlined"
-                sx={{
-                  flex: 1,
-                  textTransform: 'none',
-                  color: THEME_PRO.primary,
-                  borderColor: THEME_PRO.border,
-                  '&:hover': { backgroundColor: THEME_PRO.primaryLight },
-                }}
-              >
-                Copy Key
-              </Button>
-              <Button
-                onClick={handleSaveSettings}
-                variant="contained"
-                startIcon={<Save />}
-                sx={{
-                  flex: 1,
-                  backgroundColor: THEME_PRO.primary,
-                  color: '#fff',
-                  textTransform: 'none',
-                  fontWeight: 600,
-                  '&:hover': { backgroundColor: THEME_PRO.primaryDark },
-                }}
-              >
-                Save
-              </Button>
-            </Box>
-          </Card>
-
           {/* Theme & Display */}
           <Card sx={{ p: SPACING_PRO.xxl, borderRadius: RADIUS_PRO.lg, border: `1px solid ${THEME_PRO.border}`, boxShadow: SHADOWS_PRO.md }}>
             <Typography sx={{ fontSize: '18px', fontWeight: 700, color: THEME_PRO.textPrimary, mb: SPACING_PRO.lg }}>
