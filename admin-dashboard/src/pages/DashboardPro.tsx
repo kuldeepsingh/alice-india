@@ -1,6 +1,6 @@
 import React from 'react'
 import { LayoutPro } from '../components/LayoutPro'
-import { Box, Card, Grid, Typography, LinearProgress, Chip, Button } from '@mui/material'
+import { Box, Card, Typography, LinearProgress, Chip, Button } from '@mui/material'
 import { TrendingUp, TrendingDown, Visibility, VisibilityOff } from '@mui/icons-material'
 import { THEME_PRO, SPACING_PRO, RADIUS_PRO, SHADOWS_PRO, TRANSITIONS_PRO } from '../theme-pro'
 
@@ -94,9 +94,9 @@ export function DashboardPro() {
         </Box>
 
         {/* Stats Grid */}
-        <Grid container spacing={3} sx={{ mb: SPACING_PRO.xxxl }}>
+        <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', sm: '1fr 1fr', md: '1fr 1fr 1fr 1fr' }, gap: 3, mb: SPACING_PRO.xxxl }}>
           {stats.map((stat, index) => (
-            <Grid item xs={12} sm={6} md={3} key={index}>
+            <Box key={index}>
               <Card
                 sx={{
                   p: SPACING_PRO.xxl,
@@ -162,13 +162,13 @@ export function DashboardPro() {
                   }}
                 />
               </Card>
-            </Grid>
+            </Box>
           ))}
-        </Grid>
+        </Box>
 
         {/* Performance Section */}
-        <Grid container spacing={3}>
-          <Grid item xs={12} md={8}>
+        <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', md: '2fr 1fr' }, gap: 3 }}>
+          <Box>
             <Card
               sx={{
                 p: SPACING_PRO.xxl,
@@ -206,9 +206,9 @@ export function DashboardPro() {
                 </Box>
               ))}
             </Card>
-          </Grid>
+          </Box>
 
-          <Grid item xs={12} md={4}>
+          <Box>
             <Card
               sx={{
                 p: SPACING_PRO.xxl,
@@ -254,8 +254,8 @@ export function DashboardPro() {
                 </Button>
               </Box>
             </Card>
-          </Grid>
-        </Grid>
+          </Box>
+        </Box>
       </Box>
     </LayoutPro>
   )

@@ -141,7 +141,7 @@ export function NavbarPro() {
 
           <Button
             onClick={handleLogout}
-            startIcon={<LogOut sx={{ fontSize: '18px' }} />}
+            startIcon={<Logout sx={{ fontSize: '18px' }} />}
             sx={{
               color: THEME_PRO.error,
               textTransform: 'none',
