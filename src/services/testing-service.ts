@@ -403,6 +403,7 @@ export class TestingService {
   private static async testZerodhaConnection(userId: string): Promise<TestResult> {
     const startTime = Date.now()
     const name = 'Zerodha Connection'
+    const TIMEOUT = 5000 // 5 second timeout
 
     try {
       const credentials = await CredentialService.getCredentials(userId)
@@ -422,16 +423,22 @@ export class TestingService {
         credentials.accessToken
       )
 
-      const profile = await service.getProfile()
+      // Add timeout to prevent hanging
+      const profilePromise = service.getProfile()
+      const timeoutPromise = new Promise((_, reject) =>
+        setTimeout(() => reject(new Error('Request timeout')), TIMEOUT)
+      )
+
+      const profile = await Promise.race([profilePromise, timeoutPromise])
 
       const duration = Date.now() - startTime
 
-      if (profile && profile.userId) {
+      if (profile && (profile as any).userId) {
         return {
           name,
           status: 'pass',
           duration,
-          message: `Connected as ${profile.userName} (${profile.brokerName})`,
+          message: `Connected as ${(profile as any).userName}`,
         }
       } else {
         return {
@@ -442,11 +449,12 @@ export class TestingService {
         }
       }
     } catch (error: any) {
+      const duration = Date.now() - startTime
       return {
         name,
         status: 'fail',
-        duration: Date.now() - startTime,
-        error: error.message,
+        duration,
+        error: error.message || 'Connection test failed',
       }
     }
   }
