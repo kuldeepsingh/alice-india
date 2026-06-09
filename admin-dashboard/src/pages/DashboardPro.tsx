@@ -398,8 +398,8 @@ export function DashboardPro() {
 
           <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', md: 'repeat(4, 1fr)' }, gap: 2, mb: SPACING_PRO.md }}>
             {/* Portfolio Value Chart */}
-            <Card sx={{ backgroundColor: THEME_PRO.bgSecondary, p: SPACING_PRO.lg, borderRadius: RADIUS_PRO.lg, border: `1px solid ${THEME_PRO.border}`, boxShadow: SHADOWS_PRO.md }}>
-              <Typography sx={{ fontSize: '14px', fontWeight: 700, color: THEME_PRO.textPrimary, mb: SPACING_PRO.md }}>
+            <Card sx={{ backgroundColor: THEME_PRO.bgSecondary, p: SPACING_PRO.xs, borderRadius: RADIUS_PRO.lg, border: `1px solid ${THEME_PRO.border}`, boxShadow: SHADOWS_PRO.md }}>
+              <Typography sx={{ fontSize: '12px', fontWeight: 700, color: THEME_PRO.textPrimary, mb: SPACING_PRO.xs, textTransform: 'uppercase', letterSpacing: '0.5px' }}>
                 Portfolio Value Trend
               </Typography>
               <ResponsiveContainer width="100%" height={120}>
@@ -448,7 +448,7 @@ export function DashboardPro() {
                     cy="50%"
                     labelLine={false}
                     label={({ name, value }) => `${name}: ${value}%`}
-                    outerRadius={100}
+                    outerRadius={35}
                     fill="#8884d8"
                     dataKey="value"
                   >
