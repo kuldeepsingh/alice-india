@@ -17,6 +17,26 @@ interface StatCard {
   icon: React.ReactNode
 }
 
+// Custom Tooltip Component for Pie Charts - All text in white
+const CustomPieTooltip = ({ active, payload }: any) => {
+  if (active && payload && payload.length) {
+    const data = payload[0];
+    return (
+      <div style={{
+        backgroundColor: '#1a1a1a',
+        border: '2px solid #2196F3',
+        borderRadius: '4px',
+        padding: '8px 12px'
+      }}>
+        <p style={{ margin: 0, color: '#ffffff', fontWeight: 'bold', fontSize: '12px' }}>
+          {data.name}: {data.value}%
+        </p>
+      </div>
+    );
+  }
+  return null;
+}
+
 export function DashboardPro() {
   const [showValues, setShowValues] = React.useState(true)
   const [withdrawalOpen, setWithdrawalOpen] = React.useState(false)
@@ -456,27 +476,7 @@ export function DashboardPro() {
                       <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
                     ))}
                   </Pie>
-                  <Tooltip
-                    contentStyle={{
-                      backgroundColor: THEME_PRO.bgSecondary,
-                      border: `2px solid ${THEME_PRO.primary}`,
-                      padding: '8px 12px',
-                      borderRadius: '4px'
-                    }}
-                    wrapperStyle={{ outline: 'none' }}
-                    cursor={{ fill: THEME_PRO.primary }}
-                    formatter={(value: any, name: any) => [
-                      <span style={{ color: '#ffffff', fontWeight: 'bold', fontSize: '12px' }}>
-                        {value}%
-                      </span>,
-                      name
-                    ]}
-                    labelFormatter={(value: any) => (
-                      <span style={{ color: '#ffffff', fontWeight: 'bold', fontSize: '12px' }}>
-                        {value}
-                      </span>
-                    )}
-                  />
+                  <Tooltip content={<CustomPieTooltip />} />
                 </PieChart>
               </ResponsiveContainer>
             </Card>
