@@ -53,7 +53,7 @@ export function settingsPage() {
       <Box sx={{ backgroundColor: THEME_PRO.bgPrimary, p: SPACING_PRO.xxxl, minHeight: '100vh' }}>
         {/* Header */}
         <Box sx={{ mb: SPACING_PRO.xxxl }}>
-          <Typography variant="h4" sx={{ fontSize: '32px', fontWeight: 700, color: theme.textPrimary, mb: SPACING_PRO.md }}>
+          <Typography variant="h4" sx={{ fontSize: '32px', fontWeight: 700, color: '#ffffff', mb: SPACING_PRO.md }}>
             ⚙️ Settings
           </Typography>
           <Typography sx={{ color: theme.textSecondary }}>
