@@ -9,8 +9,8 @@ import ordersRouter from './routes/orders.ts'
 import marketDataRouter from './routes/market-data.ts'
 import logsRouter from './routes/logs.ts'
 import zerodhaRouter from './routes/zerodha.ts'
+import auditRouter from './routes/audit.ts'
 // import errorsRouter from './routes/errors.ts'  // TODO: Fix ErrorService import
-// import auditRouter from './routes/audit.ts'  // TODO: Fix AuditService import
 // import debugRouter from './routes/debug.ts'  // TODO: Fix DebugService import
 // import incidentsRouter from './routes/incidents.ts'  // TODO: Fix IncidentService import
 // import notificationsRouter from './routes/notifications.ts'  // TODO: Fix imports
@@ -203,8 +203,8 @@ export function createApp() {
   // Debugging & Monitoring routes
   // Note: Individual endpoints have their own auth/RBAC via requireAdmin(), requireDeveloper(), etc.
   v1.use('/logs', logsRouter)  // Logs API - displays all application logs
+  v1.use('/audit', auditRouter)  // Audit Trail API - immutable audit logs
   // v1.use('/errors', errorsRouter)  // TODO: Fix imports
-  // v1.use('/audit', auditRouter)  // TODO: Fix imports
   // v1.use('/debug', debugRouter)  // TODO: Fix imports
 
   // Team Coordination routes (protected)
