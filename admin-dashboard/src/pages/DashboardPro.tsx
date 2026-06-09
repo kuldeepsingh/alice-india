@@ -322,7 +322,7 @@ export function DashboardPro() {
                     cx="50%"
                     cy="50%"
                     labelLine={false}
-                    label={({ name, value }) => `${name}: ${value}%`}
+                    label={({ name, value }) => `${name}: ${value}%`} labelLine={false} 
                     outerRadius={40}
                     fill="#8884d8"
                     dataKey="value"
@@ -349,7 +349,7 @@ export function DashboardPro() {
               }}
             >
               <Typography
-                sx={{ fontSize: '14px', fontWeight: 600, color: THEME_PRO.primary, opacity: 0.9, mb: SPACING_PRO.md, textTransform: 'uppercase', letterSpacing: '0.5px' }}
+                sx={{ fontSize: '14px', fontWeight: 600, color: THEME_PRO.primary, opacity: 0.9, mb: SPACING_PRO.xs, textTransform: 'uppercase', letterSpacing: '0.5px' }}
               >
                 Account Balance
               </Typography>
@@ -411,8 +411,8 @@ export function DashboardPro() {
                     </linearGradient>
                   </defs>
                   <CartesianGrid strokeDasharray="3 3" stroke={THEME_PRO.border} />
-                  <XAxis dataKey="date" stroke={THEME_PRO.textSecondary} />
-                  <YAxis stroke={THEME_PRO.textSecondary} />
+                  <XAxis tick={{ fontSize: 9 }} dataKey="date" stroke={THEME_PRO.textSecondary} />
+                  <YAxis tick={{ fontSize: 9 }} stroke={THEME_PRO.textSecondary} />
                   <Tooltip contentStyle={{ backgroundColor: THEME_PRO.bgSecondary, border: `1px solid ${THEME_PRO.border}` }} />
                   <Area type="monotone" dataKey="value" stroke={THEME_PRO.primary} fillOpacity={1} fill="url(#colorValue)" />
                 </AreaChart>
@@ -420,15 +420,15 @@ export function DashboardPro() {
             </Card>
 
             {/* Daily Returns Chart */}
-            <Card sx={{ backgroundColor: THEME_PRO.bgSecondary, p: SPACING_PRO.lg, borderRadius: RADIUS_PRO.lg, border: `1px solid ${THEME_PRO.border}` }}>
-              <Typography sx={{ fontSize: '14px', fontWeight: 700, color: THEME_PRO.textPrimary, mb: SPACING_PRO.md }}>
+            <Card sx={{ backgroundColor: THEME_PRO.bgSecondary, p: SPACING_PRO.xs, borderRadius: RADIUS_PRO.lg, border: `1px solid ${THEME_PRO.border}` }}>
+              <Typography sx={{ fontSize: '10px', fontWeight: 700, color: THEME_PRO.textPrimary, mb: SPACING_PRO.xs, textTransform: 'uppercase' }}>
                 Daily Returns (%)
               </Typography>
               <ResponsiveContainer width="100%" height={120}>
                 <BarChart data={dailyReturnsData}>
                   <CartesianGrid strokeDasharray="3 3" stroke={THEME_PRO.border} />
-                  <XAxis dataKey="time" stroke={THEME_PRO.textSecondary} />
-                  <YAxis stroke={THEME_PRO.textSecondary} />
+                  <XAxis tick={{ fontSize: 9 }} dataKey="time" stroke={THEME_PRO.textSecondary} />
+                  <YAxis tick={{ fontSize: 9 }} stroke={THEME_PRO.textSecondary} />
                   <Tooltip contentStyle={{ backgroundColor: THEME_PRO.bgSecondary, border: `1px solid ${THEME_PRO.border}` }} />
                   <Bar dataKey="return" fill={THEME_PRO.success} radius={[8, 8, 0, 0]} />
                 </BarChart>
@@ -436,8 +436,8 @@ export function DashboardPro() {
             </Card>
 
             {/* Strategy Performance */}
-            <Card sx={{ backgroundColor: THEME_PRO.bgSecondary, p: SPACING_PRO.lg, borderRadius: RADIUS_PRO.lg, border: `1px solid ${THEME_PRO.border}` }}>
-              <Typography sx={{ fontSize: '14px', fontWeight: 700, color: THEME_PRO.textPrimary, mb: SPACING_PRO.md }}>
+            <Card sx={{ backgroundColor: THEME_PRO.bgSecondary, p: SPACING_PRO.xs, borderRadius: RADIUS_PRO.lg, border: `1px solid ${THEME_PRO.border}` }}>
+              <Typography sx={{ fontSize: '10px', fontWeight: 700, color: THEME_PRO.textPrimary, mb: SPACING_PRO.xs, textTransform: 'uppercase' }}>
                 Strategy Allocation
               </Typography>
               <ResponsiveContainer width="100%" height={120}>
@@ -447,7 +447,7 @@ export function DashboardPro() {
                     cx="50%"
                     cy="50%"
                     labelLine={false}
-                    label={({ name, value }) => `${name}: ${value}%`}
+                    label={({ name, value }) => `${name}: ${value}%`} labelLine={false} 
                     outerRadius={35}
                     fill="#8884d8"
                     dataKey="value"
@@ -462,8 +462,8 @@ export function DashboardPro() {
             </Card>
 
             {/* Win Rate Chart */}
-            <Card sx={{ backgroundColor: THEME_PRO.bgSecondary, p: SPACING_PRO.lg, borderRadius: RADIUS_PRO.lg, border: `1px solid ${THEME_PRO.border}` }}>
-              <Typography sx={{ fontSize: '14px', fontWeight: 700, color: THEME_PRO.textPrimary, mb: SPACING_PRO.md }}>
+            <Card sx={{ backgroundColor: THEME_PRO.bgSecondary, p: SPACING_PRO.xs, borderRadius: RADIUS_PRO.lg, border: `1px solid ${THEME_PRO.border}` }}>
+              <Typography sx={{ fontSize: '10px', fontWeight: 700, color: THEME_PRO.textPrimary, mb: SPACING_PRO.xs, textTransform: 'uppercase' }}>
                 Weekly Win Rate
               </Typography>
               <ResponsiveContainer width="100%" height={120}>
@@ -475,8 +475,8 @@ export function DashboardPro() {
                   { week: 'Week 5', wins: 72 },
                 ]}>
                   <CartesianGrid strokeDasharray="3 3" stroke={THEME_PRO.border} />
-                  <XAxis dataKey="week" stroke={THEME_PRO.textSecondary} />
-                  <YAxis stroke={THEME_PRO.textSecondary} />
+                  <XAxis tick={{ fontSize: 9 }} dataKey="week" stroke={THEME_PRO.textSecondary} />
+                  <YAxis tick={{ fontSize: 9 }} stroke={THEME_PRO.textSecondary} />
                   <Tooltip contentStyle={{ backgroundColor: THEME_PRO.bgSecondary, border: `1px solid ${THEME_PRO.border}` }} />
                   <Line type="monotone" dataKey="wins" stroke={THEME_PRO.primary} strokeWidth={2} dot={{ fill: THEME_PRO.primary, r: 5 }} />
                 </LineChart>
