@@ -10,6 +10,7 @@ import { IncidentService } from '../services/incident-service.ts'
 import { authMiddleware, AuthRequest } from '../middleware/auth.ts'
 import { requireDeveloper, requireAdmin } from '../middleware/rbac.ts'
 import { query } from '../services/database.ts'
+import { logger } from '../services/logger.ts'
 
 const router = Router()
 
@@ -241,6 +242,14 @@ router.put('/members/:id/role', requireAdmin(), async (req: AuthRequest, res: Re
       })
     }
 
+    // Get current user info first (for logging)
+    const currentUserResult = await query(
+      'SELECT role FROM users WHERE id = $1',
+      [id]
+    )
+
+    const previousRole = currentUserResult.rows[0]?.role || 'unknown'
+
     // Update user role in database
     const result = await query(
       'UPDATE users SET role = $1 WHERE id = $2 RETURNING id, email, role, created_at',
@@ -254,6 +263,18 @@ router.put('/members/:id/role', requireAdmin(), async (req: AuthRequest, res: Re
         correlationId: (req as any).correlationId,
       })
     }
+
+    // 📝 LOG: User role change
+    const updatedUser = result.rows[0]
+    logger.info('TeamAPI', 'User role changed', {
+      userId: id,
+      email: updatedUser.email,
+      previousRole: previousRole,
+      newRole: role,
+      changedBy: (req as any).user?.id,
+      timestamp: new Date().toISOString(),
+      correlationId: (req as any).correlationId,
+    })
 
     res.status(200).json({
       status: 'success',
