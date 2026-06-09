@@ -122,7 +122,7 @@ db_health_check() {
     log ""
     log "${CYAN}Row counts:${NC}"
     psql -h "$DB_HOST" -U "$DB_USER" -d "$DB_NAME" -c "
-        SELECT schemaname, tablename, n_live_tup
+        SELECT schemaname, relname as tablename, n_live_tup
         FROM pg_stat_user_tables
         ORDER BY n_live_tup DESC;
     " | tee -a "$LOG_FILE"
