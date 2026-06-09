@@ -143,8 +143,10 @@ export function tradingPage() {
           <Typography sx={{ color: THEME_PRO.textSecondary }}>Place and manage your trades</Typography>
         </Box>
 
-        {/* Elegant Compact Order Form - 1/3 Width */}
-        <Box sx={{ maxWidth: '380px' }}>
+        {/* THREE COLUMN LAYOUT: Order Form (1/3) + Bot (2/3) */}
+        <Box sx={{ display: 'grid', gridTemplateColumns: '1fr 2fr', gap: SPACING_PRO.lg, mb: SPACING_PRO.xxxl }}>
+
+          {/* COLUMN 1: Elegant Compact Order Form */}
           <Card sx={{
             p: SPACING_PRO.lg,
             borderRadius: RADIUS_PRO.lg,
@@ -158,7 +160,7 @@ export function tradingPage() {
                 📊 {symbol}
               </Typography>
               <Typography sx={{ fontSize: '11px', color: THEME_PRO.textSecondary, textTransform: 'uppercase', letterSpacing: '0.5px' }}>
-                Place Order
+                Manual Trade
               </Typography>
             </Box>
 
@@ -217,7 +219,7 @@ export function tradingPage() {
               </Button>
             </Box>
 
-            {/* Quantity & Price - Side by Side */}
+            {/* Quantity & Price */}
             <Box sx={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px', mb: SPACING_PRO.md }}>
               <TextField
                 label="Qty"
@@ -280,7 +282,7 @@ export function tradingPage() {
               }}
             />
 
-            {/* Order Summary - Compact */}
+            {/* Order Summary */}
             <Box sx={{
               p: '10px',
               backgroundColor: THEME_PRO.bgTertiary,
@@ -314,23 +316,13 @@ export function tradingPage() {
                 letterSpacing: '0.5px',
               }}
             >
-              {orderType === 'Buy' ? '▲' : '▼'} {orderType} {quantity || '0'} @ ₹{price || '0'}
+              {orderType === 'Buy' ? '▲' : '▼'} {orderType}
             </Button>
           </Card>
-        </Box>
 
-        {/* Empty space for layout - can be filled with other widgets */}
-        <Box sx={{ flex: 1 }} />
-
-        {/* Autonomous Trading Bot Section */}
-        <Box sx={{ mt: SPACING_PRO.xxxl }}>
-          <Box sx={{ mb: SPACING_PRO.lg }}>
-            <Typography variant="h5" sx={{ fontSize: '24px', fontWeight: 700, color: THEME_PRO.textPrimary, mb: SPACING_PRO.md }}>
-              🤖 Autonomous Trading Bot
-            </Typography>
-            <Typography sx={{ color: THEME_PRO.textSecondary }}>Create automated orders and analyze market sentiment with Claude AI</Typography>
-          </Box>
+          {/* COLUMN 2: Bot Create Order */}
           <TradingBot />
+
         </Box>
 
         {/* Order History */}
