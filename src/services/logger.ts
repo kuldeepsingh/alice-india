@@ -213,7 +213,7 @@ class Logger {
     context?: Record<string, any>,
     stackTrace?: string
   ): void {
-    LOG_BUFFER.push({
+LOG_BUFFER.push({
       timestamp: this.getTimestamp(),
       level,
       module,

@@ -29,9 +29,7 @@ declare global {
 export function requireAdmin() {
   return (req: Request, res: Response, next: NextFunction) => {
     if (!req.user) {
-      // Log authentication required
-      console.log(`[RBAC] Admin access denied - user not authenticated, path: ${req.path}`)
-      logger.warn('RBAC', 'Admin access denied - user not authenticated', {
+logger.warn('RBAC', 'Admin access denied - user not authenticated', {
         path: req.path,
         method: req.method,
         ip: req.ip,

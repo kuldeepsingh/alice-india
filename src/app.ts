@@ -83,11 +83,14 @@ export function createApp() {
       const isWarn = res.statusCode >= 300 && res.statusCode < 400
       const logLevel = isError ? 'error' : isWarn ? 'warn' : 'info'
 
+
       // Build comprehensive context
+      // Use originalUrl to get full path (req.path might be relative in nested routers)
+      const fullPath = req.originalUrl?.split('?')[0] || req.path
       const context: any = {
         requestId,
         method: req.method,
-        path: req.path,
+        path: fullPath,
         statusCode: res.statusCode,
         duration,
         durationMs: `${duration}ms`,
@@ -104,7 +107,7 @@ export function createApp() {
 
       // Add error details if error response
       if (isError && responseBody) {
-        context.errorMessage = responseBody.message || responseBody.error
+        context.errorMessage = responseBody.message || responseBody.error || responseBody.errorMessage
         context.reason = responseBody.reason
         context.errorStatus = responseBody.status
         if (responseBody.correlationId) {
@@ -129,16 +132,19 @@ export function createApp() {
       }
 
       // Construct meaningful message
-      let message = `${req.method} ${req.path} → ${res.statusCode}`
+      let message = `${req.method} ${fullPath} → ${res.statusCode}`
       if (context.errorMessage) {
         message += ` - ${context.errorMessage}`
       }
 
-      logger[logLevel as any](
-        'HTTPServer',
-        message,
-        context
-      )
+// Log appropriately based on level
+      if (logLevel === 'error') {
+        logger.error('HTTPServer', message, undefined, context)
+      } else if (logLevel === 'warn') {
+        logger.warn('HTTPServer', message, context)
+      } else {
+        logger.info('HTTPServer', message, context)
+      }
     })
     next()
   })
