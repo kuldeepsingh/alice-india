@@ -1,9 +1,10 @@
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { LayoutPro } from '../components/LayoutPro'
-import { Box, Card, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Typography, TextField, Button } from '@mui/material'
+import { Box, Card, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Typography, TextField, Button, CircularProgress } from '@mui/material'
 import { Search, Info } from '@mui/icons-material'
 import { frontendLogger } from '../services/logging-client'
+import { marketAPI } from '../services/api-services'
 
 interface Stock {
   symbol: string
@@ -132,6 +133,34 @@ function PieChart({ advancingPercent }: { advancingPercent: number }) {
 export function marketDashboard() {
   const navigate = useNavigate()
   const [searchTerm, setSearchTerm] = useState('')
+  const [stocks, setStocks] = useState(heatmapStocks)
+  const [loadingQuotes, setLoadingQuotes] = useState(false)
+
+  // Fetch real quotes from backend on mount
+  useEffect(() => {
+    const fetchQuotes = async () => {
+      try {
+        setLoadingQuotes(true)
+        const symbols = heatmapStocks.map(s => s.symbol)
+        const quotes = await marketAPI.getQuotes(symbols)
+        if (quotes && quotes.length > 0) {
+          // Update stocks with real quote data
+          const updatedStocks = heatmapStocks.map(stock => {
+            const quote = quotes.find((q: any) => q.symbol === stock.symbol)
+            return quote ? { ...stock, price: quote.price || stock.price, change: quote.change || stock.change, changePercent: quote.changePercent || stock.changePercent } : stock
+          })
+          setStocks(updatedStocks)
+        }
+      } catch (err) {
+        console.error('Error fetching market quotes:', err)
+        // Keep using fallback mock data
+      } finally {
+        setLoadingQuotes(false)
+      }
+    }
+
+    fetchQuotes()
+  }, [])
 
   const handleStockClick = (stock: Stock) => {
     const operationId = `stock-click-${Date.now()}`
@@ -193,7 +222,7 @@ export function marketDashboard() {
 
             {/* FIXED 5-COLUMN GRID */}
             <Box sx={{ display: 'grid', gridTemplateColumns: 'repeat(5, 1fr)', gap: '8px' }}>
-              {heatmapStocks.map((stock, idx) => (
+              {stocks.map((stock, idx) => (
                 <Box
                   key={idx}
                   onClick={() => handleStockClick(stock)}

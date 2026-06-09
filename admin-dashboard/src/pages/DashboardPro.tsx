@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useEffect } from 'react'
 import { LayoutPro } from '../components/LayoutPro'
 import { Box, Card, Typography, LinearProgress, Chip, Button, Dialog, DialogTitle, DialogContent, DialogActions, TextField, Alert } from '@mui/material'
 import { TrendingUp, TrendingDown, Visibility, VisibilityOff } from '@mui/icons-material'
@@ -6,6 +6,7 @@ import { LineChart, Line, AreaChart, Area, BarChart, Bar, XAxis, YAxis, Cartesia
 import { useAuthStore } from '../state/store'
 import { formatCurrency, getCurrencyByCode } from '../content/currencies'
 import { frontendLogger } from '../services/logging-client'
+import { analyticsAPI } from '../services/api-services'
 import { THEME_PRO, SPACING_PRO, RADIUS_PRO, SHADOWS_PRO, TRANSITIONS_PRO } from '../theme-pro'
 
 interface StatCard {
@@ -96,6 +97,23 @@ export function DashboardPro() {
       setDepositMessage('')
     }, 3000)
   }
+
+  // Fetch dashboard analytics from backend
+  useEffect(() => {
+    const fetchAnalytics = async () => {
+      try {
+        const analytics = await analyticsAPI.getAnalytics()
+        if (analytics && analytics.balance) {
+          setAccountBalance(analytics.balance)
+        }
+      } catch (err) {
+        console.error('Error fetching analytics:', err)
+        // Keep using default values
+      }
+    }
+
+    fetchAnalytics()
+  }, [])
 
   // Chart data
   const portfolioData = [
