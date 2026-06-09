@@ -299,40 +299,42 @@ export function DashboardPro() {
           <Box>
             <Card
               sx={{
+                backgroundColor: THEME_PRO.bgSecondary,
                 p: SPACING_PRO.xxl,
                 borderRadius: RADIUS_PRO.lg,
                 border: `1px solid ${THEME_PRO.border}`,
+                boxShadow: SHADOWS_PRO.md,
               }}
             >
               <Typography sx={{ fontSize: '18px', fontWeight: 700, color: THEME_PRO.textPrimary, mb: SPACING_PRO.lg }}>
                 Portfolio Allocation
               </Typography>
 
-              {['Stocks', 'Crypto', 'Commodities', 'Forex'].map((category, idx) => (
-                <Box key={category} sx={{ mb: SPACING_PRO.lg }}>
-                  <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: SPACING_PRO.sm }}>
-                    <Typography sx={{ fontSize: '14px', fontWeight: 600, color: THEME_PRO.textSecondary }}>
-                      {category}
-                    </Typography>
-                    <Typography sx={{ fontSize: '14px', fontWeight: 600, color: THEME_PRO.primary }}>
-                      {45 - idx * 8}%
-                    </Typography>
-                  </Box>
-                  <LinearProgress
-                    variant="determinate"
-                    value={45 - idx * 8}
-                    sx={{
-                      height: '8px',
-                      borderRadius: RADIUS_PRO.full,
-                      backgroundColor: THEME_PRO.bgTertiary,
-                      '& .MuiLinearProgress-bar': {
-                        background: [THEME_PRO.gradientPrimary, THEME_PRO.gradientSuccess, THEME_PRO.gradientWarning, THEME_PRO.gradientError][idx],
-                        borderRadius: RADIUS_PRO.full,
-                      },
-                    }}
-                  />
-                </Box>
-              ))}
+              <ResponsiveContainer width="100%" height={300}>
+                <PieChart>
+                  <Pie
+                    data={[
+                      { name: 'Stocks', value: 45 },
+                      { name: 'Crypto', value: 37 },
+                      { name: 'Commodities', value: 29 },
+                      { name: 'Forex', value: 21 },
+                    ]}
+                    cx="50%"
+                    cy="50%"
+                    labelLine={false}
+                    label={({ name, value }) => `${name}: ${value}%`}
+                    outerRadius={80}
+                    fill="#8884d8"
+                    dataKey="value"
+                  >
+                    <Cell fill={THEME_PRO.primary} />
+                    <Cell fill={THEME_PRO.success} />
+                    <Cell fill={THEME_PRO.warning} />
+                    <Cell fill={THEME_PRO.error} />
+                  </Pie>
+                  <Tooltip contentStyle={{ backgroundColor: THEME_PRO.bgSecondary, border: `1px solid ${THEME_PRO.border}` }} />
+                </PieChart>
+              </ResponsiveContainer>
             </Card>
           </Box>
 
@@ -396,7 +398,7 @@ export function DashboardPro() {
 
           <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', md: '1fr 1fr' }, gap: 3, mb: SPACING_PRO.xxxl }}>
             {/* Portfolio Value Chart */}
-            <Card sx={{ backgroundColor: THEME_PRO.bgSecondary, p: SPACING_PRO.xxl, borderRadius: RADIUS_PRO.lg, border: `1px solid ${THEME_PRO.border}` }}>
+            <Card sx={{ backgroundColor: THEME_PRO.bgSecondary, p: SPACING_PRO.xxl, borderRadius: RADIUS_PRO.lg, border: `1px solid ${THEME_PRO.border}`, boxShadow: SHADOWS_PRO.md }}>
               <Typography sx={{ fontSize: '16px', fontWeight: 700, color: THEME_PRO.textPrimary, mb: SPACING_PRO.lg }}>
                 Portfolio Value Trend
               </Typography>
