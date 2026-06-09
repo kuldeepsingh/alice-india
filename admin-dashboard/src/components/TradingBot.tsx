@@ -301,6 +301,7 @@ export const TradingBot = () => {
               borderRadius: RADIUS_PRO.lg,
               border: `1px solid ${THEME_PRO.border}`,
               boxShadow: SHADOWS_PRO.md,
+              backgroundColor: THEME_PRO.bgSecondary,
             }}
           >
             <Typography sx={{ fontSize: '18px', fontWeight: 700, color: THEME_PRO.textPrimary, mb: SPACING_PRO.lg }}>
