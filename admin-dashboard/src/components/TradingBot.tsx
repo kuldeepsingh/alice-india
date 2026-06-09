@@ -212,6 +212,7 @@ export const TradingBot = () => {
               borderRadius: RADIUS_PRO.lg,
               border: `1px solid ${THEME_PRO.border}`,
               boxShadow: SHADOWS_PRO.md,
+              backgroundColor: THEME_PRO.bgSecondary,
             }}
           >
             <Typography sx={{ fontSize: '18px', fontWeight: 700, color: THEME_PRO.textPrimary, mb: SPACING_PRO.lg }}>
@@ -241,7 +242,12 @@ export const TradingBot = () => {
               sx={{
                 '& .MuiOutlinedInput-root': {
                   backgroundColor: THEME_PRO.bgTertiary,
+                  color: THEME_PRO.textPrimary,
+                  '& fieldset': { borderColor: THEME_PRO.border },
+                  '&:hover fieldset': { borderColor: THEME_PRO.primary },
                 },
+                '& .MuiInputBase-input': { color: THEME_PRO.textPrimary },
+                '& .MuiFormLabel-root': { color: THEME_PRO.textSecondary },
               }}
             />
 
@@ -255,7 +261,12 @@ export const TradingBot = () => {
               sx={{
                 '& .MuiOutlinedInput-root': {
                   backgroundColor: THEME_PRO.bgTertiary,
+                  color: THEME_PRO.textPrimary,
+                  '& fieldset': { borderColor: THEME_PRO.border },
+                  '&:hover fieldset': { borderColor: THEME_PRO.primary },
                 },
+                '& .MuiInputBase-input': { color: THEME_PRO.textPrimary },
+                '& .MuiFormLabel-root': { color: THEME_PRO.textSecondary },
               }}
             />
 
@@ -269,7 +280,12 @@ export const TradingBot = () => {
               sx={{
                 '& .MuiOutlinedInput-root': {
                   backgroundColor: THEME_PRO.bgTertiary,
+                  color: THEME_PRO.textPrimary,
+                  '& fieldset': { borderColor: THEME_PRO.border },
+                  '&:hover fieldset': { borderColor: THEME_PRO.primary },
                 },
+                '& .MuiInputBase-input': { color: THEME_PRO.textPrimary },
+                '& .MuiFormLabel-root': { color: THEME_PRO.textSecondary },
               }}
             />
 
