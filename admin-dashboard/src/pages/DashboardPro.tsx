@@ -37,6 +37,26 @@ const CustomPieTooltip = ({ active, payload }: any) => {
   return null;
 }
 
+// Custom Tooltip Component for Daily Returns - All text in white
+const CustomBarTooltip = ({ active, payload }: any) => {
+  if (active && payload && payload.length) {
+    const data = payload[0];
+    return (
+      <div style={{
+        backgroundColor: '#1a1a1a',
+        border: '2px solid #2196F3',
+        borderRadius: '4px',
+        padding: '8px 12px'
+      }}>
+        <p style={{ margin: 0, color: '#ffffff', fontWeight: 'bold', fontSize: '12px' }}>
+          {data.payload.date}: {data.value}%
+        </p>
+      </div>
+    );
+  }
+  return null;
+}
+
 export function DashboardPro() {
   const [showValues, setShowValues] = React.useState(true)
   const [withdrawalOpen, setWithdrawalOpen] = React.useState(false)
@@ -515,15 +535,7 @@ export function DashboardPro() {
                   <CartesianGrid strokeDasharray="3 3" stroke={THEME_PRO.border} />
                   <XAxis tick={{ fontSize: 10 }} dataKey="date" stroke={THEME_PRO.textSecondary} interval={4} />
                   <YAxis tick={{ fontSize: 10 }} stroke={THEME_PRO.textSecondary} />
-                  <Tooltip
-                    contentStyle={{
-                      backgroundColor: THEME_PRO.bgSecondary,
-                      border: `2px solid ${THEME_PRO.primary}`,
-                      color: '#ffffff',
-                      fontSize: '12px',
-                      fontWeight: 'bold'
-                    }}
-                  />
+                  <Tooltip content={<CustomBarTooltip />} />
                   <Bar dataKey="return" radius={[8, 8, 0, 0]}>
                     {dailyReturnsData.map((entry, index) => (
                       <Cell key={`cell-${index}`} fill={entry.return >= 0 ? THEME_PRO.success : THEME_PRO.error} />
