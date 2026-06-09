@@ -301,79 +301,60 @@ export function DashboardPro() {
                   </Box>
                 </Box>
 
-                <Chip
-                  label={`${stat.isPositive ? '+' : '-'}${Math.abs(stat.change)}% this month`}
-                  size="small"
-                  sx={{
-                    background: stat.isPositive ? THEME_PRO.successLight : THEME_PRO.errorLight,
-                    color: stat.isPositive ? '#059669' : '#DC2626',
-                    fontWeight: 600,
-                    fontSize: '12px',
-                  }}
-                />
+                <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end' }}>
+                  <Chip
+                    label={`${stat.isPositive ? '+' : '-'}${Math.abs(stat.change)}% this month`}
+                    size="small"
+                    sx={{
+                      background: stat.isPositive ? THEME_PRO.successLight : THEME_PRO.errorLight,
+                      color: stat.isPositive ? '#059669' : '#DC2626',
+                      fontWeight: 600,
+                      fontSize: '12px',
+                    }}
+                  />
+                  {index === 0 && (
+                    <Box sx={{ display: 'flex', gap: SPACING_PRO.xs }}>
+                      <Button
+                        onClick={() => setDepositOpen(true)}
+                        size="small"
+                        sx={{
+                          backgroundColor: THEME_PRO.primary,
+                          color: '#fff',
+                          fontWeight: 600,
+                          textTransform: 'none',
+                          fontSize: '11px',
+                          px: SPACING_PRO.sm,
+                          py: '4px',
+                          '&:hover': { backgroundColor: THEME_PRO.primaryDark },
+                        }}
+                      >
+                        Deposit
+                      </Button>
+                      <Button
+                        onClick={() => setWithdrawalOpen(true)}
+                        variant="outlined"
+                        size="small"
+                        sx={{
+                          borderColor: THEME_PRO.primary,
+                          color: THEME_PRO.primary,
+                          fontWeight: 600,
+                          textTransform: 'none',
+                          fontSize: '11px',
+                          px: SPACING_PRO.sm,
+                          py: '4px',
+                          '&:hover': { backgroundColor: THEME_PRO.primaryLight },
+                        }}
+                      >
+                        Withdraw
+                      </Button>
+                    </Box>
+                  )}
+                </Box>
               </Card>
             </Box>
           ))}
         </Box>
 
-        {/* Performance Section */}
-        <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', md: '1fr 1fr' }, gap: 2 }}>
-          <Box>
-            <Card
-              sx={{
-                backgroundColor: THEME_PRO.bgSecondary,
-                p: SPACING_PRO.xs,
-                borderRadius: RADIUS_PRO.lg,
-                border: `1px solid ${THEME_PRO.border}`,
-                boxShadow: SHADOWS_PRO.md,
-                display: 'flex',
-                flexDirection: 'column',
-                justifyContent: 'space-between'
-              }}
-            >
-              <Box>
-                <Typography
-                  sx={{ fontSize: '10px', fontWeight: 600, color: THEME_PRO.primary, opacity: 0.9, mb: SPACING_PRO.xs, textTransform: 'uppercase', letterSpacing: '0.5px' }}
-                >
-                  Account Balance
-                </Typography>
-                <Typography sx={{ fontSize: '18px', fontWeight: 700, color: THEME_PRO.textPrimary, mb: SPACING_PRO.xs }}>
-                  {showValues ? formatCurrency(accountBalance, currency) : '••••••'}
-                </Typography>
-              </Box>
-              <Box sx={{ display: 'flex', gap: SPACING_PRO.sm }}>
-                <Button
-                  onClick={() => setDepositOpen(true)}
-                  variant="contained"
-                  sx={{
-                    flex: 1,
-                    backgroundColor: THEME_PRO.primary,
-                    color: '#fff',
-                    fontWeight: 600,
-                    textTransform: 'none',
-                    '&:hover': { backgroundColor: THEME_PRO.primaryDark },
-                  }}
-                >
-                  Deposit
-                </Button>
-                <Button
-                  onClick={() => setWithdrawalOpen(true)}
-                  variant="outlined"
-                  sx={{
-                    flex: 1,
-                    borderColor: THEME_PRO.primary,
-                    color: THEME_PRO.primary,
-                    fontWeight: 600,
-                    textTransform: 'none',
-                    '&:hover': { backgroundColor: THEME_PRO.primaryLight },
-                  }}
-                >
-                  Withdraw
-                </Button>
-              </Box>
-            </Card>
-          </Box>
-        </Box>
 
         {/* Charts Section */}
         <Box sx={{ mt: SPACING_PRO.md }}>
