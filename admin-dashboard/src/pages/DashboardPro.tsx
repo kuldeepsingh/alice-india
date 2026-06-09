@@ -460,10 +460,22 @@ export function DashboardPro() {
                     contentStyle={{
                       backgroundColor: THEME_PRO.bgSecondary,
                       border: `2px solid ${THEME_PRO.primary}`,
-                      color: '#ffffff',
-                      fontSize: '12px',
-                      fontWeight: 'bold'
+                      padding: '8px 12px',
+                      borderRadius: '4px'
                     }}
+                    wrapperStyle={{ outline: 'none' }}
+                    cursor={{ fill: THEME_PRO.primary }}
+                    formatter={(value: any, name: any) => [
+                      <span style={{ color: '#ffffff', fontWeight: 'bold', fontSize: '12px' }}>
+                        {value}%
+                      </span>,
+                      name
+                    ]}
+                    labelFormatter={(value: any) => (
+                      <span style={{ color: '#ffffff', fontWeight: 'bold', fontSize: '12px' }}>
+                        {value}
+                      </span>
+                    )}
                   />
                 </PieChart>
               </ResponsiveContainer>
