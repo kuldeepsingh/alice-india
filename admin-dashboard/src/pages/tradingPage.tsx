@@ -151,27 +151,6 @@ export function tradingPage() {
       count: updatedOrders.length
     })
 
-    // Also save to backend so it appears in Orders page
-    try {
-      await ordersAPI.create({
-        accountId: 'default-account',
-        symbol: newOrder.symbol,
-        side: newOrder.type === 'Buy' ? 'BUY' : 'SELL',
-        quantity: newOrder.quantity,
-        price: newOrder.price,
-      })
-      frontendLogger.info('Trading', 'Order saved to backend', {
-        orderId: newOrder.id,
-        symbol: newOrder.symbol,
-      })
-    } catch (err) {
-      frontendLogger.warn('Trading', 'Failed to save order to backend', {
-        orderId: newOrder.id,
-        error: err instanceof Error ? err.message : String(err),
-      })
-      // Continue anyway - order is saved locally
-    }
-
     frontendLogger.info('Trading', 'Order executed successfully', {
       orderId: newOrder.id,
       symbol: newOrder.symbol,

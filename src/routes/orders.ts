@@ -62,14 +62,13 @@ router.post('/', async (req: AuthRequest, res) => {
       },
     })
 
-    // Check all required fields
-    if (!accountId || !symbol || !side || quantity === undefined || price === undefined) {
+    // Check all required fields (accountId is optional)
+    if (!symbol || !side || quantity === undefined || price === undefined) {
       const duration = Date.now() - startTime
       logger.warn('Orders', 'Create order validation failed - missing required fields', {
         requestId,
         userId,
         missingFields: {
-          accountId: !accountId,
           symbol: !symbol,
           side: !side,
           quantity: quantity === undefined,
@@ -156,55 +155,58 @@ router.post('/', async (req: AuthRequest, res) => {
       price,
     })
 
-    // ===== ACCOUNT VERIFICATION =====
-    logger.debug('Orders', 'Fetching account details from database', {
-      requestId,
-      userId,
-      accountId,
-    })
-
-    const accountStart = Date.now()
-    const account = await accountService.getAccountById(accountId)
-    const accountDuration = Date.now() - accountStart
-
-    if (!account) {
-      const duration = Date.now() - startTime
-      logger.warn('Orders', 'Create order failed - account not found', {
+    // ===== ACCOUNT VERIFICATION (Optional) =====
+    let account = null
+    if (accountId) {
+      logger.debug('Orders', 'Fetching account details from database', {
         requestId,
         userId,
         accountId,
-        accountDurationMs: accountDuration,
-        durationMs: duration,
       })
-      return res.status(404).json({
-        error: 'Account not found',
-        reason: 'account_not_found',
-      })
-    }
 
-    logger.debug('Orders', 'Account found, verifying ownership', {
-      requestId,
-      userId,
-      accountId,
-      accountOwnerId: account.userId,
-      accountDurationMs: accountDuration,
-    })
+      const accountStart = Date.now()
+      account = await accountService.getAccountById(accountId)
+      const accountDuration = Date.now() - accountStart
 
-    // Verify user owns the account
-    if (account.userId !== userId) {
-      const duration = Date.now() - startTime
-      logger.warn('Orders', 'Create order failed - access denied to account', {
+      if (!account) {
+        const duration = Date.now() - startTime
+        logger.warn('Orders', 'Create order failed - account not found', {
+          requestId,
+          userId,
+          accountId,
+          accountDurationMs: accountDuration,
+          durationMs: duration,
+        })
+        return res.status(404).json({
+          error: 'Account not found',
+          reason: 'account_not_found',
+        })
+      }
+
+      logger.debug('Orders', 'Account found, verifying ownership', {
         requestId,
         userId,
         accountId,
         accountOwnerId: account.userId,
-        reason: 'access_denied',
-        durationMs: duration,
+        accountDurationMs: accountDuration,
       })
-      return res.status(403).json({
-        error: 'Access denied',
-        reason: 'access_denied',
-      })
+
+      // Verify user owns the account
+      if (account.userId !== userId) {
+        const duration = Date.now() - startTime
+        logger.warn('Orders', 'Create order failed - access denied to account', {
+          requestId,
+          userId,
+          accountId,
+          accountOwnerId: account.userId,
+          reason: 'access_denied',
+          durationMs: duration,
+        })
+        return res.status(403).json({
+          error: 'Access denied',
+          reason: 'access_denied',
+        })
+      }
     }
 
     // ===== ORDER CREATION =====
@@ -283,7 +285,7 @@ router.post('/', async (req: AuthRequest, res) => {
       errorMessage,
       errorStack,
       durationMs: duration,
-      ipAddress,
+      ipAddress: req.ip,
       timestamp: new Date().toISOString(),
     })
 
