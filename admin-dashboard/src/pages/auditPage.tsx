@@ -55,7 +55,7 @@ export function auditPage() {
             </Box>
           </Card>
         ) : (
-          <Card sx={{ borderRadius: RADIUS_PRO.lg, border: `1px solid ${THEME_PRO.border}`, overflow: 'hidden' }}>
+          <Card sx={{ backgroundColor: THEME_PRO.bgSecondary, borderRadius: RADIUS_PRO.lg, border: `1px solid ${THEME_PRO.border}`, overflow: 'hidden' }}>
             <TableContainer>
               <Table>
                 <TableHead sx={{ backgroundColor: THEME_PRO.bgTertiary }}>
