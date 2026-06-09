@@ -193,7 +193,6 @@ export function AdminLogsPage() {
                     Download
                   </Button>
                 </Stack>
-                </Box>
               </Box>
 
               <Box
@@ -278,7 +277,6 @@ export function AdminLogsPage() {
                     Download
                   </Button>
                 </Stack>
-                </Box>
               </Box>
 
               <Box
