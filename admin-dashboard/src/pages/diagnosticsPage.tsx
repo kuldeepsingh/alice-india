@@ -154,112 +154,157 @@ export function diagnosticsPage() {
 
   return (
     <LayoutPro>
-      <Box sx={{ p: SPACING_PRO.xxxl, backgroundColor: THEME_PRO.bgPrimary, minHeight: '100vh' }}>
-        <Box sx={{ mb: SPACING_PRO.xxxl, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-          <Box>
-            <Typography variant="h4" sx={{ fontSize: '32px', fontWeight: 700, color: THEME_PRO.textPrimary, mb: SPACING_PRO.md }}>
-              🧪 Diagnostics
-            </Typography>
-            <Typography sx={{ color: THEME_PRO.textSecondary }}>Run system health checks</Typography>
-          </Box>
-          <Box sx={{ display: 'flex', gap: SPACING_PRO.md, alignItems: 'center' }}>
-            {!running ? (
-              <Button
-                variant="contained"
-                startIcon={<PlayArrow />}
-                onClick={handleStart}
-                sx={{ backgroundColor: THEME_PRO.primary, color: '#fff' }}
-              >
-                Run Tests
-              </Button>
-            ) : (
-              <>
-                <Box sx={{ minWidth: '120px', textAlign: 'right' }}>
-                  <Typography sx={{ fontSize: '14px', color: THEME_PRO.textSecondary, fontWeight: 500 }}>
-                    {Math.round(progress)}% Complete
-                  </Typography>
-                </Box>
+      <Box sx={{ p: SPACING_PRO.xxxl, backgroundColor: THEME_PRO.bgPrimary, minHeight: '100vh', display: 'flex', flexDirection: 'column' }}>
+
+        {/* TOP: Header with Start/Stop button */}
+        <Box sx={{ mb: SPACING_PRO.xxxl }}>
+          <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+            <Box>
+              <Typography variant="h4" sx={{ fontSize: '32px', fontWeight: 700, color: THEME_PRO.textPrimary, mb: SPACING_PRO.md }}>
+                🧪 Diagnostics
+              </Typography>
+              <Typography sx={{ color: THEME_PRO.textSecondary }}>Run system health checks</Typography>
+            </Box>
+            <Box sx={{ display: 'flex', gap: SPACING_PRO.md, alignItems: 'center' }}>
+              {!running ? (
                 <Button
                   variant="contained"
-                  startIcon={<Stop />}
-                  onClick={handleStop}
+                  startIcon={<PlayArrow />}
+                  onClick={handleStart}
                   sx={{
-                    backgroundColor: THEME_PRO.error,
+                    backgroundColor: THEME_PRO.primary,
                     color: '#fff',
-                    '&:hover': { backgroundColor: '#d32f2f' }
+                    fontSize: '16px',
+                    px: SPACING_PRO.xl,
+                    py: '10px'
                   }}
                 >
-                  Stop
+                  Run Tests
                 </Button>
-              </>
-            )}
+              ) : (
+                <>
+                  <Box sx={{ minWidth: '150px', textAlign: 'right' }}>
+                    <Typography sx={{ fontSize: '18px', color: THEME_PRO.textSecondary, fontWeight: 700 }}>
+                      {Math.round(progress)}%
+                    </Typography>
+                    <Typography sx={{ fontSize: '12px', color: THEME_PRO.textSecondary, mt: '4px' }}>
+                      {Math.floor(tests.length * (progress / 100))} of {tests.length} tests
+                    </Typography>
+                  </Box>
+                  <Button
+                    variant="contained"
+                    startIcon={<Stop />}
+                    onClick={handleStop}
+                    sx={{
+                      backgroundColor: THEME_PRO.error,
+                      color: '#fff',
+                      fontSize: '16px',
+                      px: SPACING_PRO.xl,
+                      py: '10px',
+                      '&:hover': { backgroundColor: '#d32f2f' }
+                    }}
+                  >
+                    Stop
+                  </Button>
+                </>
+              )}
+            </Box>
+          </Box>
+
+          {stoppedMessage && (
+            <Alert severity="warning" sx={{ mt: SPACING_PRO.lg }}>
+              {stoppedMessage}
+            </Alert>
+          )}
+        </Box>
+
+        {/* MIDDLE: Horizontal health checks with colored underlines */}
+        <Box sx={{ mb: SPACING_PRO.xxxl }}>
+          <Box sx={{
+            display: 'flex',
+            gap: SPACING_PRO.lg,
+            overflow: 'auto',
+            pb: SPACING_PRO.lg,
+            scrollBehavior: 'smooth'
+          }}>
+            {tests.map((test, idx) => {
+              const isCompleted = progress >= ((idx + 1) / tests.length) * 100
+              const isRunning = progress >= (idx / tests.length) * 100 && progress < ((idx + 1) / tests.length) * 100
+
+              return (
+                <Card
+                  key={idx}
+                  sx={{
+                    flex: '0 0 auto',
+                    width: '180px',
+                    p: SPACING_PRO.md,
+                    borderRadius: RADIUS_PRO.lg,
+                    border: `1px solid ${THEME_PRO.border}`,
+                    position: 'relative',
+                    overflow: 'hidden',
+                    transition: 'all 0.3s ease',
+                    opacity: running && !isCompleted && !isRunning ? 0.6 : 1,
+                    boxShadow: isRunning ? `0 0 12px ${THEME_PRO.primary}40` : 'none',
+                    '&::after': {
+                      content: '""',
+                      position: 'absolute',
+                      bottom: 0,
+                      left: 0,
+                      right: 0,
+                      height: '6px',
+                      backgroundColor: isRunning
+                        ? THEME_PRO.primary
+                        : isCompleted
+                        ? THEME_PRO.success
+                        : THEME_PRO.border,
+                      transition: 'background-color 0.3s ease',
+                    }
+                  }}
+                >
+                  <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', textAlign: 'center', gap: SPACING_PRO.sm }}>
+                    <Box sx={{ fontSize: '32px' }}>
+                      {getStatusIcon(test.status)}
+                    </Box>
+                    <Typography sx={{ fontWeight: 600, color: THEME_PRO.textPrimary, fontSize: '14px', lineHeight: 1.3 }}>
+                      {test.name}
+                    </Typography>
+                    <Chip
+                      label={test.status}
+                      size="small"
+                      sx={{
+                        backgroundColor: test.status === 'passed' ? THEME_PRO.successLight : THEME_PRO.warningLight,
+                        color: test.status === 'passed' ? THEME_PRO.success : THEME_PRO.warning,
+                        fontSize: '11px',
+                        height: '24px',
+                        fontWeight: 500
+                      }}
+                    />
+                    <Typography sx={{ fontSize: '12px', color: THEME_PRO.textSecondary, fontWeight: 500 }}>
+                      {test.duration}
+                    </Typography>
+                    {isRunning && (
+                      <Box sx={{
+                        width: '10px',
+                        height: '10px',
+                        borderRadius: '50%',
+                        backgroundColor: THEME_PRO.primary,
+                        animation: 'pulse 1.5s ease-in-out infinite',
+                        '@keyframes pulse': {
+                          '0%, 100%': { opacity: 1 },
+                          '50%': { opacity: 0.4 }
+                        }
+                      }} />
+                    )}
+                  </Box>
+                </Card>
+              )
+            })}
           </Box>
         </Box>
 
-        {running && (
-          <Box sx={{ mb: SPACING_PRO.lg }}>
-            <LinearProgress
-              variant="determinate"
-              value={progress}
-              sx={{
-                mb: SPACING_PRO.md,
-                backgroundColor: THEME_PRO.border,
-                '& .MuiLinearProgress-bar': {
-                  backgroundColor: THEME_PRO.primary,
-                }
-              }}
-            />
-            <Typography sx={{ fontSize: '12px', color: THEME_PRO.textSecondary }}>
-              Running {Math.floor(tests.length * (progress / 100))} of {tests.length} health checks...
-            </Typography>
-          </Box>
-        )}
-
-        {stoppedMessage && (
-          <Alert severity="warning" sx={{ mb: SPACING_PRO.lg }}>
-            {stoppedMessage}
-          </Alert>
-        )}
-
-        <Box sx={{ display: 'grid', gap: 2, mb: SPACING_PRO.xxxl }}>
-          {tests.map((test, idx) => (
-            <Card
-              key={idx}
-              sx={{
-                p: SPACING_PRO.lg,
-                borderRadius: RADIUS_PRO.lg,
-                border: `1px solid ${THEME_PRO.border}`,
-                display: 'flex',
-                justifyContent: 'space-between',
-                alignItems: 'center',
-                opacity: running && idx >= Math.floor(tests.length * (progress / 100)) ? 0.5 : 1,
-                transition: 'opacity 0.3s ease'
-              }}
-            >
-              <Box sx={{ display: 'flex', alignItems: 'center', gap: SPACING_PRO.lg }}>
-                {getStatusIcon(test.status)}
-                <Box>
-                  <Typography sx={{ fontWeight: 600, color: THEME_PRO.textPrimary }}>
-                    {idx + 1}. {test.name}
-                  </Typography>
-                  <Typography sx={{ fontSize: '12px', color: THEME_PRO.textSecondary }}>
-                    Response time: {test.duration}
-                  </Typography>
-                </Box>
-              </Box>
-              <Chip
-                label={test.status}
-                sx={{
-                  backgroundColor: test.status === 'passed' ? THEME_PRO.successLight : THEME_PRO.warningLight,
-                  color: test.status === 'passed' ? THEME_PRO.success : THEME_PRO.warning
-                }}
-              />
-            </Card>
-          ))}
-        </Box>
-
+        {/* BOTTOM: Live Log Stream */}
         {(running || logs.length > 0) && (
-          <Box>
+          <Box sx={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
             <Box sx={{ display: 'flex', alignItems: 'center', gap: SPACING_PRO.md, mb: SPACING_PRO.lg }}>
               <Code sx={{ color: THEME_PRO.primary }} />
               <Typography variant="h6" sx={{ color: THEME_PRO.textPrimary, fontWeight: 600 }}>
@@ -290,10 +335,11 @@ export function diagnosticsPage() {
                 fontSize: '12px',
                 p: SPACING_PRO.lg,
                 borderRadius: RADIUS_PRO.lg,
-                maxHeight: '400px',
+                maxHeight: '350px',
                 overflowY: 'auto',
                 border: `1px solid ${THEME_PRO.border}`,
                 lineHeight: 1.6,
+                flex: 1,
               }}
             >
               {logs.length === 0 ? (
