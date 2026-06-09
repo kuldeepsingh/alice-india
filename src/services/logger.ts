@@ -161,9 +161,14 @@ class Logger {
 
     let output = `${gray}[${timestamp}]${reset} ${color}[${level}]${reset} ${COLORS.BOLD}${module}${reset}: ${message}`
 
-    // Add context if provided
+    // Add context if provided - properly stringify objects
     if (context && Object.keys(context).length > 0) {
-      output += ` ${gray}${JSON.stringify(context)}${reset}`
+      try {
+        const contextStr = typeof context === 'string' ? context : JSON.stringify(context, null, 2)
+        output += ` ${gray}${contextStr}${reset}`
+      } catch (e) {
+        output += ` ${gray}[Unable to serialize context]${reset}`
+      }
     }
 
     return output

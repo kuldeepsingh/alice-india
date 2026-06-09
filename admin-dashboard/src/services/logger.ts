@@ -132,9 +132,15 @@ class FrontendLogger {
       CONSOLE_STYLES.MESSAGE
     )
 
-    // Add context if provided
+    // Add context if provided - properly handle objects
     if (context && Object.keys(context).length > 0) {
-      console.log('%cContext:', CONSOLE_STYLES.MODULE, context)
+      try {
+        console.log('%cContext:', CONSOLE_STYLES.MODULE, context)
+        // Also log stringified version for better visibility
+        console.log('%cDetails:', CONSOLE_STYLES.MODULE, JSON.stringify(context, null, 2))
+      } catch (e) {
+        console.log('%cContext: [Unable to serialize]', CONSOLE_STYLES.MODULE)
+      }
     }
   }
 
