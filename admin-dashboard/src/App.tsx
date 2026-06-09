@@ -1,6 +1,7 @@
-import React from 'react'
+import React, { useEffect } from 'react'
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom'
 import { useAuthStore } from './state/store'
+import { frontendLogger } from './services/logger'
 import { Login } from './pages/Login'
 import { DashboardPro } from './pages/DashboardPro'
 import { UsersPage } from './pages/UsersPage'
@@ -26,6 +27,16 @@ function ProtectedRoute({ children }: { children: React.ReactNode }) {
 
 export function App() {
   const { isAuthenticated } = useAuthStore()
+
+  // Initialize frontend logger
+  useEffect(() => {
+    frontendLogger.info('App', 'Frontend application initialized')
+    frontendLogger.debug('App', 'Frontend logger ready', {
+      timestamp: new Date().toISOString(),
+      userAgent: navigator.userAgent,
+      url: window.location.href,
+    })
+  }, [])
 
   return (
     <Router>
