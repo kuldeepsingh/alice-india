@@ -23,30 +23,38 @@ export function authMiddleware(req: AuthRequest, res: Response, next: NextFuncti
     })
 
     if (!authHeader) {
-      logger.warn('Auth', 'Auth failed - missing authorization header', {
+      const errorMsg = 'Missing authorization header'
+      logger.warn('Auth', `Auth failed - ${errorMsg}`, {
         ip: req.ip,
         path: req.path,
         method: req.method,
         userAgent: req.get('user-agent'),
+        reason: 'missing_header',
+        errorMessage: errorMsg,
       })
       return res.status(401).json({
         status: 'error',
-        error: 'Missing authorization header',
-        message: 'Authorization header is required. Format: Bearer <token>'
+        error: errorMsg,
+        message: 'Authorization header is required. Format: Bearer <token>',
+        reason: 'missing_header',
       })
     }
 
     if (!authHeader.startsWith('Bearer ')) {
-      logger.warn('Auth', 'Auth failed - invalid authorization format', {
+      const errorMsg = 'Invalid authorization format'
+      logger.warn('Auth', `Auth failed - ${errorMsg}`, {
         ip: req.ip,
         path: req.path,
         method: req.method,
         authHeaderFormat: authHeader.substring(0, 20) + '...',
+        reason: 'invalid_format',
+        errorMessage: errorMsg,
       })
       return res.status(401).json({
         status: 'error',
-        error: 'Invalid authorization format',
-        message: 'Authorization header must start with "Bearer "'
+        error: errorMsg,
+        message: 'Authorization header must start with "Bearer "',
+        reason: 'invalid_format',
       })
     }
 
@@ -89,10 +97,19 @@ export function authMiddleware(req: AuthRequest, res: Response, next: NextFuncti
     next()
   } catch (error) {
     const errorMessage = error instanceof Error ? error.message : String(error)
+    const errorType = error?.constructor?.name || 'UnknownError'
 
-    logger.error('Auth', 'Token verification failed', error, {
+    // Determine the reason for token verification failure
+    let reason = 'token_verification_failed'
+    if (errorMessage.includes('expired')) reason = 'token_expired'
+    if (errorMessage.includes('malformed')) reason = 'token_malformed'
+    if (errorMessage.includes('invalid')) reason = 'token_invalid'
+    if (errorMessage.includes('signature')) reason = 'token_signature_invalid'
+
+    logger.error('Auth', `Token verification failed: ${errorMessage}`, error, {
       errorMessage,
-      errorType: error?.constructor?.name,
+      errorType,
+      reason,
       ip: req.ip,
       path: req.path,
       method: req.method,
@@ -103,6 +120,7 @@ export function authMiddleware(req: AuthRequest, res: Response, next: NextFuncti
       status: 'error',
       error: 'Invalid token',
       message: errorMessage,
+      reason,
     })
   }
 }
