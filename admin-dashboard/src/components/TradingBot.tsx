@@ -60,9 +60,11 @@ export const TradingBot = () => {
 
   const checkKeyStatus = async () => {
     try {
+      const token = localStorage.getItem('authToken')
       const response = await fetch('http://localhost:3000/api/v1/user/api-keys/status', {
         headers: {
-          'X-User-ID': userId,
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json',
         },
       })
       const data = await response.json()
@@ -89,11 +91,12 @@ export const TradingBot = () => {
 
     setLoading(true)
     try {
+      const token = localStorage.getItem('authToken')
       const response = await fetch('http://localhost:3000/api/v1/orders', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'X-User-ID': userId,
+          'Authorization': `Bearer ${token}`,
         },
         body: JSON.stringify({
           symbol,
@@ -132,11 +135,12 @@ export const TradingBot = () => {
 
     setLoading(true)
     try {
+      const token = localStorage.getItem('authToken')
       const response = await fetch('http://localhost:3000/api/v1/market-analysis/sentiment', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'X-User-ID': userId,
+          'Authorization': `Bearer ${token}`,
         },
         body: JSON.stringify({
           symbol: symbol,

@@ -136,13 +136,15 @@ export class ClaudeService {
 
       return result
     } catch (error: any) {
-      console.error('[Claude] Sentiment analysis error:', error.message)
+      const errorMsg = error.message || String(error)
+      console.error('[Claude] Sentiment analysis error:', errorMsg)
+      console.error('[Claude] Full error:', error)
 
       return {
         sentiment: 0,
         trend: 'neutral',
         confidence: 0.3,
-        reasoning: 'Claude service unavailable.',
+        reasoning: `Claude service unavailable: ${errorMsg}`,
       }
     }
   }
@@ -245,12 +247,19 @@ Respond with ONLY this JSON (no other text):
    * Build sentiment analysis prompt
    */
   private buildSentimentPrompt(request: SentimentAnalysisRequest): string {
+    // Handle recentNews as either array or string
+    const newsText = request.recentNews
+      ? (Array.isArray(request.recentNews)
+          ? request.recentNews.join('\n')
+          : String(request.recentNews))
+      : ''
+
     return `Analyze this market data and provide sentiment assessment:
 
 Market Data:
 ${JSON.stringify(request.marketData, null, 2)}
 
-${request.recentNews ? `Recent News:\n${request.recentNews.join('\n')}` : ''}
+${newsText ? `Recent News:\n${newsText}` : ''}
 ${request.globalContext ? `\nGlobal Context: ${request.globalContext}` : ''}
 
 Respond with ONLY this JSON (no other text):

@@ -77,8 +77,10 @@ export function createApp() {
   // Configuration routes (comes first - needed by other routes)
   v1.use('/config', configRouter)
 
-  // User API Keys routes (secure storage, requires authentication)
-  v1.use('/user/api-keys', authMiddleware, apiKeysRouter)
+  // User API Keys routes
+  // Internal routes (backend-to-backend) - no auth required
+  // Public routes - auth required via middleware in the router itself
+  v1.use('/user/api-keys', apiKeysRouter)
 
   // Authentication routes
   v1.use('/auth', authRouter)
@@ -106,11 +108,11 @@ export function createApp() {
   // Metrics & Monitoring routes
   // v1.use('/metrics', metricsRouter)  // TODO: Fix imports
 
-  // Trading routes
-  v1.use('/trading', tradingRouter)
+  // Trading routes - requires authentication
+  v1.use('/trading', authMiddleware, tradingRouter)
 
-  // Market analysis routes (Claude AI analysis)
-  v1.use('/market-analysis', marketAnalysisRouter)
+  // Market analysis routes (Claude AI analysis) - requires authentication
+  v1.use('/market-analysis', authMiddleware, marketAnalysisRouter)
 
   // Credentials routes
   v1.use('/credentials', credentialsRouter)

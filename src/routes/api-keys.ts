@@ -13,6 +13,7 @@
 import express, { Request, Response } from 'express'
 import { apiKeyVaultService } from '../services/api-key-vault-service'
 import { logger } from '../services/logger'
+import { authMiddleware, AuthRequest } from '../middleware/auth'
 import pg from 'pg'
 
 const router = express.Router()
@@ -28,8 +29,9 @@ const getUserId = (req: Request): string | null => {
 /**
  * POST /api/v1/user/api-keys
  * Save encrypted API keys for the current user
+ * Auth: Required
  */
-router.post('/', async (req: Request, res: Response) => {
+router.post('/', authMiddleware, async (req: AuthRequest, res: Response) => {
   try {
     const userId = getUserId(req)
     if (!userId) {
@@ -153,8 +155,9 @@ router.post('/', async (req: Request, res: Response) => {
 /**
  * GET /api/v1/user/api-keys/status
  * Check which API keys are configured (without returning the keys)
+ * Auth: Required
  */
-router.get('/status', async (req: Request, res: Response) => {
+router.get('/status', authMiddleware, async (req: AuthRequest, res: Response) => {
   try {
     const userId = getUserId(req)
     if (!userId) {
@@ -201,7 +204,7 @@ router.get('/status', async (req: Request, res: Response) => {
  * DELETE /api/v1/user/api-keys/:keyType
  * Delete a specific API key for the current user
  */
-router.delete('/:keyType', async (req: Request, res: Response) => {
+router.delete('/:keyType', authMiddleware, async (req: AuthRequest, res: Response) => {
   try {
     const userId = getUserId(req)
     if (!userId) {
@@ -264,10 +267,15 @@ router.delete('/:keyType', async (req: Request, res: Response) => {
  * POST /api/v1/user/api-keys/internal/get
  * Internal endpoint for backend services to retrieve decrypted keys
  * (Only for backend-to-backend communication, not exposed to frontend)
+ * NOTE: This route bypasses auth middleware - called internally by backend services
  */
 router.post('/internal/get', async (req: Request, res: Response) => {
+  let userId: string | undefined
+  let keyType: string | undefined
+
   try {
-    const { userId, keyType } = req.body
+    userId = req.body.userId
+    keyType = req.body.keyType
 
     if (!userId || !keyType) {
       return res.status(400).json({
@@ -326,12 +334,18 @@ router.post('/internal/get', async (req: Request, res: Response) => {
       data: decrypted,
     })
   } catch (error) {
+    const errorMsg = error instanceof Error ? error.message : String(error)
     logger.error({
       type: 'api_key_internal_error',
-      error: error instanceof Error ? error.message : String(error),
+      userId,
+      keyType,
+      error: errorMsg,
+      stack: error instanceof Error ? error.stack : undefined,
     })
+    console.error('API Key Decryption Error:', errorMsg)
     res.status(500).json({
       error: 'Failed to retrieve API key',
+      details: errorMsg,
     })
   }
 })

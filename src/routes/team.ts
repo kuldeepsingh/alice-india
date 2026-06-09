@@ -243,7 +243,7 @@ router.put('/members/:id/role', requireAdmin(), async (req: AuthRequest, res: Re
 
     // Update user role in database
     const result = await query(
-      'UPDATE users SET role = $1, updated_at = CURRENT_TIMESTAMP WHERE id = $2 RETURNING id, email, role, created_at',
+      'UPDATE users SET role = $1 WHERE id = $2 RETURNING id, email, role, created_at',
       [role, id]
     )
 
