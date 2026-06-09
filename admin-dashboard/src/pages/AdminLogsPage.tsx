@@ -30,8 +30,9 @@ import { THEME_PRO, SPACING_PRO, RADIUS_PRO, SHADOWS_PRO } from '../theme-pro'
 interface LogEntry {
   timestamp: string
   level: string
-  service: string
+  module: string
   message: string
+  context?: Record<string, any>
 }
 
 interface LogFile {
@@ -65,23 +66,26 @@ export function AdminLogsPage() {
     try {
       const params = new URLSearchParams({
         limit: limit.toString(),
-        offset: offset.toString(),
       })
 
       if (levelFilter) params.append('level', levelFilter)
-      if (serviceFilter) params.append('service', serviceFilter)
+      if (serviceFilter) params.append('module', serviceFilter)
       if (searchTerm) params.append('search', searchTerm)
 
-      const response = await fetch(`/api/v1/admin/logs?${params}`)
+      // Fetch logs from backend API
+      const response = await fetch(`/api/v1/logs?${params}`)
       if (!response.ok) {
         throw new Error(`Failed to fetch logs: ${response.status}`)
       }
       const data = await response.json()
 
-      setLogs(data.logs || [])
-      setTotalLogs(data.total || 0)
+      // Map API response to component state
+      setLogs(data.data || [])
+      setTotalLogs(data.pagination?.total || 0)
+
+      console.log('✅ Logs fetched:', data.data?.length || 0, 'logs')
     } catch (error) {
-      console.error('Failed to fetch logs:', error)
+      console.error('❌ Failed to fetch logs:', error)
       setLogs([])
       setTotalLogs(0)
     } finally {
@@ -91,45 +95,47 @@ export function AdminLogsPage() {
 
   const fetchLogStats = async () => {
     try {
-      const response = await fetch('/api/v1/admin/logs/stats')
+      // Fetch statistics from backend API
+      const response = await fetch('/api/v1/logs/stats')
       if (!response.ok) {
         throw new Error(`Failed to fetch log stats: ${response.status}`)
       }
       const data = await response.json()
-      setLogFiles(data.files || [])
+
+      // Stats returned as-is, set empty files array for now
+      setLogFiles([])
+
+      console.log('📊 Stats fetched:', data.stats)
     } catch (error) {
-      console.error('Failed to fetch log stats:', error)
+      console.error('❌ Failed to fetch log stats:', error)
       setLogFiles([])
     }
   }
 
-  const handleDownload = async (filename: string) => {
+  const handleDownload = async () => {
     try {
-      const response = await fetch(`/api/v1/admin/logs/download/${filename}`)
-      const blob = await response.blob()
+      // Download all logs as JSON
+      const response = await fetch('/api/v1/logs/export')
+      const data = await response.json()
+      const blob = new Blob([JSON.stringify(data.data, null, 2)], { type: 'application/json' })
       const url = window.URL.createObjectURL(blob)
       const a = document.createElement('a')
       a.href = url
-      a.download = filename
+      a.download = `logs-${new Date().toISOString().split('T')[0]}.json`
       a.click()
+      window.URL.revokeObjectURL(url)
+      console.log('✅ Logs exported')
     } catch (error) {
-      console.error('Failed to download log:', error)
+      console.error('❌ Failed to download log:', error)
     }
   }
 
   const handleClearLogs = async () => {
     try {
-      const response = await fetch('/api/v1/admin/logs/clear', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ daysToKeep: parseInt(daysToKeep) }),
-      })
-
-      if (response.ok) {
-        setShowClearDialog(false)
-        fetchLogStats()
-        fetchLogs()
-      }
+      // Clear logs endpoint not yet implemented
+      // For now, just show a message
+      console.log('Clear logs feature coming soon')
+      setShowClearDialog(false)
     } catch (error) {
       console.error('Failed to clear logs:', error)
     }
@@ -337,7 +343,7 @@ export function AdminLogsPage() {
                         />
                       </TableCell>
                       <TableCell sx={{ color: THEME_PRO.primary, fontWeight: 600, fontSize: '13px' }}>
-                        {log.service}
+                        {log.module}
                       </TableCell>
                       <TableCell sx={{ color: THEME_PRO.textSecondary, fontSize: '13px', maxWidth: '400px', wordBreak: 'break-word' }}>
                         {log.message}
