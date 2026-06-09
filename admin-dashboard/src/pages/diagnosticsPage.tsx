@@ -152,18 +152,18 @@ export function diagnosticsPage() {
 
   return (
     <LayoutPro>
-      <Box sx={{ p: SPACING_PRO.xxxl, backgroundColor: THEME_PRO.bgPrimary, minHeight: '100vh', display: 'flex', flexDirection: 'column' }}>
+      <Box sx={{ backgroundColor: THEME_PRO.bgSecondary, p: SPACING_PRO.xxxl, backgroundColor: THEME_PRO.bgPrimary, minHeight: '100vh', display: 'flex', flexDirection: 'column' }}>
 
         {/* TOP: Header with Start/Stop button */}
         <Box sx={{ mb: SPACING_PRO.xxxl }}>
-          <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+          <Box sx={{ backgroundColor: THEME_PRO.bgSecondary, display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
             <Box>
               <Typography variant="h4" sx={{ fontSize: '32px', fontWeight: 700, color: THEME_PRO.textPrimary, mb: SPACING_PRO.md }}>
                 🧪 Diagnostics
               </Typography>
               <Typography sx={{ color: THEME_PRO.textSecondary }}>Run system health checks</Typography>
             </Box>
-            <Box sx={{ display: 'flex', gap: SPACING_PRO.md, alignItems: 'center' }}>
+            <Box sx={{ backgroundColor: THEME_PRO.bgSecondary, display: 'flex', gap: SPACING_PRO.md, alignItems: 'center' }}>
               {!running ? (
                 <Button
                   variant="contained"
@@ -259,7 +259,7 @@ export function diagnosticsPage() {
                     }
                   }}
                 >
-                  <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', textAlign: 'center', gap: SPACING_PRO.sm }}>
+                  <Box sx={{ backgroundColor: THEME_PRO.bgSecondary, display: 'flex', flexDirection: 'column', alignItems: 'center', textAlign: 'center', gap: SPACING_PRO.sm }}>
                     <Box sx={{ fontSize: '32px' }}>
                       {getStatusIcon(test.status)}
                     </Box>
@@ -303,7 +303,7 @@ export function diagnosticsPage() {
         {/* BOTTOM: Live Log Stream */}
         {(running || logs.length > 0) && (
           <Box sx={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
-            <Box sx={{ display: 'flex', alignItems: 'center', gap: SPACING_PRO.md, mb: SPACING_PRO.lg }}>
+            <Box sx={{ backgroundColor: THEME_PRO.bgSecondary, display: 'flex', alignItems: 'center', gap: SPACING_PRO.md, mb: SPACING_PRO.lg }}>
               <Code sx={{ color: THEME_PRO.primary }} />
               <Typography variant="h6" sx={{ color: THEME_PRO.textPrimary, fontWeight: 600 }}>
                 Live Log Stream
@@ -356,7 +356,7 @@ export function diagnosticsPage() {
 
                   return (
                     <Box key={idx} sx={{ mb: SPACING_PRO.sm, color: levelColor }}>
-                      <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: '4px' }}>
+                      <Box sx={{ backgroundColor: THEME_PRO.bgSecondary, display: 'flex', justifyContent: 'space-between', mb: '4px' }}>
                         <span>{timestamp} [{level}]</span>
                         <span style={{ opacity: 0.7 }}>{log.module}</span>
                       </Box>

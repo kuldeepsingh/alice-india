@@ -286,7 +286,7 @@ export function UsersPage() {
 
   return (
     <LayoutPro>
-      <Box sx={{ p: SPACING_PRO.xxxl, backgroundColor: THEME_PRO.bgPrimary, minHeight: '100vh' }}>
+      <Box sx={{ backgroundColor: THEME_PRO.bgSecondary, p: SPACING_PRO.xxxl, backgroundColor: THEME_PRO.bgPrimary, minHeight: '100vh' }}>
         {/* Header */}
         <Box sx={{ mb: SPACING_PRO.xxxl, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
           <Box>
@@ -308,7 +308,7 @@ export function UsersPage() {
 
         {/* Loading State */}
         {loading ? (
-          <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '300px' }}>
+          <Box sx={{ backgroundColor: THEME_PRO.bgSecondary, display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '300px' }}>
             <CircularProgress />
           </Box>
         ) : (
@@ -316,7 +316,7 @@ export function UsersPage() {
 
 
         {/* Search Bar */}
-        <Card sx={{ p: SPACING_PRO.lg, mb: SPACING_PRO.lg, borderRadius: RADIUS_PRO.lg, border: `1px solid ${THEME_PRO.border}` }}>
+        <Card sx={{ backgroundColor: THEME_PRO.bgSecondary, p: SPACING_PRO.lg, mb: SPACING_PRO.lg, borderRadius: RADIUS_PRO.lg, border: `1px solid ${THEME_PRO.border}` }}>
           <TextField
             fullWidth
             placeholder="Search users by name or email..."
@@ -335,7 +335,7 @@ export function UsersPage() {
         </Card>
 
         {/* Users Table */}
-        <Card sx={{ borderRadius: RADIUS_PRO.lg, border: `1px solid ${THEME_PRO.border}`, boxShadow: SHADOWS_PRO.md, overflow: 'hidden' }}>
+        <Card sx={{ backgroundColor: THEME_PRO.bgSecondary, borderRadius: RADIUS_PRO.lg, border: `1px solid ${THEME_PRO.border}`, boxShadow: SHADOWS_PRO.md, overflow: 'hidden' }}>
           <TableContainer>
             <Table>
               <TableHead sx={{ backgroundColor: THEME_PRO.bgTertiary }}>

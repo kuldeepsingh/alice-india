@@ -190,9 +190,9 @@ export function tradingPage() {
 
   return (
     <LayoutPro>
-      <Box sx={{ p: SPACING_PRO.xxxl, backgroundColor: THEME_PRO.bgPrimary, minHeight: '100vh' }}>
+      <Box sx={{ backgroundColor: THEME_PRO.bgSecondary, p: SPACING_PRO.xxxl, backgroundColor: THEME_PRO.bgPrimary, minHeight: '100vh' }}>
         {/* Header with Backend Status */}
-        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: SPACING_PRO.xxxl }}>
+        <Box sx={{ backgroundColor: THEME_PRO.bgSecondary, display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: SPACING_PRO.xxxl }}>
           <Box>
             <Typography variant="h4" sx={{ fontSize: '32px', fontWeight: 700, color: THEME_PRO.textPrimary, mb: SPACING_PRO.md }}>
               📈 Trading
@@ -237,7 +237,7 @@ export function tradingPage() {
         </Box>
 
         {/* THREE COLUMN LAYOUT: Order Form (1/3) + Bot (2/3) */}
-        <Box sx={{ display: 'grid', gridTemplateColumns: '1fr 2fr', gap: SPACING_PRO.lg, mb: SPACING_PRO.xxxl }}>
+        <Box sx={{ backgroundColor: THEME_PRO.bgSecondary, display: 'grid', gridTemplateColumns: '1fr 2fr', gap: SPACING_PRO.lg, mb: SPACING_PRO.xxxl }}>
 
           {/* COLUMN 1: Elegant Compact Order Form */}
           <Card sx={{
@@ -275,7 +275,7 @@ export function tradingPage() {
             )}
 
             {/* Buy/Sell Toggle - Compact */}
-            <Box sx={{ display: 'flex', gap: '6px', mb: SPACING_PRO.md }}>
+            <Box sx={{ backgroundColor: THEME_PRO.bgSecondary, display: 'flex', gap: '6px', mb: SPACING_PRO.md }}>
               <Button
                 variant={orderType === 'Buy' ? 'contained' : 'outlined'}
                 onClick={() => setOrderType('Buy')}
@@ -313,7 +313,7 @@ export function tradingPage() {
             </Box>
 
             {/* Quantity & Price */}
-            <Box sx={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px', mb: SPACING_PRO.md }}>
+            <Box sx={{ backgroundColor: THEME_PRO.bgSecondary, display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px', mb: SPACING_PRO.md }}>
               <TextField
                 label="Qty"
                 value={quantity}
@@ -383,7 +383,7 @@ export function tradingPage() {
               mb: SPACING_PRO.md,
               border: `1px solid ${THEME_PRO.border}`
             }}>
-              <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: SPACING_PRO.sm }}>
+              <Box sx={{ backgroundColor: THEME_PRO.bgSecondary, display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: SPACING_PRO.sm }}>
                 <Typography sx={{ fontSize: '11px', color: THEME_PRO.textSecondary, fontWeight: 600 }}>
                   Total:
                 </Typography>
@@ -424,7 +424,7 @@ export function tradingPage() {
             <Typography sx={{ fontSize: '20px', fontWeight: 700, color: THEME_PRO.textPrimary, mb: SPACING_PRO.lg }}>
               📋 Recent Orders
             </Typography>
-            <Card sx={{ borderRadius: RADIUS_PRO.lg, border: `1px solid ${THEME_PRO.border}`, overflow: 'hidden', backgroundColor: THEME_PRO.bgSecondary }}>
+            <Card sx={{ backgroundColor: THEME_PRO.bgSecondary, borderRadius: RADIUS_PRO.lg, border: `1px solid ${THEME_PRO.border}`, overflow: 'hidden', backgroundColor: THEME_PRO.bgSecondary }}>
               <TableContainer sx={{ backgroundColor: THEME_PRO.bgSecondary }}>
                 <Table>
                   <TableHead sx={{ backgroundColor: THEME_PRO.bgTertiary }}>
@@ -495,12 +495,12 @@ export function tradingPage() {
             Please review your order details before confirming:
           </Typography>
 
-          <Box sx={{ p: SPACING_PRO.lg, backgroundColor: THEME_PRO.bgTertiary, borderRadius: RADIUS_PRO.md, mb: SPACING_PRO.lg }}>
-            <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: SPACING_PRO.md }}>
+          <Box sx={{ backgroundColor: THEME_PRO.bgSecondary, p: SPACING_PRO.lg, backgroundColor: THEME_PRO.bgTertiary, borderRadius: RADIUS_PRO.md, mb: SPACING_PRO.lg }}>
+            <Box sx={{ backgroundColor: THEME_PRO.bgSecondary, display: 'flex', justifyContent: 'space-between', mb: SPACING_PRO.md }}>
               <Typography sx={{ color: THEME_PRO.textSecondary }}>Symbol:</Typography>
               <Typography sx={{ fontWeight: 600, color: THEME_PRO.textPrimary }}>{symbol.toUpperCase()}</Typography>
             </Box>
-            <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: SPACING_PRO.md }}>
+            <Box sx={{ backgroundColor: THEME_PRO.bgSecondary, display: 'flex', justifyContent: 'space-between', mb: SPACING_PRO.md }}>
               <Typography sx={{ color: THEME_PRO.textSecondary }}>Order Type:</Typography>
               <Chip
                 label={orderType}
@@ -510,11 +510,11 @@ export function tradingPage() {
                 }}
               />
             </Box>
-            <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: SPACING_PRO.md }}>
+            <Box sx={{ backgroundColor: THEME_PRO.bgSecondary, display: 'flex', justifyContent: 'space-between', mb: SPACING_PRO.md }}>
               <Typography sx={{ color: THEME_PRO.textSecondary }}>Quantity:</Typography>
               <Typography sx={{ fontWeight: 600, color: THEME_PRO.textPrimary }}>{quantity}</Typography>
             </Box>
-            <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: SPACING_PRO.md }}>
+            <Box sx={{ backgroundColor: THEME_PRO.bgSecondary, display: 'flex', justifyContent: 'space-between', mb: SPACING_PRO.md }}>
               <Typography sx={{ color: THEME_PRO.textSecondary }}>Price:</Typography>
               <Typography sx={{ fontWeight: 600, color: THEME_PRO.textPrimary }}>₹{parseFloat(price).toLocaleString()}</Typography>
             </Box>
@@ -526,7 +526,7 @@ export function tradingPage() {
             </Box>
           </Box>
         </DialogContent>
-        <DialogActions sx={{ p: SPACING_PRO.lg, gap: SPACING_PRO.sm }}>
+        <DialogActions sx={{ backgroundColor: THEME_PRO.bgSecondary, p: SPACING_PRO.lg, gap: SPACING_PRO.sm }}>
           <Button onClick={() => setConfirmDialogOpen(false)} sx={{ color: THEME_PRO.textSecondary, textTransform: 'none', fontWeight: 600 }}>
             Cancel
           </Button>

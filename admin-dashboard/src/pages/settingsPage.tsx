@@ -50,7 +50,7 @@ export function settingsPage() {
 
   return (
     <LayoutPro>
-      <Box sx={{ p: SPACING_PRO.xxxl, backgroundColor: theme.bgPrimary, minHeight: '100vh' }}>
+      <Box sx={{ backgroundColor: THEME_PRO.bgSecondary, p: SPACING_PRO.xxxl, backgroundColor: theme.bgPrimary, minHeight: '100vh' }}>
         {/* Header */}
         <Box sx={{ mb: SPACING_PRO.xxxl }}>
           <Typography variant="h4" sx={{ fontSize: '32px', fontWeight: 700, color: theme.textPrimary, mb: SPACING_PRO.md }}>
@@ -69,14 +69,14 @@ export function settingsPage() {
         )}
 
         {/* Settings Grid */}
-        <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', lg: '1fr 1fr' }, gap: 3, mb: SPACING_PRO.xxxl }}>
+        <Box sx={{ backgroundColor: THEME_PRO.bgSecondary, display: 'grid', gridTemplateColumns: { xs: '1fr', lg: '1fr 1fr' }, gap: 3, mb: SPACING_PRO.xxxl }}>
           {/* Display & Preferences */}
-          <Card sx={{ p: SPACING_PRO.xxl, borderRadius: RADIUS_PRO.lg, border: `1px solid ${THEME_PRO.border}`, boxShadow: SHADOWS_PRO.md }}>
+          <Card sx={{ backgroundColor: THEME_PRO.bgSecondary, p: SPACING_PRO.xxl, borderRadius: RADIUS_PRO.lg, border: `1px solid ${THEME_PRO.border}`, boxShadow: SHADOWS_PRO.md }}>
             <Typography sx={{ fontSize: '18px', fontWeight: 700, color: THEME_PRO.textPrimary, mb: SPACING_PRO.lg }}>
               ⚙️ Display & Preferences
             </Typography>
 
-            <Box sx={{ display: 'flex', flexDirection: 'column', gap: SPACING_PRO.lg }}>
+            <Box sx={{ backgroundColor: THEME_PRO.bgSecondary, display: 'flex', flexDirection: 'column', gap: SPACING_PRO.lg }}>
               <FormControlLabel
                 control={<Switch checked={notifications} onChange={(e) => setNotifications(e.target.checked)} />}
                 label={
@@ -112,7 +112,7 @@ export function settingsPage() {
           </Card>
 
           {/* Currency Settings */}
-          <Card sx={{ p: SPACING_PRO.xxl, borderRadius: RADIUS_PRO.lg, border: `1px solid ${THEME_PRO.border}`, boxShadow: SHADOWS_PRO.md }}>
+          <Card sx={{ backgroundColor: THEME_PRO.bgSecondary, p: SPACING_PRO.xxl, borderRadius: RADIUS_PRO.lg, border: `1px solid ${THEME_PRO.border}`, boxShadow: SHADOWS_PRO.md }}>
             <Typography sx={{ fontSize: '18px', fontWeight: 700, color: THEME_PRO.textPrimary, mb: SPACING_PRO.lg }}>
               💱 Currency Settings
             </Typography>
@@ -146,7 +146,7 @@ export function settingsPage() {
               >
                 {SUPPORTED_CURRENCIES.map((curr) => (
                   <MenuItem key={curr.code} value={curr.code}>
-                    <Box sx={{ display: 'flex', gap: 1, alignItems: 'center', width: '100%' }}>
+                    <Box sx={{ backgroundColor: THEME_PRO.bgSecondary, display: 'flex', gap: 1, alignItems: 'center', width: '100%' }}>
                       <Typography sx={{ fontWeight: 600 }}>{curr.symbol}</Typography>
                       <Typography sx={{ fontWeight: 600 }}>{curr.code}</Typography>
                       <Typography sx={{ fontSize: '12px', color: THEME_PRO.textSecondary, ml: 'auto' }}>
@@ -173,13 +173,13 @@ export function settingsPage() {
         </Box>
 
         {/* Account & Security */}
-        <Card sx={{ p: SPACING_PRO.xxl, borderRadius: RADIUS_PRO.lg, border: `1px solid ${THEME_PRO.border}`, boxShadow: SHADOWS_PRO.md, mb: SPACING_PRO.xxxl }}>
+        <Card sx={{ backgroundColor: THEME_PRO.bgSecondary, p: SPACING_PRO.xxl, borderRadius: RADIUS_PRO.lg, border: `1px solid ${THEME_PRO.border}`, boxShadow: SHADOWS_PRO.md, mb: SPACING_PRO.xxxl }}>
           <Typography sx={{ fontSize: '18px', fontWeight: 700, color: THEME_PRO.textPrimary, mb: SPACING_PRO.lg }}>
             🔐 Account & Security
           </Typography>
 
-          <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', sm: '1fr 1fr' }, gap: 2, mb: SPACING_PRO.lg }}>
-            <Box sx={{ p: SPACING_PRO.lg, backgroundColor: THEME_PRO.bgTertiary, borderRadius: RADIUS_PRO.md }}>
+          <Box sx={{ backgroundColor: THEME_PRO.bgSecondary, display: 'grid', gridTemplateColumns: { xs: '1fr', sm: '1fr 1fr' }, gap: 2, mb: SPACING_PRO.lg }}>
+            <Box sx={{ backgroundColor: THEME_PRO.bgSecondary, p: SPACING_PRO.lg, backgroundColor: THEME_PRO.bgTertiary, borderRadius: RADIUS_PRO.md }}>
               <Typography sx={{ fontSize: '12px', color: THEME_PRO.textTertiary, textTransform: 'uppercase', fontWeight: 600, mb: SPACING_PRO.sm }}>
                 Account Status
               </Typography>
@@ -187,7 +187,7 @@ export function settingsPage() {
                 ✓ Active
               </Typography>
             </Box>
-            <Box sx={{ p: SPACING_PRO.lg, backgroundColor: THEME_PRO.bgTertiary, borderRadius: RADIUS_PRO.md }}>
+            <Box sx={{ backgroundColor: THEME_PRO.bgSecondary, p: SPACING_PRO.lg, backgroundColor: THEME_PRO.bgTertiary, borderRadius: RADIUS_PRO.md }}>
               <Typography sx={{ fontSize: '12px', color: THEME_PRO.textTertiary, textTransform: 'uppercase', fontWeight: 600, mb: SPACING_PRO.sm }}>
                 Last Updated
               </Typography>
@@ -199,7 +199,7 @@ export function settingsPage() {
 
           <Divider sx={{ borderColor: THEME_PRO.border, my: SPACING_PRO.lg }} />
 
-          <Box sx={{ display: 'flex', gap: SPACING_PRO.sm }}>
+          <Box sx={{ backgroundColor: THEME_PRO.bgSecondary, display: 'flex', gap: SPACING_PRO.sm }}>
             <Button
               onClick={handleSaveSettings}
               variant="contained"

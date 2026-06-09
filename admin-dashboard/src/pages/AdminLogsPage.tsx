@@ -114,7 +114,7 @@ export function AdminLogsPage() {
 
   return (
     <LayoutPro>
-      <Box sx={{ p: SPACING_PRO.xxxl, backgroundColor: THEME_PRO.bgPrimary, minHeight: '100vh' }}>
+      <Box sx={{ backgroundColor: THEME_PRO.bgSecondary, p: SPACING_PRO.xxxl, backgroundColor: THEME_PRO.bgPrimary, minHeight: '100vh' }}>
         {/* Header */}
         <Box sx={{ mb: SPACING_PRO.xxxl }}>
           <Typography variant="h4" sx={{ fontSize: '32px', fontWeight: 700, color: THEME_PRO.textPrimary, mb: SPACING_PRO.md }}>
@@ -123,7 +123,7 @@ export function AdminLogsPage() {
         </Box>
 
         {loading && (
-          <Box sx={{ display: 'flex', justifyContent: 'center', p: SPACING_PRO.xxl }}>
+          <Box sx={{ backgroundColor: THEME_PRO.bgSecondary, display: 'flex', justifyContent: 'center', p: SPACING_PRO.xxl }}>
             <CircularProgress />
           </Box>
         )}
@@ -131,9 +131,9 @@ export function AdminLogsPage() {
         {!loading && (
           <Stack spacing={SPACING_PRO.lg}>
             {/* Frontend Logs */}
-            <Card sx={{ p: SPACING_PRO.xxl, borderRadius: RADIUS_PRO.lg, border: `1px solid ${THEME_PRO.border}` }}>
-              <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: SPACING_PRO.lg }}>
-                <Box sx={{ display: 'flex', alignItems: 'center', gap: SPACING_PRO.lg }}>
+            <Card sx={{ backgroundColor: THEME_PRO.bgSecondary, p: SPACING_PRO.xxl, borderRadius: RADIUS_PRO.lg, border: `1px solid ${THEME_PRO.border}` }}>
+              <Box sx={{ backgroundColor: THEME_PRO.bgSecondary, display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: SPACING_PRO.lg }}>
+                <Box sx={{ backgroundColor: THEME_PRO.bgSecondary, display: 'flex', alignItems: 'center', gap: SPACING_PRO.lg }}>
                   <Typography sx={{ fontSize: '18px', fontWeight: 700, color: THEME_PRO.textPrimary }}>
                     🌐 Frontend Logs
                   </Typography>
@@ -215,9 +215,9 @@ export function AdminLogsPage() {
             </Card>
 
             {/* Backend Logs */}
-            <Card sx={{ p: SPACING_PRO.xxl, borderRadius: RADIUS_PRO.lg, border: `1px solid ${THEME_PRO.border}` }}>
-              <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: SPACING_PRO.lg }}>
-                <Box sx={{ display: 'flex', alignItems: 'center', gap: SPACING_PRO.lg }}>
+            <Card sx={{ backgroundColor: THEME_PRO.bgSecondary, p: SPACING_PRO.xxl, borderRadius: RADIUS_PRO.lg, border: `1px solid ${THEME_PRO.border}` }}>
+              <Box sx={{ backgroundColor: THEME_PRO.bgSecondary, display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: SPACING_PRO.lg }}>
+                <Box sx={{ backgroundColor: THEME_PRO.bgSecondary, display: 'flex', alignItems: 'center', gap: SPACING_PRO.lg }}>
                   <Typography sx={{ fontSize: '18px', fontWeight: 700, color: THEME_PRO.textPrimary }}>
                     🖥️ Backend Logs
                   </Typography>

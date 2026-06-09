@@ -393,7 +393,7 @@ export function DashboardPro() {
 
           <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', md: '1fr 1fr' }, gap: 3, mb: SPACING_PRO.xxxl }}>
             {/* Portfolio Value Chart */}
-            <Card sx={{ backgroundColor: THEME_PRO.bgSecondary, p: SPACING_PRO.xxl, borderRadius: RADIUS_PRO.lg, border: `1px solid ${THEME_PRO.border}` }}>
+            <Card sx={{ p: SPACING_PRO.xxl, borderRadius: RADIUS_PRO.lg, border: `1px solid ${THEME_PRO.border}` }}>
               <Typography sx={{ fontSize: '16px', fontWeight: 700, color: THEME_PRO.textPrimary, mb: SPACING_PRO.lg }}>
                 Portfolio Value Trend
               </Typography>
@@ -415,7 +415,7 @@ export function DashboardPro() {
             </Card>
 
             {/* Daily Returns Chart */}
-            <Card sx={{ backgroundColor: THEME_PRO.bgSecondary, p: SPACING_PRO.xxl, borderRadius: RADIUS_PRO.lg, border: `1px solid ${THEME_PRO.border}` }}>
+            <Card sx={{ p: SPACING_PRO.xxl, borderRadius: RADIUS_PRO.lg, border: `1px solid ${THEME_PRO.border}` }}>
               <Typography sx={{ fontSize: '16px', fontWeight: 700, color: THEME_PRO.textPrimary, mb: SPACING_PRO.lg }}>
                 Daily Returns (%)
               </Typography>
@@ -431,7 +431,7 @@ export function DashboardPro() {
             </Card>
 
             {/* Strategy Performance */}
-            <Card sx={{ backgroundColor: THEME_PRO.bgSecondary, p: SPACING_PRO.xxl, borderRadius: RADIUS_PRO.lg, border: `1px solid ${THEME_PRO.border}` }}>
+            <Card sx={{ p: SPACING_PRO.xxl, borderRadius: RADIUS_PRO.lg, border: `1px solid ${THEME_PRO.border}` }}>
               <Typography sx={{ fontSize: '16px', fontWeight: 700, color: THEME_PRO.textPrimary, mb: SPACING_PRO.lg }}>
                 Strategy Allocation
               </Typography>
@@ -457,7 +457,7 @@ export function DashboardPro() {
             </Card>
 
             {/* Win Rate Chart */}
-            <Card sx={{ backgroundColor: THEME_PRO.bgSecondary, p: SPACING_PRO.xxl, borderRadius: RADIUS_PRO.lg, border: `1px solid ${THEME_PRO.border}` }}>
+            <Card sx={{ p: SPACING_PRO.xxl, borderRadius: RADIUS_PRO.lg, border: `1px solid ${THEME_PRO.border}` }}>
               <Typography sx={{ fontSize: '16px', fontWeight: 700, color: THEME_PRO.textPrimary, mb: SPACING_PRO.lg }}>
                 Weekly Win Rate
               </Typography>
@@ -560,7 +560,7 @@ export function DashboardPro() {
             </Box>
           </Box>
         </DialogContent>
-        <DialogActions sx={{ backgroundColor: THEME_PRO.bgSecondary, p: SPACING_PRO.lg, gap: SPACING_PRO.sm }}>
+        <DialogActions sx={{ p: SPACING_PRO.lg, gap: SPACING_PRO.sm }}>
           <Button
             onClick={() => setWithdrawalOpen(false)}
             sx={{ color: THEME_PRO.textSecondary, textTransform: 'none', fontWeight: 600 }}
@@ -668,7 +668,7 @@ export function DashboardPro() {
             </Box>
           </Box>
         </DialogContent>
-        <DialogActions sx={{ backgroundColor: THEME_PRO.bgSecondary, p: SPACING_PRO.lg, gap: SPACING_PRO.sm }}>
+        <DialogActions sx={{ p: SPACING_PRO.lg, gap: SPACING_PRO.sm }}>
           <Button
             onClick={() => setDepositOpen(false)}
             sx={{ color: THEME_PRO.textSecondary, textTransform: 'none', fontWeight: 600 }}

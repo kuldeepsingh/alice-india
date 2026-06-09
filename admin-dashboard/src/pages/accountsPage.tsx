@@ -140,7 +140,7 @@ export function AccountsPage() {
         )}
 
         {loading ? (
-          <Box sx={{ display: "flex", justifyContent: "center", p: SPACING_PRO.xxxl }}>
+          <Box sx={{ backgroundColor: THEME_PRO.bgSecondary, display: "flex", justifyContent: "center", p: SPACING_PRO.xxxl }}>
             <CircularProgress sx={{ color: THEME_PRO.primary }} />
           </Box>
         ) : accounts.length === 0 ? (
@@ -375,7 +375,7 @@ export function AccountsPage() {
             sx={{ backgroundColor: THEME_PRO.bgSecondary, p: SPACING_PRO.lg }}
           >
             {loadingZerodhaData ? (
-              <Box sx={{ display: "flex", justifyContent: "center", p: SPACING_PRO.xxxl }}>
+              <Box sx={{ backgroundColor: THEME_PRO.bgSecondary, display: "flex", justifyContent: "center", p: SPACING_PRO.xxxl }}>
                 <CircularProgress />
               </Box>
             ) : (
@@ -404,7 +404,7 @@ export function AccountsPage() {
                   }}
                 >
                   {zerodhaData.holdings.length > 0 ? (
-                    <Box sx={{ display: "flex", flexDirection: "column", gap: SPACING_PRO.sm }}>
+                    <Box sx={{ backgroundColor: THEME_PRO.bgSecondary, display: "flex", flexDirection: "column", gap: SPACING_PRO.sm }}>
                       {zerodhaData.holdings.map((holding: any) => (
                         <Typography key={holding.id} sx={{ fontSize: "13px", color: THEME_PRO.textPrimary }}>
                           • {holding.symbol}: {holding.quantity} shares @ ₹{holding.averagePrice?.toLocaleString?.()} avg (Current: ₹{holding.currentPrice?.toLocaleString?.()}, P&L: ₹{holding.pnl?.toLocaleString?.()})
@@ -438,7 +438,7 @@ export function AccountsPage() {
                   }}
                 >
                   {zerodhaData.balance ? (
-                    <Box sx={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: SPACING_PRO.lg }}>
+                    <Box sx={{ backgroundColor: THEME_PRO.bgSecondary, display: "grid", gridTemplateColumns: "1fr 1fr", gap: SPACING_PRO.lg }}>
                       <Box>
                         <Typography
                           sx={{ fontSize: "12px", color: THEME_PRO.textSecondary, mb: "4px" }}
@@ -546,7 +546,7 @@ export function AccountsPage() {
                   }}
                 >
                   {zerodhaData.orders.length > 0 ? (
-                    <Box sx={{ display: "flex", flexDirection: "column", gap: SPACING_PRO.sm }}>
+                    <Box sx={{ backgroundColor: THEME_PRO.bgSecondary, display: "flex", flexDirection: "column", gap: SPACING_PRO.sm }}>
                       {zerodhaData.orders.slice(0, 10).map((order: any) => (
                         <Typography key={order.zerodhaOrderId} sx={{ fontSize: "13px", color: THEME_PRO.textPrimary }}>
                           {order.zerodhaOrderId}: {order.symbol} - {order.side} {order.quantity} @ ₹{order.price?.toLocaleString?.()} [{order.status}]

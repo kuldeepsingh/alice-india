@@ -12,7 +12,7 @@ const sessions = [
 export function debugPage() {
   return (
     <LayoutPro>
-      <Box sx={{ p: SPACING_PRO.xxxl, backgroundColor: THEME_PRO.bgPrimary, minHeight: '100vh' }}>
+      <Box sx={{ backgroundColor: THEME_PRO.bgSecondary, p: SPACING_PRO.xxxl, backgroundColor: THEME_PRO.bgPrimary, minHeight: '100vh' }}>
         <Box sx={{ mb: SPACING_PRO.xxxl }}>
           <Typography variant="h4" sx={{ fontSize: '32px', fontWeight: 700, color: THEME_PRO.textPrimary, mb: SPACING_PRO.md }}>
             🐛 Debug Sessions
@@ -20,9 +20,9 @@ export function debugPage() {
           <Typography sx={{ color: THEME_PRO.textSecondary }}>Monitor API requests and responses</Typography>
         </Box>
 
-        <Box sx={{ display: 'grid', gap: 2 }}>
+        <Box sx={{ backgroundColor: THEME_PRO.bgSecondary, display: 'grid', gap: 2 }}>
           {sessions.map((session) => (
-            <Card key={session.id} sx={{ p: SPACING_PRO.lg, borderRadius: RADIUS_PRO.lg, border: `1px solid ${THEME_PRO.border}`, display: 'grid', gridTemplateColumns: 'auto 1fr auto', gap: SPACING_PRO.lg, alignItems: 'center' }}>
+            <Card key={session.id} sx={{ backgroundColor: THEME_PRO.bgSecondary, p: SPACING_PRO.lg, borderRadius: RADIUS_PRO.lg, border: `1px solid ${THEME_PRO.border}`, display: 'grid', gridTemplateColumns: 'auto 1fr auto', gap: SPACING_PRO.lg, alignItems: 'center' }}>
               <Typography sx={{ fontSize: '20px' }}>{'📡'}</Typography>
               <Box>
                 <Typography sx={{ fontWeight: 700, color: THEME_PRO.textPrimary }}>{session.endpoint}</Typography>

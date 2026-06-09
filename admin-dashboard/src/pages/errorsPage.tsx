@@ -132,7 +132,7 @@ export function errorsPage() {
 
   return (
     <LayoutPro>
-      <Box sx={{ p: SPACING_PRO.xxxl, backgroundColor: THEME_PRO.bgPrimary, minHeight: '100vh' }}>
+      <Box sx={{ backgroundColor: THEME_PRO.bgSecondary, p: SPACING_PRO.xxxl, backgroundColor: THEME_PRO.bgPrimary, minHeight: '100vh' }}>
         {/* Header */}
         <Box sx={{ mb: SPACING_PRO.xxxl }}>
           <Typography variant="h4" sx={{ fontSize: '32px', fontWeight: 700, color: THEME_PRO.textPrimary, mb: SPACING_PRO.md }}>
@@ -144,7 +144,7 @@ export function errorsPage() {
         </Box>
 
         {/* Filters */}
-        <Card sx={{ p: SPACING_PRO.lg, borderRadius: RADIUS_PRO.lg, border: `1px solid ${THEME_PRO.border}`, mb: SPACING_PRO.lg }}>
+        <Card sx={{ backgroundColor: THEME_PRO.bgSecondary, p: SPACING_PRO.lg, borderRadius: RADIUS_PRO.lg, border: `1px solid ${THEME_PRO.border}`, mb: SPACING_PRO.lg }}>
           <Stack direction="row" spacing={SPACING_PRO.lg}>
             <FormControl sx={{ minWidth: 150 }}>
               <InputLabel>Error Level</InputLabel>
@@ -181,7 +181,7 @@ export function errorsPage() {
 
         {/* Errors List */}
         {loading ? (
-          <Box sx={{ display: 'flex', justifyContent: 'center', p: SPACING_PRO.xxl }}>
+          <Box sx={{ backgroundColor: THEME_PRO.bgSecondary, display: 'flex', justifyContent: 'center', p: SPACING_PRO.xxl }}>
             <CircularProgress />
           </Box>
         ) : filteredErrors.length === 0 ? (
@@ -202,9 +202,9 @@ export function errorsPage() {
                 }}
                 onClick={() => setSelectedGroup(error)}
               >
-                <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'start' }}>
+                <Box sx={{ backgroundColor: THEME_PRO.bgSecondary, display: 'flex', justifyContent: 'space-between', alignItems: 'start' }}>
                   <Box sx={{ flex: 1 }}>
-                    <Box sx={{ display: 'flex', alignItems: 'center', gap: SPACING_PRO.md, mb: SPACING_PRO.sm }}>
+                    <Box sx={{ backgroundColor: THEME_PRO.bgSecondary, display: 'flex', alignItems: 'center', gap: SPACING_PRO.md, mb: SPACING_PRO.sm }}>
                       <Typography sx={{ fontSize: '20px' }}>
                         {getSeverityEmoji(error.severity)}
                       </Typography>
@@ -239,7 +239,7 @@ export function errorsPage() {
         <Dialog open={selectedGroup !== null} onClose={() => setSelectedGroup(null)} maxWidth="lg" fullWidth>
           {selectedGroup && (
             <>
-              <DialogTitle sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+              <DialogTitle sx={{ backgroundColor: THEME_PRO.bgSecondary, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                 <Box>
                   <Typography sx={{ fontWeight: 700, fontSize: '18px' }}>
                     {selectedGroup.errorType}: {selectedGroup.errorMessage}
@@ -256,11 +256,11 @@ export function errorsPage() {
                 <Stack spacing={SPACING_PRO.lg} sx={{ mt: SPACING_PRO.lg }}>
                   {/* Most Recent Occurrence */}
                   {selectedGroup.occurrences[0] && (
-                    <Card sx={{ p: SPACING_PRO.lg, backgroundColor: THEME_PRO.bgTertiary, border: `1px solid ${THEME_PRO.border}` }}>
+                    <Card sx={{ backgroundColor: THEME_PRO.bgSecondary, p: SPACING_PRO.lg, backgroundColor: THEME_PRO.bgTertiary, border: `1px solid ${THEME_PRO.border}` }}>
                       <Typography sx={{ fontWeight: 700, mb: SPACING_PRO.md }}>
                         Most Recent Occurrence
                       </Typography>
-                      <Box sx={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: SPACING_PRO.lg, fontSize: '13px' }}>
+                      <Box sx={{ backgroundColor: THEME_PRO.bgSecondary, display: 'grid', gridTemplateColumns: '1fr 1fr', gap: SPACING_PRO.lg, fontSize: '13px' }}>
                         <Box>
                           <Typography sx={{ fontWeight: 600, color: THEME_PRO.textSecondary, mb: SPACING_PRO.xs }}>
                             Timestamp
@@ -313,7 +313,7 @@ export function errorsPage() {
 
                   {/* Error Context */}
                   {selectedGroup.occurrences[0]?.context && (
-                    <Card sx={{ p: SPACING_PRO.lg, backgroundColor: THEME_PRO.bgTertiary, border: `1px solid ${THEME_PRO.border}` }}>
+                    <Card sx={{ backgroundColor: THEME_PRO.bgSecondary, p: SPACING_PRO.lg, backgroundColor: THEME_PRO.bgTertiary, border: `1px solid ${THEME_PRO.border}` }}>
                       <Typography sx={{ fontWeight: 700, mb: SPACING_PRO.md }}>
                         Error Context
                       </Typography>
@@ -337,7 +337,7 @@ export function errorsPage() {
 
                   {/* Stack Trace */}
                   {selectedGroup.occurrences[0]?.stackTrace && (
-                    <Card sx={{ p: SPACING_PRO.lg, backgroundColor: THEME_PRO.bgTertiary, border: `1px solid ${THEME_PRO.border}` }}>
+                    <Card sx={{ backgroundColor: THEME_PRO.bgSecondary, p: SPACING_PRO.lg, backgroundColor: THEME_PRO.bgTertiary, border: `1px solid ${THEME_PRO.border}` }}>
                       <Typography sx={{ fontWeight: 700, mb: SPACING_PRO.md }}>
                         Stack Trace
                       </Typography>
@@ -360,7 +360,7 @@ export function errorsPage() {
                   )}
 
                   {/* All Occurrences */}
-                  <Card sx={{ p: SPACING_PRO.lg, backgroundColor: THEME_PRO.bgTertiary, border: `1px solid ${THEME_PRO.border}` }}>
+                  <Card sx={{ backgroundColor: THEME_PRO.bgSecondary, p: SPACING_PRO.lg, backgroundColor: THEME_PRO.bgTertiary, border: `1px solid ${THEME_PRO.border}` }}>
                     <Typography sx={{ fontWeight: 700, mb: SPACING_PRO.md }}>
                       All Occurrences ({selectedGroup.occurrences.length})
                     </Typography>

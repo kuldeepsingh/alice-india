@@ -191,14 +191,14 @@ export function marketDashboard() {
             <Typography sx={{ fontSize: '28px', fontWeight: 700, color: '#fff' }}>Market Dashboard</Typography>
             <Typography sx={{ fontSize: '13px', color: '#888' }}>Real-time market data and analysis</Typography>
           </Box>
-          <Box sx={{ display: 'flex', gap: '12px' }}>
+          <Box sx={{ backgroundColor: THEME_PRO.bgSecondary, display: 'flex', gap: '12px' }}>
             <TextField placeholder="Search stocks..." size="small" value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} sx={{ width: '250px', '& .MuiOutlinedInput-root': { backgroundColor: '#1a1a1a', color: '#fff', '& fieldset': { borderColor: '#333' } } }} InputProps={{ startAdornment: <Search sx={{ mr: '8px', color: '#666' }} /> }} />
             <Button variant="contained" sx={{ backgroundColor: '#1976d2', color: '#fff' }}>● Live</Button>
           </Box>
         </Box>
 
         {/* INDICES ROW - 6 CARDS (COMPACT) */}
-        <Box sx={{ display: 'grid', gridTemplateColumns: 'repeat(6, 1fr)', gap: '12px', mb: '24px' }}>
+        <Box sx={{ backgroundColor: THEME_PRO.bgSecondary, display: 'grid', gridTemplateColumns: 'repeat(6, 1fr)', gap: '12px', mb: '24px' }}>
           {indices.map((idx, i) => (
             <Card key={i} sx={{ p: '10px 8px', backgroundColor: '#1a1a1a', border: '1px solid #2a2a2a', borderRadius: '6px', minHeight: 'auto' }}>
               <Typography sx={{ fontSize: '9px', color: '#888', fontWeight: 600, textTransform: 'uppercase', mb: '3px', lineHeight: 1 }}>{idx.name}</Typography>
@@ -211,17 +211,17 @@ export function marketDashboard() {
         </Box>
 
         {/* MAIN GRID - HEATMAP (60%) + GAINERS/LOSERS (40%) */}
-        <Box sx={{ display: 'grid', gridTemplateColumns: '60% 40%', gap: '16px', mb: '24px' }}>
+        <Box sx={{ backgroundColor: THEME_PRO.bgSecondary, display: 'grid', gridTemplateColumns: '60% 40%', gap: '16px', mb: '24px' }}>
 
           {/* HEATMAP - FIXED 5 COLUMNS × 4 ROWS */}
           <Card sx={{ p: '16px', backgroundColor: '#1a1a1a', border: '1px solid #2a2a2a', borderRadius: '6px' }}>
-            <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: '12px' }}>
+            <Box sx={{ backgroundColor: THEME_PRO.bgSecondary, display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: '12px' }}>
               <Typography sx={{ fontSize: '16px', fontWeight: 700, color: '#fff' }}>Market Heatmap</Typography>
               <Info sx={{ color: '#666', fontSize: '18px' }} />
             </Box>
 
             {/* FIXED 5-COLUMN GRID */}
-            <Box sx={{ display: 'grid', gridTemplateColumns: 'repeat(5, 1fr)', gap: '8px' }}>
+            <Box sx={{ backgroundColor: THEME_PRO.bgSecondary, display: 'grid', gridTemplateColumns: 'repeat(5, 1fr)', gap: '8px' }}>
               {stocks.map((stock, idx) => (
                 <Box
                   key={idx}
@@ -252,11 +252,11 @@ export function marketDashboard() {
           </Card>
 
           {/* GAINERS & LOSERS - STACKED */}
-          <Box sx={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+          <Box sx={{ backgroundColor: THEME_PRO.bgSecondary, display: 'flex', flexDirection: 'column', gap: '16px' }}>
 
             {/* TOP GAINERS */}
             <Card sx={{ p: '12px', backgroundColor: '#1a1a1a', border: '1px solid #2a2a2a', borderRadius: '6px' }}>
-              <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: '8px' }}>
+              <Box sx={{ backgroundColor: THEME_PRO.bgSecondary, display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: '8px' }}>
                 <Typography sx={{ fontSize: '14px', fontWeight: 700, color: '#fff' }}>Top Gainers</Typography>
                 <Button size="small" sx={{ color: '#1976d2', fontSize: '10px' }}>View all</Button>
               </Box>
@@ -286,7 +286,7 @@ export function marketDashboard() {
 
             {/* TOP LOSERS */}
             <Card sx={{ p: '12px', backgroundColor: '#1a1a1a', border: '1px solid #2a2a2a', borderRadius: '6px' }}>
-              <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: '8px' }}>
+              <Box sx={{ backgroundColor: THEME_PRO.bgSecondary, display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: '8px' }}>
                 <Typography sx={{ fontSize: '14px', fontWeight: 700, color: '#fff' }}>Top Losers</Typography>
                 <Button size="small" sx={{ color: '#1976d2', fontSize: '10px' }}>View all</Button>
               </Box>
@@ -317,11 +317,11 @@ export function marketDashboard() {
         </Box>
 
         {/* BOTTOM GRID - 3 COLUMNS: SECTOR (30%) + INDICES (30%) + NEWS (40%) */}
-        <Box sx={{ display: 'grid', gridTemplateColumns: '30% 30% 40%', gap: '16px' }}>
+        <Box sx={{ backgroundColor: THEME_PRO.bgSecondary, display: 'grid', gridTemplateColumns: '30% 30% 40%', gap: '16px' }}>
 
           {/* SECTOR BREADTH WITH PIE CHART */}
           <Card sx={{ p: '16px', backgroundColor: '#1a1a1a', border: '1px solid #2a2a2a', borderRadius: '6px' }}>
-            <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: '12px' }}>
+            <Box sx={{ backgroundColor: THEME_PRO.bgSecondary, display: 'flex', justifyContent: 'space-between', mb: '12px' }}>
               <Typography sx={{ fontSize: '14px', fontWeight: 700, color: '#fff' }}>Sector Breadth</Typography>
               <Button size="small" sx={{ color: '#1976d2', fontSize: '10px' }}>View all</Button>
             </Box>
@@ -330,7 +330,7 @@ export function marketDashboard() {
               {sectors.map((sector) => (
                 <Box key={sector.name} sx={{ mb: '8px', display: 'flex', justifyContent: 'space-between', fontSize: '11px' }}>
                   <Typography sx={{ color: '#fff' }}>{sector.name}</Typography>
-                  <Box sx={{ display: 'flex', gap: '8px', color: '#888' }}>
+                  <Box sx={{ backgroundColor: THEME_PRO.bgSecondary, display: 'flex', gap: '8px', color: '#888' }}>
                     <Typography sx={{ color: '#4caf50' }}>↑ {sector.advancing}</Typography>
                     <Typography sx={{ color: '#f44336' }}>↓ {sector.declining}</Typography>
                     <Typography>→ {sector.neutral}</Typography>
@@ -342,7 +342,7 @@ export function marketDashboard() {
 
           {/* INDICES TABLE */}
           <Card sx={{ p: '12px', backgroundColor: '#1a1a1a', border: '1px solid #2a2a2a', borderRadius: '6px' }}>
-            <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: '8px' }}>
+            <Box sx={{ backgroundColor: THEME_PRO.bgSecondary, display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: '8px' }}>
               <Typography sx={{ fontSize: '14px', fontWeight: 700, color: '#fff' }}>Indices</Typography>
               <Button size="small" sx={{ color: '#1976d2', fontSize: '10px' }}>View all</Button>
             </Box>
@@ -372,7 +372,7 @@ export function marketDashboard() {
 
           {/* MARKET NEWS */}
           <Card sx={{ p: '16px', backgroundColor: '#1a1a1a', border: '1px solid #2a2a2a', borderRadius: '6px' }}>
-            <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: '12px' }}>
+            <Box sx={{ backgroundColor: THEME_PRO.bgSecondary, display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: '12px' }}>
               <Typography sx={{ fontSize: '14px', fontWeight: 700, color: '#fff' }}>Market News</Typography>
               <Button size="small" sx={{ color: '#1976d2', fontSize: '10px' }}>View all</Button>
             </Box>
