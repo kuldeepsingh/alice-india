@@ -107,7 +107,7 @@ db_health_check() {
     log "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
 
     # Check if database exists
-    if psql -h "$DB_HOST" -U "$DB_USER" -lqt | cut -d \| -f 1 | grep -qw "$DB_NAME"; then
+    if psql -h "$DB_HOST" -U "$DB_USER" -lqt | cut -d \| -f 1 | grep -w "$DB_NAME" > /dev/null; then
         log "${GREEN}✅ Database exists${NC}"
     else
         log "${RED}❌ Database does not exist!${NC}"
@@ -115,7 +115,7 @@ db_health_check() {
     fi
 
     # Check if tables exist
-    TABLE_COUNT=$(psql -h "$DB_HOST" -U "$DB_USER" -d "$DB_NAME" -c "SELECT COUNT(*) FROM information_schema.tables WHERE table_schema = 'public';" | grep -oP '\d+')
+    TABLE_COUNT=$(psql -h "$DB_HOST" -U "$DB_USER" -d "$DB_NAME" -c "SELECT COUNT(*) FROM information_schema.tables WHERE table_schema = 'public';" | grep -E '[0-9]+' | head -1 | tr -d ' ')
     log "✅ Tables: $TABLE_COUNT"
 
     # Check row counts
