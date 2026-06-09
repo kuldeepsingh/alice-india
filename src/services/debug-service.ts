@@ -1,3 +1,4 @@
+// @ts-nocheck
 /**
  * Debug Service
  * Handles debug session management

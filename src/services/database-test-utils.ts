@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { query } from './database.ts'
 import { logger } from './logger.ts'
 

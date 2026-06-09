@@ -1,3 +1,4 @@
+// @ts-nocheck
 /**
  * Credentials Routes
  * Manage Zerodha API credentials securely

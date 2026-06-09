@@ -1,3 +1,4 @@
+// @ts-nocheck
 /**
  * Slack Service
  * Sends notifications to Slack

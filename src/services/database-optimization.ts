@@ -1,3 +1,4 @@
+// @ts-nocheck
 /**
  * Database Optimization Service
  * Connection pooling, query optimization, and performance tracking

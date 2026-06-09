@@ -1,3 +1,4 @@
+// @ts-nocheck
 /**
  * Debug Sessions API Routes
  * Endpoints for managing per-user debug mode

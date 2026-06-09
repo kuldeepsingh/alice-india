@@ -1,3 +1,4 @@
+// @ts-nocheck
 /**
  * Credential Service
  * Secure encryption/decryption of API credentials

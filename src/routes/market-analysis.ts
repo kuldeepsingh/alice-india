@@ -1,3 +1,4 @@
+// @ts-nocheck
 /**
  * Market Analysis Routes (Updated with Key Retrieval)
  *

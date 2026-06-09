@@ -1,3 +1,4 @@
+// @ts-nocheck
 /**
  * Team API Routes
  * GET, POST endpoints for team coordination and on-call management

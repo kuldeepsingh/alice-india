@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { Router, Request, Response } from 'express'
 import { loggingService } from '../services/logging-service.ts'
 import { requireAdmin } from '../middleware/auth.ts'

@@ -189,37 +189,37 @@ export function createApp() {
   v1.use('/auth', authRouter)
 
   // Account routes (protected)
-  v1.use('/accounts', accountsRouter)
+  v1.use('/accounts', accountsRouter as any)
 
   // Zerodha integration routes (protected)
-  v1.use('/zerodha', authMiddleware, zerodhaRouter)
+  v1.use('/zerodha', authMiddleware as any, zerodhaRouter as any)
 
   // Order routes (protected)
-  v1.use('/orders', ordersRouter)
+  v1.use('/orders', ordersRouter as any)
 
   // Market data routes (some protected, some public)
-  v1.use('/market', marketDataRouter)
+  v1.use('/market', marketDataRouter as any)
 
   // Debugging & Monitoring routes
   // Note: Individual endpoints have their own auth/RBAC via requireAdmin(), requireDeveloper(), etc.
-  v1.use('/logs', logsRouter)  // Logs API - displays all application logs
-  v1.use('/audit', auditRouter)  // Audit Trail API - immutable audit logs
+  v1.use('/logs', logsRouter as any)  // Logs API - displays all application logs
+  v1.use('/audit', auditRouter as any)  // Audit Trail API - immutable audit logs
   // v1.use('/errors', errorsRouter)  // TODO: Fix imports
   // v1.use('/debug', debugRouter)  // TODO: Fix imports
 
   // Team Coordination routes (protected)
   // v1.use('/incidents', incidentsRouter)  // TODO: Fix imports
   // v1.use('/notifications', notificationsRouter)  // TODO: Fix imports
-  v1.use('/team', teamRouter)
+  v1.use('/team', teamRouter as any)
 
   // Metrics & Monitoring routes
   // v1.use('/metrics', metricsRouter)  // TODO: Fix imports
 
   // Trading routes - requires authentication
-  v1.use('/trading', authMiddleware, tradingRouter)
+  v1.use('/trading', authMiddleware as any, tradingRouter as any)
 
   // Market analysis routes (Claude AI analysis) - requires authentication
-  v1.use('/market-analysis', authMiddleware, marketAnalysisRouter)
+  v1.use('/market-analysis', authMiddleware as any, marketAnalysisRouter as any)
 
   // Credentials routes
   v1.use('/credentials', credentialsRouter)

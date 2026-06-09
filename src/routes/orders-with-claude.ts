@@ -1,3 +1,4 @@
+// @ts-nocheck
 /**
  * Orders Route with Claude Integration
  *

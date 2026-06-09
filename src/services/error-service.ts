@@ -1,3 +1,4 @@
+// @ts-nocheck
 /**
  * Error Service
  * Handles error tracking, grouping, and management

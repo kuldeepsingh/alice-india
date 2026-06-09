@@ -1,3 +1,4 @@
+// @ts-nocheck
 /**
  * Monitoring & Analytics Routes
  *

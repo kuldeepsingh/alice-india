@@ -178,12 +178,9 @@ export function errorLoggingMiddleware() {
     LoggingService.storeLog({
       level: 'ERROR',
       message: `Error: ${err.message}`,
-      userId,
-      correlationId,
       module: 'error-handler',
-      context: errorContext,
+      context: { ...errorContext, userId, correlationId, requestId: correlationId },
       stackTrace: err.stack,
-      requestId: correlationId,
     }).catch((dbError) => {
       logger.error({
         type: 'error_log_failed',

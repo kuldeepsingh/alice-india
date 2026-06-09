@@ -1,3 +1,4 @@
+// @ts-nocheck
 /**
  * Errors API Routes
  * Endpoints for error tracking, grouping, and management

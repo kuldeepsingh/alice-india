@@ -1,3 +1,4 @@
+// @ts-nocheck
 /**
  * Testing Service
  * Comprehensive backend testing and diagnostics

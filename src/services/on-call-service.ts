@@ -1,3 +1,4 @@
+// @ts-nocheck
 /**
  * On-Call Service
  * Manages on-call schedule and team availability

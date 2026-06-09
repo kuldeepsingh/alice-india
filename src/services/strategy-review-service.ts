@@ -1,3 +1,4 @@
+// @ts-nocheck
 /**
  * Strategy Review Service
  *

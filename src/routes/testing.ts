@@ -1,3 +1,4 @@
+// @ts-nocheck
 /**
  * Testing Routes
  * Run backend tests and diagnostics

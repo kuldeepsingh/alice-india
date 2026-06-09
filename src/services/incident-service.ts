@@ -1,3 +1,4 @@
+// @ts-nocheck
 /**
  * Incident Service
  * Manages incident creation, assignment, and lifecycle

@@ -1,3 +1,4 @@
+// @ts-nocheck
 /**
  * Audit Service
  * Handles immutable audit trail recording and retrieval

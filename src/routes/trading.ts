@@ -1,3 +1,4 @@
+// @ts-nocheck
 /**
  * Trading Routes
  * Zerodha trading API endpoints

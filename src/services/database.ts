@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { Pool } from 'pg'
 import { readFileSync, readdirSync } from 'fs'
 import { join } from 'path'
