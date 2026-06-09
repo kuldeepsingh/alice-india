@@ -201,7 +201,7 @@ list_users() {
             email,
             role,
             created_at,
-            (SELECT COUNT(*) FROM user_api_keys WHERE user_id = u.id) as api_keys
+            (SELECT COUNT(*) FROM user_api_keys WHERE user_id = u.id::text) as api_keys
         FROM users u
         ORDER BY created_at DESC;
     " | tee -a "$LOG_FILE"
@@ -343,7 +343,7 @@ api_keys_status() {
             ak.created_at,
             ak.last_used_at
         FROM users u
-        LEFT JOIN user_api_keys ak ON u.id = ak.user_id
+        LEFT JOIN user_api_keys ak ON u.id::text = ak.user_id
         ORDER BY u.email, ak.key_type;
     " | tee -a "$LOG_FILE"
 
