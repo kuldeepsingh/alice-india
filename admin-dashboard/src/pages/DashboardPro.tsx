@@ -332,7 +332,7 @@ export function DashboardPro() {
                     <Cell fill={THEME_PRO.warning} />
                     <Cell fill={THEME_PRO.error} />
                   </Pie>
-                  <Tooltip contentStyle={{ backgroundColor: THEME_PRO.bgSecondary, border: `1px solid ${THEME_PRO.border}` }} />
+                  <Tooltip contentStyle={{ backgroundColor: THEME_PRO.bgSecondary, border: `1px solid ${THEME_PRO.border}`, color: THEME_PRO.textPrimary }}  />
                 </PieChart>
               </ResponsiveContainer>
             </Card>
@@ -413,7 +413,7 @@ export function DashboardPro() {
                   <CartesianGrid strokeDasharray="3 3" stroke={THEME_PRO.border} />
                   <XAxis tick={{ fontSize: 9 }} dataKey="date" stroke={THEME_PRO.textSecondary} />
                   <YAxis tick={{ fontSize: 9 }} stroke={THEME_PRO.textSecondary} />
-                  <Tooltip contentStyle={{ backgroundColor: THEME_PRO.bgSecondary, border: `1px solid ${THEME_PRO.border}` }} />
+                  <Tooltip contentStyle={{ backgroundColor: THEME_PRO.bgSecondary, border: `1px solid ${THEME_PRO.border}`, color: THEME_PRO.textPrimary }}  />
                   <Area type="monotone" dataKey="value" stroke={THEME_PRO.primary} fillOpacity={1} fill="url(#colorValue)" />
                 </AreaChart>
               </ResponsiveContainer>
@@ -429,7 +429,7 @@ export function DashboardPro() {
                   <CartesianGrid strokeDasharray="3 3" stroke={THEME_PRO.border} />
                   <XAxis tick={{ fontSize: 9 }} dataKey="time" stroke={THEME_PRO.textSecondary} />
                   <YAxis tick={{ fontSize: 9 }} stroke={THEME_PRO.textSecondary} />
-                  <Tooltip contentStyle={{ backgroundColor: THEME_PRO.bgSecondary, border: `1px solid ${THEME_PRO.border}` }} />
+                  <Tooltip contentStyle={{ backgroundColor: THEME_PRO.bgSecondary, border: `1px solid ${THEME_PRO.border}`, color: THEME_PRO.textPrimary }}  />
                   <Bar dataKey="return" fill={THEME_PRO.success} radius={[8, 8, 0, 0]} />
                 </BarChart>
               </ResponsiveContainer>
@@ -456,7 +456,7 @@ export function DashboardPro() {
                       <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
                     ))}
                   </Pie>
-                  <Tooltip contentStyle={{ backgroundColor: THEME_PRO.bgSecondary, border: `1px solid ${THEME_PRO.border}` }} />
+                  <Tooltip contentStyle={{ backgroundColor: THEME_PRO.bgSecondary, border: `1px solid ${THEME_PRO.border}`, color: THEME_PRO.textPrimary }}  />
                 </PieChart>
               </ResponsiveContainer>
             </Card>
@@ -477,7 +477,7 @@ export function DashboardPro() {
                   <CartesianGrid strokeDasharray="3 3" stroke={THEME_PRO.border} />
                   <XAxis tick={{ fontSize: 9 }} dataKey="week" stroke={THEME_PRO.textSecondary} />
                   <YAxis tick={{ fontSize: 9 }} stroke={THEME_PRO.textSecondary} />
-                  <Tooltip contentStyle={{ backgroundColor: THEME_PRO.bgSecondary, border: `1px solid ${THEME_PRO.border}` }} />
+                  <Tooltip contentStyle={{ backgroundColor: THEME_PRO.bgSecondary, border: `1px solid ${THEME_PRO.border}`, color: THEME_PRO.textPrimary }}  />
                   <Line type="monotone" dataKey="wins" stroke={THEME_PRO.primary} strokeWidth={2} dot={{ fill: THEME_PRO.primary, r: 5 }} />
                 </LineChart>
               </ResponsiveContainer>
