@@ -213,6 +213,7 @@ export const ApiKeySettings = ({ onKeysUpdated }: Props) => {
       {/* Claude API Key */}
       <Card
         sx={{
+          backgroundColor: THEME_PRO.bgSecondary,
           p: SPACING_PRO.xxl,
           borderRadius: RADIUS_PRO.lg,
           border: `1px solid ${THEME_PRO.border}`,
@@ -395,6 +396,7 @@ export const ApiKeySettings = ({ onKeysUpdated }: Props) => {
       {/* Zerodha API Keys */}
       <Card
         sx={{
+          backgroundColor: THEME_PRO.bgSecondary,
           p: SPACING_PRO.xxl,
           borderRadius: RADIUS_PRO.lg,
           border: `1px solid ${THEME_PRO.border}`,
