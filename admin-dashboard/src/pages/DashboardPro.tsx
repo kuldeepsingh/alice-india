@@ -269,7 +269,7 @@ export function DashboardPro() {
                 mb: SPACING_PRO.md,
               }}
             >
-              Trading Dashboard
+              Dashboard
             </Typography>
             <Typography sx={{ color: THEME_PRO.textSecondary, fontSize: '14px' }}>
               Welcome back! Here's your trading overview • Currency: {currencyInfo.symbol} {currency}
