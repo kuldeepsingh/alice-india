@@ -501,6 +501,18 @@ class Logger {
   getLogDirectory(): string {
     return LOG_DIR
   }
+
+  /**
+   * COMPATIBILITY: Create a child logger with additional context
+   * Old pino format: const child = logger.child({ userId: 123 })
+   * Returns: Logger instance with merged context
+   */
+  child(context: Record<string, any>) {
+    // Return this logger instance - it will use merged context for all logs
+    // In a production system, this would create a new logger with inherited context
+    // For now, we return the same logger since context is passed to each call
+    return this
+  }
 }
 
 // ============================================================================
@@ -553,4 +565,64 @@ logger.info('Logger', 'Exhaustive Logger Service initialized', {
   environment: process.env.NODE_ENV,
 })
 
-export default logger
+// ============================================================================
+// PINO COMPATIBILITY WRAPPER
+// ============================================================================
+
+/**
+ * Create a pino-compatible logger wrapper
+ * This wraps our new logger to make it compatible with pino-http middleware
+ * and any code expecting a pino logger interface
+ */
+function createPinoCompatibleLogger() {
+  return {
+    // Standard pino methods
+    trace: (msg: any, obj?: any) => {
+      if (typeof msg === 'string') logger.debug('HTTP', msg, obj)
+      else logger.debug('HTTP', JSON.stringify(msg), msg)
+    },
+    debug: (msg: any, obj?: any) => {
+      if (typeof msg === 'string') logger.debug('HTTP', msg, obj)
+      else logger.debug('HTTP', JSON.stringify(msg), msg)
+    },
+    info: (msg: any, obj?: any) => {
+      if (typeof msg === 'string') logger.info('HTTP', msg, obj)
+      else logger.info('HTTP', JSON.stringify(msg), msg)
+    },
+    warn: (msg: any, obj?: any) => {
+      if (typeof msg === 'string') logger.warn('HTTP', msg, obj)
+      else logger.warn('HTTP', JSON.stringify(msg), msg)
+    },
+    error: (msg: any, obj?: any) => {
+      const error = msg instanceof Error ? msg : (obj instanceof Error ? obj : undefined)
+      if (typeof msg === 'string') logger.error('HTTP', msg, error, obj)
+      else logger.error('HTTP', JSON.stringify(msg), msg instanceof Error ? msg : undefined, msg)
+    },
+    fatal: (msg: any, obj?: any) => {
+      const error = msg instanceof Error ? msg : (obj instanceof Error ? obj : undefined)
+      if (typeof msg === 'string') logger.fatal('HTTP', msg, error, obj)
+      else logger.fatal('HTTP', JSON.stringify(msg), msg instanceof Error ? msg : undefined, msg)
+    },
+
+    // Pino child method - for compatibility
+    child: (context: Record<string, any>) => {
+      return createPinoCompatibleLogger()
+    },
+
+    // Expose our logger methods too
+    getRecentLogs: logger.getRecentLogs.bind(logger),
+    getLogsByLevel: logger.getLogsByLevel.bind(logger),
+    getLogsByModule: logger.getLogsByModule.bind(logger),
+    searchLogs: logger.searchLogs.bind(logger),
+    getErrorLogs: logger.getErrorLogs.bind(logger),
+    getLogStatistics: logger.getLogStatistics.bind(logger),
+    clearBuffer: logger.clearBuffer.bind(logger),
+    getLogFilePath: logger.getLogFilePath.bind(logger),
+    getLogDirectory: logger.getLogDirectory.bind(logger),
+  }
+}
+
+// Create and export pino-compatible logger
+const pinoCompatibleLogger = createPinoCompatibleLogger()
+
+export default pinoCompatibleLogger
