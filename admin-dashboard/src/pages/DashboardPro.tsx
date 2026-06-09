@@ -225,11 +225,13 @@ export function DashboardPro() {
             <Box key={index}>
               <Card
                 sx={{
+                  backgroundColor: THEME_PRO.bgSecondary,
                   p: SPACING_PRO.xxl,
                   borderRadius: RADIUS_PRO.lg,
                   border: `1px solid ${THEME_PRO.border}`,
                   transition: TRANSITIONS_PRO.normal,
                   cursor: 'pointer',
+                  boxShadow: SHADOWS_PRO.md,
                   '&:hover': {
                     boxShadow: SHADOWS_PRO.lg,
                     transform: 'translateY(-4px)',
@@ -337,18 +339,19 @@ export function DashboardPro() {
           <Box>
             <Card
               sx={{
+                backgroundColor: THEME_PRO.bgSecondary,
                 p: SPACING_PRO.xxl,
                 borderRadius: RADIUS_PRO.lg,
                 border: `1px solid ${THEME_PRO.border}`,
-                background: THEME_PRO.gradientPrimary,
+                boxShadow: SHADOWS_PRO.md,
               }}
             >
               <Typography
-                sx={{ fontSize: '14px', fontWeight: 600, color: THEME_PRO.textInverse, opacity: 0.8, mb: SPACING_PRO.md }}
+                sx={{ fontSize: '14px', fontWeight: 600, color: THEME_PRO.primary, opacity: 0.9, mb: SPACING_PRO.md, textTransform: 'uppercase', letterSpacing: '0.5px' }}
               >
                 Account Balance
               </Typography>
-              <Typography sx={{ fontSize: '32px', fontWeight: 700, color: THEME_PRO.textInverse, mb: SPACING_PRO.lg }}>
+              <Typography sx={{ fontSize: '32px', fontWeight: 700, color: THEME_PRO.textPrimary, mb: SPACING_PRO.lg }}>
                 {showValues ? formatCurrency(accountBalance, currency) : '••••••'}
               </Typography>
               <Box sx={{ display: 'flex', gap: SPACING_PRO.sm }}>
@@ -357,11 +360,11 @@ export function DashboardPro() {
                   variant="contained"
                   sx={{
                     flex: 1,
-                    backgroundColor: THEME_PRO.textInverse,
-                    color: THEME_PRO.primary,
+                    backgroundColor: THEME_PRO.primary,
+                    color: '#fff',
                     fontWeight: 600,
                     textTransform: 'none',
-                    '&:hover': { backgroundColor: THEME_PRO.bgPrimary },
+                    '&:hover': { backgroundColor: THEME_PRO.primaryDark },
                   }}
                 >
                   Deposit
@@ -371,11 +374,11 @@ export function DashboardPro() {
                   variant="outlined"
                   sx={{
                     flex: 1,
-                    borderColor: THEME_PRO.textInverse,
-                    color: THEME_PRO.textInverse,
+                    borderColor: THEME_PRO.primary,
+                    color: THEME_PRO.primary,
                     fontWeight: 600,
                     textTransform: 'none',
-                    '&:hover': { backgroundColor: 'rgba(255,255,255,0.1)' },
+                    '&:hover': { backgroundColor: THEME_PRO.primaryLight },
                   }}
                 >
                   Withdraw
