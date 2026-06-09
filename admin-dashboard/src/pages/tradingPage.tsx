@@ -154,12 +154,11 @@ export function tradingPage() {
     // Also save to backend so it appears in Orders page
     try {
       await ordersAPI.create({
+        accountId: 'default-account',
         symbol: newOrder.symbol,
-        side: newOrder.type,
+        side: newOrder.type === 'Buy' ? 'BUY' : 'SELL',
         quantity: newOrder.quantity,
         price: newOrder.price,
-        orderType: 'MARKET',
-        status: newOrder.status,
       })
       frontendLogger.info('Trading', 'Order saved to backend', {
         orderId: newOrder.id,
