@@ -418,10 +418,6 @@ export function DashboardPro() {
 
         {/* Charts Section */}
         <Box sx={{ mt: SPACING_PRO.md }}>
-          <Typography variant="h5" sx={{ fontSize: '22px', fontWeight: 700, color: THEME_PRO.textPrimary, mb: SPACING_PRO.lg }}>
-            📊 Performance Analytics
-          </Typography>
-
           {/* Top Row: 3 Charts */}
           <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', md: 'repeat(3, 1fr)' }, gap: 2, mb: SPACING_PRO.md }}>
             {/* Portfolio Value Chart */}
