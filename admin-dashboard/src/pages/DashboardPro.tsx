@@ -295,7 +295,7 @@ export function DashboardPro() {
         </Box>
 
         {/* Performance Section */}
-        <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', md: '1.5fr 1.5fr' }, gap: 2 }}>
+        <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', md: '1fr 2fr' }, gap: 2 }}>
           <Box>
             <Card
               sx={{
