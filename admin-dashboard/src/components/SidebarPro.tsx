@@ -25,7 +25,6 @@ import {
   WarningAmber,
   Group,
   Speed,
-  SmartToy,
   BarChart,
 } from '@mui/icons-material'
 import { THEME_PRO, SPACING_PRO, RADIUS_PRO, TRANSITIONS_PRO } from '../theme-pro'
@@ -39,7 +38,6 @@ const menuSections = [
       { label: 'Accounts', path: '/accounts', icon: AccountBalance },
       { label: 'Orders', path: '/orders', icon: ShoppingCart },
       { label: 'Market', path: '/market', icon: BarChart },
-      { label: 'Autonomous Bot', path: '/trading-bot', icon: SmartToy },
       { label: 'Analytics', path: '/analytics', icon: TrendingUp },
     ],
   },
