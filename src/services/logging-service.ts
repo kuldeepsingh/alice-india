@@ -255,6 +255,39 @@ class LoggingService {
       return 0
     }
   }
+
+  /**
+   * Store a log entry (static method for compatibility)
+   * Used by log-capture middleware
+   */
+  async storeLog(logData: {
+    level: LogLevel
+    message: string
+    module?: string
+    context?: any
+    stackTrace?: string
+  }): Promise<void> {
+    this.log(
+      logData.level,
+      logData.module || 'HTTP',
+      logData.message,
+      logData.context,
+      logData.stackTrace ? new Error(logData.stackTrace) : undefined
+    )
+  }
+
+  /**
+   * Static storeLog method for compatibility with middleware
+   */
+  static async storeLog(logData: {
+    level: LogLevel
+    message: string
+    module?: string
+    context?: any
+    stackTrace?: string
+  }): Promise<void> {
+    return loggingService.storeLog(logData)
+  }
 }
 
 export { LoggingService }; export const loggingService = new LoggingService()

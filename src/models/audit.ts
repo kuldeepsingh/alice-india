@@ -19,6 +19,9 @@ export type AuditAction =
   | 'account_created'
   | 'account_updated'
   | 'account_deleted'
+  | 'unauthorized_access'
+  | 'permission_denied'
+  | 'ownership_violation'
 
 export type AuditStatus = 'success' | 'failure'
 
