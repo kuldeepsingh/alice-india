@@ -323,7 +323,7 @@ export function DashboardPro() {
                     cy="50%"
                     labelLine={false}
                     label={({ name, value }) => `${name}: ${value}%`}
-                    outerRadius={50}
+                    outerRadius={40}
                     fill="#8884d8"
                     dataKey="value"
                   >
@@ -402,7 +402,7 @@ export function DashboardPro() {
               <Typography sx={{ fontSize: '14px', fontWeight: 700, color: THEME_PRO.textPrimary, mb: SPACING_PRO.md }}>
                 Portfolio Value Trend
               </Typography>
-              <ResponsiveContainer width="100%" height={150}>
+              <ResponsiveContainer width="100%" height={120}>
                 <AreaChart data={portfolioData}>
                   <defs>
                     <linearGradient id="colorValue" x1="0" y1="0" x2="0" y2="1">
@@ -424,7 +424,7 @@ export function DashboardPro() {
               <Typography sx={{ fontSize: '14px', fontWeight: 700, color: THEME_PRO.textPrimary, mb: SPACING_PRO.md }}>
                 Daily Returns (%)
               </Typography>
-              <ResponsiveContainer width="100%" height={150}>
+              <ResponsiveContainer width="100%" height={120}>
                 <BarChart data={dailyReturnsData}>
                   <CartesianGrid strokeDasharray="3 3" stroke={THEME_PRO.border} />
                   <XAxis dataKey="time" stroke={THEME_PRO.textSecondary} />
@@ -440,7 +440,7 @@ export function DashboardPro() {
               <Typography sx={{ fontSize: '14px', fontWeight: 700, color: THEME_PRO.textPrimary, mb: SPACING_PRO.md }}>
                 Strategy Allocation
               </Typography>
-              <ResponsiveContainer width="100%" height={150}>
+              <ResponsiveContainer width="100%" height={120}>
                 <PieChart>
                   <Pie
                     data={strategyData}
@@ -466,7 +466,7 @@ export function DashboardPro() {
               <Typography sx={{ fontSize: '14px', fontWeight: 700, color: THEME_PRO.textPrimary, mb: SPACING_PRO.md }}>
                 Weekly Win Rate
               </Typography>
-              <ResponsiveContainer width="100%" height={150}>
+              <ResponsiveContainer width="100%" height={120}>
                 <LineChart data={[
                   { week: 'Week 1', wins: 65 },
                   { week: 'Week 2', wins: 70 },
