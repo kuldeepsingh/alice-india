@@ -18,6 +18,7 @@ import { incidentsPage as IncidentsPage } from './pages/incidentsPage'
 import { teamPage as TeamPage } from './pages/teamPage'
 import { performancePage as PerformancePage } from './pages/performancePage'
 import { tradingPage as TradingPage } from './pages/tradingPage'
+import { marketDashboard as MarketDashboard } from './pages/marketDashboard'
 import TradingBotPage from './pages/TradingBotPage'
 
 function ProtectedRoute({ children }: { children: React.ReactNode }) {
@@ -46,6 +47,7 @@ export function App() {
         <Route path="/users" element={<ProtectedRoute><UsersPage /></ProtectedRoute>} />
         <Route path="/accounts" element={<ProtectedRoute><AccountsPage /></ProtectedRoute>} />
         <Route path="/orders" element={<ProtectedRoute><OrdersPage /></ProtectedRoute>} />
+        <Route path="/market" element={<ProtectedRoute><MarketDashboard /></ProtectedRoute>} />
         <Route path="/trading" element={<ProtectedRoute><TradingPage /></ProtectedRoute>} />
         <Route path="/trading-bot" element={<ProtectedRoute><TradingBotPage /></ProtectedRoute>} />
         <Route path="/analytics" element={<ProtectedRoute><AnalyticsPage /></ProtectedRoute>} />
