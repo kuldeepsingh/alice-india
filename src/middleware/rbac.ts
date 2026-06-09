@@ -29,14 +29,37 @@ declare global {
 export function requireAdmin() {
   return (req: Request, res: Response, next: NextFunction) => {
     if (!req.user) {
+      // Log authentication required
+      console.log(`[RBAC] Admin access denied - user not authenticated, path: ${req.path}`)
+      logger.warn('RBAC', 'Admin access denied - user not authenticated', {
+        path: req.path,
+        method: req.method,
+        ip: req.ip,
+        reason: 'not_authenticated',
+        errorMessage: 'User is not authenticated',
+        requiredRole: Roles.ADMIN,
+      })
       return res.status(401).json({
         status: 'error',
         message: 'Authentication required',
+        reason: 'not_authenticated',
         correlationId: req.correlationId,
       })
     }
 
     if (req.user.role !== Roles.ADMIN) {
+      // Log role mismatch
+      console.log(`[RBAC] Admin access denied - insufficient role: ${req.user.role}, path: ${req.path}`)
+      logger.warn('RBAC', `Admin access denied - user has insufficient role: ${req.user.role}`, {
+        userId: req.user.id,
+        userEmail: req.user.email,
+        userRole: req.user.role,
+        requiredRole: Roles.ADMIN,
+        path: req.path,
+        method: req.method,
+        ip: req.ip,
+        reason: 'insufficient_role',
+      })
       logger.warn({
         type: 'unauthorized_access',
         userId: req.user.id,

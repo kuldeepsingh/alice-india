@@ -190,8 +190,9 @@ export function createApp() {
   // Market data routes (some protected, some public)
   v1.use('/market', marketDataRouter)
 
-  // Debugging & Monitoring routes (protected)
-  v1.use('/logs', authMiddleware, logsRouter)  // Logs API - displays all application logs (requires auth)
+  // Debugging & Monitoring routes
+  // Note: Individual endpoints have their own auth/RBAC via requireAdmin(), requireDeveloper(), etc.
+  v1.use('/logs', logsRouter)  // Logs API - displays all application logs
   // v1.use('/errors', errorsRouter)  // TODO: Fix imports
   // v1.use('/audit', auditRouter)  // TODO: Fix imports
   // v1.use('/debug', debugRouter)  // TODO: Fix imports
