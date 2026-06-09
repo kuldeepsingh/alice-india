@@ -4,152 +4,90 @@ import {
   Box,
   Card,
   Typography,
-  TextField,
   Button,
-  Table,
-  TableBody,
-  TableCell,
-  TableContainer,
-  TableHead,
-  TableRow,
-  Chip,
-  Select,
-  MenuItem,
-  FormControl,
-  InputLabel,
+  Stack,
   CircularProgress,
-  Alert,
-  Dialog,
-  DialogTitle,
-  DialogContent,
-  DialogActions,
 } from '@mui/material'
-import { Download, Refresh, Delete, Info } from '@mui/icons-material'
-import { THEME_PRO, SPACING_PRO, RADIUS_PRO, SHADOWS_PRO } from '../theme-pro'
-
-interface LogEntry {
-  timestamp: string
-  level: string
-  module: string
-  message: string
-  context?: Record<string, any>
-}
-
-interface LogFile {
-  name: string
-  size: number
-  modified: string
-}
+import { Refresh } from '@mui/icons-material'
+import { THEME_PRO, SPACING_PRO, RADIUS_PRO } from '../theme-pro'
 
 export function AdminLogsPage() {
-  const [logs, setLogs] = useState<LogEntry[]>([])
-  const [logFiles, setLogFiles] = useState<LogFile[]>([])
+  const [backendLogs, setBackendLogs] = useState<string>('')
+  const [frontendLogs, setFrontendLogs] = useState<string>('')
   const [loading, setLoading] = useState(false)
-  const [totalLogs, setTotalLogs] = useState(0)
-
-  const [limit] = useState(100)
-  const [offset, setOffset] = useState(0)
-  const [levelFilter, setLevelFilter] = useState<string>('')
-  const [serviceFilter, setServiceFilter] = useState('')
-  const [searchTerm, setSearchTerm] = useState('')
-
-  const [showClearDialog, setShowClearDialog] = useState(false)
-  const [daysToKeep, setDaysToKeep] = useState('30')
 
   useEffect(() => {
     fetchLogs()
-    fetchLogStats()
-  }, [offset, levelFilter, serviceFilter, searchTerm])
+    // Auto-refresh every 5 seconds
+    const interval = setInterval(fetchLogs, 5000)
+    return () => clearInterval(interval)
+  }, [])
 
   const fetchLogs = async () => {
     setLoading(true)
     try {
-      const params = new URLSearchParams({
-        limit: limit.toString(),
-      })
-
-      if (levelFilter) params.append('level', levelFilter)
-      if (serviceFilter) params.append('module', serviceFilter)
-      if (searchTerm) params.append('search', searchTerm)
-
-      // Fetch logs from backend API
-      const response = await fetch(`/api/v1/logs?${params}`)
-      if (!response.ok) {
-        throw new Error(`Failed to fetch logs: ${response.status}`)
-      }
+      // Fetch backend logs from API
+      const response = await fetch('/api/v1/logs?limit=500')
       const data = await response.json()
 
-      // Map API response to component state
-      setLogs(data.data || [])
-      setTotalLogs(data.pagination?.total || 0)
+      // Convert logs array to formatted JSON text
+      const logsText = data.data
+        .map((log: any) => JSON.stringify(log))
+        .join('\n')
 
-      console.log('✅ Logs fetched:', data.data?.length || 0, 'logs')
+      setBackendLogs(logsText)
+
+      // Frontend logs from localStorage
+      const storedLogs = localStorage.getItem('app_logs')
+      if (storedLogs) {
+        try {
+          const frontendLogsArray = JSON.parse(storedLogs)
+          const frontendText = frontendLogsArray
+            .map((log: any) => JSON.stringify(log))
+            .join('\n')
+          setFrontendLogs(frontendText)
+        } catch (e) {
+          setFrontendLogs(storedLogs)
+        }
+      } else {
+        setFrontendLogs('No frontend logs yet. Check console for activity.')
+      }
     } catch (error) {
-      console.error('❌ Failed to fetch logs:', error)
-      setLogs([])
-      setTotalLogs(0)
+      console.error('Failed to fetch logs:', error)
+      setBackendLogs('Error loading backend logs')
     } finally {
       setLoading(false)
     }
   }
 
-  const fetchLogStats = async () => {
-    try {
-      // Fetch statistics from backend API
-      const response = await fetch('/api/v1/logs/stats')
-      if (!response.ok) {
-        throw new Error(`Failed to fetch log stats: ${response.status}`)
-      }
-      const data = await response.json()
-
-      // Stats returned as-is, set empty files array for now
-      setLogFiles([])
-
-      console.log('📊 Stats fetched:', data.stats)
-    } catch (error) {
-      console.error('❌ Failed to fetch log stats:', error)
-      setLogFiles([])
-    }
+  const handleCopyBackend = () => {
+    navigator.clipboard.writeText(backendLogs)
+    alert('Backend logs copied to clipboard!')
   }
 
-  const handleDownload = async () => {
-    try {
-      // Download all logs as JSON
-      const response = await fetch('/api/v1/logs/export')
-      const data = await response.json()
-      const blob = new Blob([JSON.stringify(data.data, null, 2)], { type: 'application/json' })
-      const url = window.URL.createObjectURL(blob)
-      const a = document.createElement('a')
-      a.href = url
-      a.download = `logs-${new Date().toISOString().split('T')[0]}.json`
-      a.click()
-      window.URL.revokeObjectURL(url)
-      console.log('✅ Logs exported')
-    } catch (error) {
-      console.error('❌ Failed to download log:', error)
-    }
+  const handleCopyFrontend = () => {
+    navigator.clipboard.writeText(frontendLogs)
+    alert('Frontend logs copied to clipboard!')
   }
 
-  const handleClearLogs = async () => {
-    try {
-      // Clear logs endpoint not yet implemented
-      // For now, just show a message
-      console.log('Clear logs feature coming soon')
-      setShowClearDialog(false)
-    } catch (error) {
-      console.error('Failed to clear logs:', error)
-    }
+  const handleDownloadBackend = () => {
+    const element = document.createElement('a')
+    const file = new Blob([backendLogs], { type: 'text/plain' })
+    element.href = URL.createObjectURL(file)
+    element.download = `backend-logs-${new Date().toISOString().split('T')[0]}.log`
+    document.body.appendChild(element)
+    element.click()
+    document.body.removeChild(element)
   }
 
-  const getLevelColor = (level: string) => {
-    const colors: any = {
-      DEBUG: THEME_PRO.info,
-      INFO: THEME_PRO.success,
-      WARN: THEME_PRO.warning,
-      ERROR: THEME_PRO.error,
-      FATAL: '#d32f2f',
-    }
-    return colors[level] || THEME_PRO.textSecondary
+  const handleDownloadFrontend = () => {
+    const element = document.createElement('a')
+    const file = new Blob([frontendLogs], { type: 'text/plain' })
+    element.href = URL.createObjectURL(file)
+    element.download = `frontend-logs-${new Date().toISOString().split('T')[0]}.log`
+    document.body.appendChild(element)
+    element.click()
+    document.body.removeChild(element)
   }
 
   return (
@@ -158,272 +96,149 @@ export function AdminLogsPage() {
         {/* Header */}
         <Box sx={{ mb: SPACING_PRO.xxxl }}>
           <Typography variant="h4" sx={{ fontSize: '32px', fontWeight: 700, color: THEME_PRO.textPrimary, mb: SPACING_PRO.md }}>
-            📋 Complete System Logs
+            📋 System Logs
           </Typography>
           <Typography sx={{ color: THEME_PRO.textSecondary }}>
-            View and manage all application logs for troubleshooting and diagnostics
+            Real-time backend and frontend logs in raw JSON format
           </Typography>
         </Box>
 
-        {/* Log Files Summary */}
-        <Card sx={{ p: SPACING_PRO.xxl, borderRadius: RADIUS_PRO.lg, border: `1px solid ${THEME_PRO.border}`, mb: SPACING_PRO.lg }}>
-          <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: SPACING_PRO.lg }}>
-            <Typography sx={{ fontSize: '16px', fontWeight: 700, color: THEME_PRO.textPrimary }}>
-              📁 Log Files ({logFiles.length})
-            </Typography>
-            <Box sx={{ display: 'flex', gap: SPACING_PRO.sm }}>
-              <Button
-                startIcon={<Refresh />}
-                onClick={fetchLogStats}
-                sx={{
-                  textTransform: 'none',
-                  color: THEME_PRO.primary,
-                  border: `1px solid ${THEME_PRO.border}`,
-                  '&:hover': { backgroundColor: THEME_PRO.primaryLight },
-                }}
-              >
-                Refresh
-              </Button>
-              <Button
-                startIcon={<Delete />}
-                onClick={() => setShowClearDialog(true)}
-                sx={{
-                  textTransform: 'none',
-                  color: THEME_PRO.error,
-                  border: `1px solid ${THEME_PRO.border}`,
-                  '&:hover': { backgroundColor: THEME_PRO.errorLight },
-                }}
-              >
-                Clear Old
-              </Button>
-            </Box>
+        {loading && (
+          <Box sx={{ display: 'flex', justifyContent: 'center', p: SPACING_PRO.xxl }}>
+            <CircularProgress />
           </Box>
+        )}
 
-          {logFiles.length > 0 && (
-            <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', md: '1fr 1fr 1fr' }, gap: 2 }}>
-              {logFiles.map((file) => (
-                <Card key={file.name} sx={{ p: SPACING_PRO.lg, backgroundColor: THEME_PRO.bgTertiary, border: `1px solid ${THEME_PRO.border}` }}>
-                  <Typography sx={{ fontSize: '13px', fontWeight: 600, color: THEME_PRO.primary, mb: SPACING_PRO.sm }}>
-                    {file.name}
-                  </Typography>
-                  <Typography sx={{ fontSize: '12px', color: THEME_PRO.textSecondary, mb: SPACING_PRO.sm }}>
-                    Size: {(file.size / 1024).toFixed(2)} KB
-                  </Typography>
-                  <Typography sx={{ fontSize: '12px', color: THEME_PRO.textTertiary, mb: SPACING_PRO.md }}>
-                    Modified: {file.modified}
-                  </Typography>
+        {!loading && (
+          <Stack spacing={SPACING_PRO.lg}>
+            {/* Backend Logs */}
+            <Card sx={{ p: SPACING_PRO.xxl, borderRadius: RADIUS_PRO.lg, border: `1px solid ${THEME_PRO.border}` }}>
+              <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: SPACING_PRO.lg }}>
+                <Typography sx={{ fontSize: '18px', fontWeight: 700, color: THEME_PRO.textPrimary }}>
+                  🖥️ Backend Logs
+                </Typography>
+                <Stack direction="row" spacing={SPACING_PRO.sm}>
                   <Button
-                    fullWidth
                     size="small"
-                    startIcon={<Download />}
-                    onClick={() => handleDownload(file.name)}
+                    startIcon={<Refresh />}
+                    onClick={fetchLogs}
                     sx={{
                       textTransform: 'none',
                       color: THEME_PRO.primary,
-                      border: `1px solid ${THEME_PRO.primary}`,
-                      '&:hover': { backgroundColor: THEME_PRO.primaryLight },
+                      border: `1px solid ${THEME_PRO.border}`,
+                    }}
+                  >
+                    Refresh
+                  </Button>
+                  <Button
+                    size="small"
+                    onClick={handleCopyBackend}
+                    sx={{
+                      textTransform: 'none',
+                      color: THEME_PRO.primary,
+                      border: `1px solid ${THEME_PRO.border}`,
+                    }}
+                  >
+                    Copy
+                  </Button>
+                  <Button
+                    size="small"
+                    onClick={handleDownloadBackend}
+                    sx={{
+                      textTransform: 'none',
+                      color: THEME_PRO.primary,
+                      border: `1px solid ${THEME_PRO.border}`,
                     }}
                   >
                     Download
                   </Button>
-                </Card>
-              ))}
-            </Box>
-          )}
-        </Card>
+                </Stack>
+              </Box>
 
-        {/* Filters */}
-        <Card sx={{ p: SPACING_PRO.xxl, borderRadius: RADIUS_PRO.lg, border: `1px solid ${THEME_PRO.border}`, mb: SPACING_PRO.lg }}>
-          <Typography sx={{ fontSize: '16px', fontWeight: 700, color: THEME_PRO.textPrimary, mb: SPACING_PRO.lg }}>
-            🔍 Filters
-          </Typography>
-
-          <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', md: '1fr 1fr 1fr' }, gap: 2 }}>
-            <TextField
-              placeholder="Search logs..."
-              value={searchTerm}
-              onChange={(e) => {
-                setSearchTerm(e.target.value)
-                setOffset(0)
-              }}
-              sx={{
-                '& .MuiOutlinedInput-root': {
-                  backgroundColor: THEME_PRO.bgTertiary,
-                  '& fieldset': { borderColor: THEME_PRO.border },
-                },
-              }}
-            />
-
-            <FormControl>
-              <InputLabel>Level</InputLabel>
-              <Select
-                value={levelFilter}
-                label="Level"
-                onChange={(e) => {
-                  setLevelFilter(e.target.value)
-                  setOffset(0)
-                }}
+              <Box
+                component="pre"
                 sx={{
                   backgroundColor: THEME_PRO.bgTertiary,
-                  '& .MuiOutlinedInput-notchedOutline': { borderColor: THEME_PRO.border },
+                  color: THEME_PRO.textSecondary,
+                  p: SPACING_PRO.lg,
+                  borderRadius: RADIUS_PRO.md,
+                  border: `1px solid ${THEME_PRO.border}`,
+                  maxHeight: '600px',
+                  overflow: 'auto',
+                  fontFamily: 'monospace',
+                  fontSize: '12px',
+                  lineHeight: 1.5,
                 }}
               >
-                <MenuItem value="">All Levels</MenuItem>
-                <MenuItem value="DEBUG">DEBUG</MenuItem>
-                <MenuItem value="INFO">INFO</MenuItem>
-                <MenuItem value="WARN">WARN</MenuItem>
-                <MenuItem value="ERROR">ERROR</MenuItem>
-                <MenuItem value="FATAL">FATAL</MenuItem>
-              </Select>
-            </FormControl>
+                {backendLogs || 'No logs yet...'}
+              </Box>
+            </Card>
 
-            <TextField
-              placeholder="Filter by service..."
-              value={serviceFilter}
-              onChange={(e) => {
-                setServiceFilter(e.target.value)
-                setOffset(0)
-              }}
-              sx={{
-                '& .MuiOutlinedInput-root': {
+            {/* Frontend Logs */}
+            <Card sx={{ p: SPACING_PRO.xxl, borderRadius: RADIUS_PRO.lg, border: `1px solid ${THEME_PRO.border}` }}>
+              <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: SPACING_PRO.lg }}>
+                <Typography sx={{ fontSize: '18px', fontWeight: 700, color: THEME_PRO.textPrimary }}>
+                  🌐 Frontend Logs
+                </Typography>
+                <Stack direction="row" spacing={SPACING_PRO.sm}>
+                  <Button
+                    size="small"
+                    startIcon={<Refresh />}
+                    onClick={fetchLogs}
+                    sx={{
+                      textTransform: 'none',
+                      color: THEME_PRO.primary,
+                      border: `1px solid ${THEME_PRO.border}`,
+                    }}
+                  >
+                    Refresh
+                  </Button>
+                  <Button
+                    size="small"
+                    onClick={handleCopyFrontend}
+                    sx={{
+                      textTransform: 'none',
+                      color: THEME_PRO.primary,
+                      border: `1px solid ${THEME_PRO.border}`,
+                    }}
+                  >
+                    Copy
+                  </Button>
+                  <Button
+                    size="small"
+                    onClick={handleDownloadFrontend}
+                    sx={{
+                      textTransform: 'none',
+                      color: THEME_PRO.primary,
+                      border: `1px solid ${THEME_PRO.border}`,
+                    }}
+                  >
+                    Download
+                  </Button>
+                </Stack>
+              </Box>
+
+              <Box
+                component="pre"
+                sx={{
                   backgroundColor: THEME_PRO.bgTertiary,
-                  '& fieldset': { borderColor: THEME_PRO.border },
-                },
-              }}
-            />
-          </Box>
-
-          <Box sx={{ mt: SPACING_PRO.lg, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-            <Typography sx={{ fontSize: '13px', color: THEME_PRO.textSecondary }}>
-              Showing {logs.length} of {totalLogs} logs
-            </Typography>
-          </Box>
-        </Card>
-
-        {/* Logs Table */}
-        {loading ? (
-          <Box sx={{ display: 'flex', justifyContent: 'center', p: SPACING_PRO.xxl }}>
-            <CircularProgress />
-          </Box>
-        ) : logs.length > 0 ? (
-          <Card sx={{ borderRadius: RADIUS_PRO.lg, border: `1px solid ${THEME_PRO.border}`, overflow: 'hidden' }}>
-            <TableContainer>
-              <Table>
-                <TableHead sx={{ backgroundColor: THEME_PRO.bgTertiary }}>
-                  <TableRow>
-                    <TableCell sx={{ fontWeight: 700, color: THEME_PRO.textPrimary, width: '150px' }}>
-                      Timestamp
-                    </TableCell>
-                    <TableCell sx={{ fontWeight: 700, color: THEME_PRO.textPrimary, width: '80px' }}>
-                      Level
-                    </TableCell>
-                    <TableCell sx={{ fontWeight: 700, color: THEME_PRO.textPrimary, width: '120px' }}>
-                      Service
-                    </TableCell>
-                    <TableCell sx={{ fontWeight: 700, color: THEME_PRO.textPrimary }}>
-                      Message
-                    </TableCell>
-                  </TableRow>
-                </TableHead>
-                <TableBody>
-                  {logs.map((log, idx) => (
-                    <TableRow key={idx} sx={{ borderBottom: `1px solid ${THEME_PRO.border}`, '&:hover': { backgroundColor: THEME_PRO.bgTertiary } }}>
-                      <TableCell sx={{ color: THEME_PRO.textSecondary, fontSize: '12px', fontFamily: 'monospace' }}>
-                        {new Date(log.timestamp).toLocaleString()}
-                      </TableCell>
-                      <TableCell>
-                        <Chip
-                          label={log.level}
-                          size="small"
-                          sx={{
-                            backgroundColor: getLevelColor(log.level) + '20',
-                            color: getLevelColor(log.level),
-                            fontWeight: 600,
-                          }}
-                        />
-                      </TableCell>
-                      <TableCell sx={{ color: THEME_PRO.primary, fontWeight: 600, fontSize: '13px' }}>
-                        {log.module}
-                      </TableCell>
-                      <TableCell sx={{ color: THEME_PRO.textSecondary, fontSize: '13px', maxWidth: '400px', wordBreak: 'break-word' }}>
-                        {log.message}
-                      </TableCell>
-                    </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
-            </TableContainer>
-          </Card>
-        ) : (
-          <Alert sx={{ backgroundColor: THEME_PRO.infoLight, color: THEME_PRO.info, borderColor: THEME_PRO.info, border: `1px solid` }}>
-            No logs found matching your filters
-          </Alert>
-        )}
-
-        {/* Pagination */}
-        {totalLogs > limit && (
-          <Box sx={{ display: 'flex', justifyContent: 'center', gap: SPACING_PRO.sm, mt: SPACING_PRO.lg }}>
-            <Button
-              disabled={offset === 0}
-              onClick={() => setOffset(Math.max(0, offset - limit))}
-              sx={{
-                textTransform: 'none',
-                color: THEME_PRO.primary,
-                border: `1px solid ${THEME_PRO.border}`,
-              }}
-            >
-              Previous
-            </Button>
-            <Typography sx={{ alignSelf: 'center', color: THEME_PRO.textSecondary }}>
-              Page {Math.floor(offset / limit) + 1} of {Math.ceil(totalLogs / limit)}
-            </Typography>
-            <Button
-              disabled={offset + limit >= totalLogs}
-              onClick={() => setOffset(offset + limit)}
-              sx={{
-                textTransform: 'none',
-                color: THEME_PRO.primary,
-                border: `1px solid ${THEME_PRO.border}`,
-              }}
-            >
-              Next
-            </Button>
-          </Box>
+                  color: THEME_PRO.textSecondary,
+                  p: SPACING_PRO.lg,
+                  borderRadius: RADIUS_PRO.md,
+                  border: `1px solid ${THEME_PRO.border}`,
+                  maxHeight: '600px',
+                  overflow: 'auto',
+                  fontFamily: 'monospace',
+                  fontSize: '12px',
+                  lineHeight: 1.5,
+                }}
+              >
+                {frontendLogs || 'No frontend logs yet...'}
+              </Box>
+            </Card>
+          </Stack>
         )}
       </Box>
-
-      {/* Clear Logs Dialog */}
-      <Dialog open={showClearDialog} onClose={() => setShowClearDialog(false)} maxWidth="sm" fullWidth>
-        <DialogTitle>Clear Old Logs</DialogTitle>
-        <DialogContent>
-          <Box sx={{ pt: SPACING_PRO.lg }}>
-            <Typography sx={{ mb: SPACING_PRO.md, color: THEME_PRO.textSecondary }}>
-              Remove log files older than:
-            </Typography>
-            <TextField
-              fullWidth
-              type="number"
-              value={daysToKeep}
-              onChange={(e) => setDaysToKeep(e.target.value)}
-              inputProps={{ min: '1' }}
-              sx={{
-                '& .MuiOutlinedInput-root': {
-                  backgroundColor: THEME_PRO.bgTertiary,
-                },
-              }}
-            />
-            <Typography sx={{ mt: SPACING_PRO.sm, fontSize: '12px', color: THEME_PRO.textSecondary }}>
-              Default: 30 days
-            </Typography>
-          </Box>
-        </DialogContent>
-        <DialogActions sx={{ p: SPACING_PRO.lg }}>
-          <Button onClick={() => setShowClearDialog(false)}>Cancel</Button>
-          <Button onClick={handleClearLogs} variant="contained" sx={{ backgroundColor: THEME_PRO.error }}>
-            Clear
-          </Button>
-        </DialogActions>
-      </Dialog>
     </LayoutPro>
   )
 }
