@@ -24,6 +24,7 @@ export function tradingPage() {
   const [symbol, setSymbol] = useState('INFY')
   const [quantity, setQuantity] = useState('100')
   const [price, setPrice] = useState('1850')
+  const [stopLoss, setStopLoss] = useState('')
   const [executedOrders, setExecutedOrders] = useState<ExecutedOrder[]>([])
   const [orderMessage, setOrderMessage] = useState('')
   const [confirmDialogOpen, setConfirmDialogOpen] = useState(false)
@@ -127,6 +128,7 @@ export function tradingPage() {
     setSymbol('INFY')
     setQuantity('100')
     setPrice('1850')
+    setStopLoss('')
 
     setTimeout(() => setOrderMessage(''), 4000)
   }
@@ -141,143 +143,184 @@ export function tradingPage() {
           <Typography sx={{ color: THEME_PRO.textSecondary }}>Place and manage your trades</Typography>
         </Box>
 
-        <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', md: '1fr' }, gap: 3 }}>
-          {/* Order Form */}
-          <Box>
-            <Card sx={{ p: SPACING_PRO.xxl, borderRadius: RADIUS_PRO.lg, border: `1px solid ${THEME_PRO.border}`, boxShadow: SHADOWS_PRO.md, backgroundColor: THEME_PRO.bgSecondary }}>
-              <Typography sx={{ fontSize: '18px', fontWeight: 700, color: THEME_PRO.textPrimary, mb: SPACING_PRO.lg }}>
-                Place New Order
+        {/* Elegant Compact Order Form - 1/3 Width */}
+        <Box sx={{ maxWidth: '380px' }}>
+          <Card sx={{
+            p: SPACING_PRO.lg,
+            borderRadius: RADIUS_PRO.lg,
+            border: `1px solid ${THEME_PRO.border}`,
+            boxShadow: SHADOWS_PRO.md,
+            backgroundColor: THEME_PRO.bgSecondary,
+          }}>
+            {/* Header */}
+            <Box sx={{ mb: SPACING_PRO.lg }}>
+              <Typography sx={{ fontSize: '16px', fontWeight: 700, color: THEME_PRO.textPrimary, mb: '8px' }}>
+                📊 {symbol}
               </Typography>
+              <Typography sx={{ fontSize: '11px', color: THEME_PRO.textSecondary, textTransform: 'uppercase', letterSpacing: '0.5px' }}>
+                Place Order
+              </Typography>
+            </Box>
 
-              {orderMessage && (
-                <Alert
-                  sx={{
-                    mb: SPACING_PRO.lg,
-                    backgroundColor: orderMessage.includes('✅') ? THEME_PRO.successLight : THEME_PRO.errorLight,
-                    color: orderMessage.includes('✅') ? THEME_PRO.success : THEME_PRO.error,
-                    border: `1px solid ${orderMessage.includes('✅') ? THEME_PRO.success : THEME_PRO.error}`,
-                  }}
-                >
-                  {orderMessage}
-                </Alert>
-              )}
-
-              <Box sx={{ display: 'flex', gap: SPACING_PRO.sm, mb: SPACING_PRO.lg }}>
-                <Button
-                  variant={orderType === 'Buy' ? 'contained' : 'outlined'}
-                  onClick={() => setOrderType('Buy')}
-                  sx={{
-                    flex: 1,
-                    backgroundColor: orderType === 'Buy' ? THEME_PRO.success : 'transparent',
-                    color: orderType === 'Buy' ? '#fff' : THEME_PRO.success,
-                    borderColor: THEME_PRO.success,
-                    textTransform: 'none',
-                    fontWeight: 600,
-                  }}
-                >
-                  Buy
-                </Button>
-                <Button
-                  variant={orderType === 'Sell' ? 'contained' : 'outlined'}
-                  onClick={() => setOrderType('Sell')}
-                  sx={{
-                    flex: 1,
-                    backgroundColor: orderType === 'Sell' ? THEME_PRO.error : 'transparent',
-                    color: orderType === 'Sell' ? '#fff' : THEME_PRO.error,
-                    borderColor: THEME_PRO.error,
-                    textTransform: 'none',
-                    fontWeight: 600,
-                  }}
-                >
-                  Sell
-                </Button>
-              </Box>
-
-              <TextField
-                fullWidth
-                label="Symbol"
-                value={symbol}
-                onChange={(e) => setSymbol(e.target.value)}
-                margin="normal"
+            {/* Alert Message */}
+            {orderMessage && (
+              <Alert
                 sx={{
-                  '& .MuiOutlinedInput-root': {
-                    backgroundColor: THEME_PRO.bgTertiary,
-                    color: THEME_PRO.textPrimary,
-                    '& fieldset': { borderColor: THEME_PRO.border },
-                    '&:hover fieldset': { borderColor: THEME_PRO.primary },
-                  },
-                  '& .MuiInputBase-input': { color: THEME_PRO.textPrimary },
-                  '& .MuiFormLabel-root': { color: THEME_PRO.textSecondary },
+                  mb: SPACING_PRO.md,
+                  py: '6px',
+                  px: SPACING_PRO.md,
+                  backgroundColor: orderMessage.includes('✅') ? THEME_PRO.successLight : THEME_PRO.errorLight,
+                  color: orderMessage.includes('✅') ? THEME_PRO.success : THEME_PRO.error,
+                  border: `1px solid ${orderMessage.includes('✅') ? THEME_PRO.success : THEME_PRO.error}`,
+                  fontSize: '12px',
                 }}
-              />
+              >
+                {orderMessage}
+              </Alert>
+            )}
+
+            {/* Buy/Sell Toggle - Compact */}
+            <Box sx={{ display: 'flex', gap: '6px', mb: SPACING_PRO.md }}>
+              <Button
+                variant={orderType === 'Buy' ? 'contained' : 'outlined'}
+                onClick={() => setOrderType('Buy')}
+                size="small"
+                sx={{
+                  flex: 1,
+                  height: '32px',
+                  backgroundColor: orderType === 'Buy' ? THEME_PRO.success : 'transparent',
+                  color: orderType === 'Buy' ? '#fff' : THEME_PRO.success,
+                  borderColor: THEME_PRO.success,
+                  textTransform: 'none',
+                  fontWeight: 600,
+                  fontSize: '12px',
+                }}
+              >
+                Buy
+              </Button>
+              <Button
+                variant={orderType === 'Sell' ? 'contained' : 'outlined'}
+                onClick={() => setOrderType('Sell')}
+                size="small"
+                sx={{
+                  flex: 1,
+                  height: '32px',
+                  backgroundColor: orderType === 'Sell' ? THEME_PRO.error : 'transparent',
+                  color: orderType === 'Sell' ? '#fff' : THEME_PRO.error,
+                  borderColor: THEME_PRO.error,
+                  textTransform: 'none',
+                  fontWeight: 600,
+                  fontSize: '12px',
+                }}
+              >
+                Sell
+              </Button>
+            </Box>
+
+            {/* Quantity & Price - Side by Side */}
+            <Box sx={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px', mb: SPACING_PRO.md }}>
               <TextField
-                fullWidth
-                label="Quantity"
+                label="Qty"
                 value={quantity}
                 onChange={(e) => setQuantity(e.target.value)}
-                margin="normal"
                 type="number"
+                size="small"
                 sx={{
                   '& .MuiOutlinedInput-root': {
                     backgroundColor: THEME_PRO.bgTertiary,
                     color: THEME_PRO.textPrimary,
+                    height: '36px',
+                    fontSize: '12px',
                     '& fieldset': { borderColor: THEME_PRO.border },
-                    '&:hover fieldset': { borderColor: THEME_PRO.primary },
                   },
-                  '& .MuiInputBase-input': { color: THEME_PRO.textPrimary },
-                  '& .MuiFormLabel-root': { color: THEME_PRO.textSecondary },
+                  '& .MuiInputBase-input': { color: THEME_PRO.textPrimary, padding: '8px' },
+                  '& .MuiFormLabel-root': { fontSize: '12px', color: THEME_PRO.textSecondary },
                 }}
               />
               <TextField
-                fullWidth
                 label="Price"
                 value={price}
                 onChange={(e) => setPrice(e.target.value)}
-                margin="normal"
                 type="number"
+                size="small"
                 sx={{
                   '& .MuiOutlinedInput-root': {
                     backgroundColor: THEME_PRO.bgTertiary,
                     color: THEME_PRO.textPrimary,
+                    height: '36px',
+                    fontSize: '12px',
                     '& fieldset': { borderColor: THEME_PRO.border },
-                    '&:hover fieldset': { borderColor: THEME_PRO.primary },
                   },
-                  '& .MuiInputBase-input': { color: THEME_PRO.textPrimary },
-                  '& .MuiFormLabel-root': { color: THEME_PRO.textSecondary },
+                  '& .MuiInputBase-input': { color: THEME_PRO.textPrimary, padding: '8px' },
+                  '& .MuiFormLabel-root': { fontSize: '12px', color: THEME_PRO.textSecondary },
                 }}
               />
+            </Box>
 
-              <Box sx={{ mt: SPACING_PRO.lg, p: SPACING_PRO.lg, backgroundColor: THEME_PRO.bgTertiary, borderRadius: RADIUS_PRO.md }}>
-                <Typography sx={{ fontSize: '12px', color: THEME_PRO.textSecondary, mb: SPACING_PRO.sm }}>
-                  💰 Order Summary
+            {/* Stop Loss */}
+            <TextField
+              fullWidth
+              label="Stop Loss"
+              value={stopLoss}
+              onChange={(e) => setStopLoss(e.target.value)}
+              type="number"
+              placeholder="Optional"
+              size="small"
+              sx={{
+                mb: SPACING_PRO.md,
+                '& .MuiOutlinedInput-root': {
+                  backgroundColor: THEME_PRO.bgTertiary,
+                  color: THEME_PRO.textPrimary,
+                  height: '36px',
+                  fontSize: '12px',
+                  '& fieldset': { borderColor: THEME_PRO.border },
+                },
+                '& .MuiInputBase-input': { color: THEME_PRO.textPrimary, padding: '8px' },
+                '& .MuiFormLabel-root': { fontSize: '12px', color: THEME_PRO.textSecondary },
+              }}
+            />
+
+            {/* Order Summary - Compact */}
+            <Box sx={{
+              p: '10px',
+              backgroundColor: THEME_PRO.bgTertiary,
+              borderRadius: RADIUS_PRO.md,
+              mb: SPACING_PRO.md,
+              border: `1px solid ${THEME_PRO.border}`
+            }}>
+              <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: SPACING_PRO.sm }}>
+                <Typography sx={{ fontSize: '11px', color: THEME_PRO.textSecondary, fontWeight: 600 }}>
+                  Total:
                 </Typography>
-                <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
-                  <Typography sx={{ fontSize: '13px', color: THEME_PRO.textSecondary }}>Total Value:</Typography>
-                  <Typography sx={{ fontSize: '13px', fontWeight: 600, color: THEME_PRO.primary }}>
-                    {quantity && price ? (parseFloat(quantity) * parseFloat(price)).toLocaleString() : '—'}
-                  </Typography>
-                </Box>
+                <Typography sx={{ fontSize: '13px', fontWeight: 700, color: THEME_PRO.primary }}>
+                  ₹{quantity && price ? (parseFloat(quantity) * parseFloat(price)).toLocaleString() : '0'}
+                </Typography>
               </Box>
+            </Box>
 
-              <Button
-                fullWidth
-                variant="contained"
-                startIcon={<SendToMobile />}
-                onClick={handlePlaceOrder}
-                sx={{
-                  mt: SPACING_PRO.lg,
-                  backgroundColor: orderType === 'Buy' ? THEME_PRO.success : THEME_PRO.error,
-                  color: '#fff',
-                  textTransform: 'none',
-                  fontWeight: 600,
-                }}
-              >
-                Place {orderType} Order
-              </Button>
-            </Card>
-          </Box>
-
+            {/* Place Order Button */}
+            <Button
+              fullWidth
+              variant="contained"
+              onClick={handlePlaceOrder}
+              size="small"
+              sx={{
+                backgroundColor: orderType === 'Buy' ? THEME_PRO.success : THEME_PRO.error,
+                color: '#fff',
+                textTransform: 'uppercase',
+                fontWeight: 700,
+                fontSize: '12px',
+                height: '38px',
+                letterSpacing: '0.5px',
+              }}
+            >
+              {orderType === 'Buy' ? '▲' : '▼'} {orderType} {quantity || '0'} @ ₹{price || '0'}
+            </Button>
+          </Card>
         </Box>
+
+        {/* Empty space for layout - can be filled with other widgets */}
+        <Box sx={{ flex: 1 }} />
 
         {/* Autonomous Trading Bot Section */}
         <Box sx={{ mt: SPACING_PRO.xxxl }}>
