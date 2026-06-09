@@ -456,7 +456,15 @@ export function DashboardPro() {
                       <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
                     ))}
                   </Pie>
-                  <Tooltip contentStyle={{ backgroundColor: THEME_PRO.bgSecondary, border: `1px solid ${THEME_PRO.border}`, color: THEME_PRO.textPrimary }}  />
+                  <Tooltip
+                    contentStyle={{
+                      backgroundColor: THEME_PRO.bgSecondary,
+                      border: `2px solid ${THEME_PRO.primary}`,
+                      color: '#ffffff',
+                      fontSize: '12px',
+                      fontWeight: 'bold'
+                    }}
+                  />
                 </PieChart>
               </ResponsiveContainer>
             </Card>
