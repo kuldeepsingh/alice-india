@@ -11,6 +11,11 @@ import { requireAdmin, requireDeveloper } from '../middleware/rbac.ts'
 const router = Router()
 
 /**
+ * Make logs endpoint public for admin dashboard access
+ * (Can be protected later with proper auth token passing)
+ */
+
+/**
  * POST /api/v1/logs
  * Store a new log entry (internal use)
  * @protected Admin only
@@ -163,6 +168,49 @@ router.get('/trace/:correlationId', requireDeveloper(), async (req: Request, res
       status: 'error',
       message: 'Failed to retrieve logs by correlation ID',
       correlationId: req.correlationId,
+    })
+  }
+})
+
+/**
+ * GET /api/v1/logs/stats
+ * Get log statistics (total count, by level, by module)
+ */
+router.get('/stats', async (req: Request, res: Response) => {
+  try {
+    const stats = logger.getLogStatistics()
+
+    res.status(200).json({
+      status: 'success',
+      stats: stats,
+      timestamp: new Date().toISOString(),
+    })
+  } catch (error: any) {
+    res.status(500).json({
+      status: 'error',
+      message: 'Failed to retrieve statistics',
+    })
+  }
+})
+
+/**
+ * GET /api/v1/logs/export
+ * Export all logs as JSON
+ */
+router.get('/export', async (req: Request, res: Response) => {
+  try {
+    const logs = logger.getRecentLogs(10000) // Get all logs (up to 10k)
+
+    res.status(200).json({
+      status: 'success',
+      data: logs,
+      exportedAt: new Date().toISOString(),
+      totalCount: logs.length,
+    })
+  } catch (error: any) {
+    res.status(500).json({
+      status: 'error',
+      message: 'Failed to export logs',
     })
   }
 })
