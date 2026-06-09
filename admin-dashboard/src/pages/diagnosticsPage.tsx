@@ -199,7 +199,7 @@ export function diagnosticsPage() {
                       fontSize: '16px',
                       px: SPACING_PRO.xl,
                       py: '10px',
-                      '&:hover': { backgroundColor: '#d32f2f' }
+                      '&:hover': { backgroundColor: THEME_PRO.error, opacity: 0.8 }
                     }}
                   >
                     Stop
@@ -327,8 +327,8 @@ export function diagnosticsPage() {
 
             <Paper
               sx={{
-                backgroundColor: '#1a1a1a',
-                color: '#00ff00',
+                backgroundColor: THEME_PRO.bgSecondary,
+                color: THEME_PRO.success,
                 fontFamily: 'monospace',
                 fontSize: '12px',
                 p: SPACING_PRO.lg,
@@ -341,7 +341,7 @@ export function diagnosticsPage() {
               }}
             >
               {logs.length === 0 ? (
-                <Typography sx={{ color: '#666', fontFamily: 'monospace' }}>
+                <Typography sx={{ color: THEME_PRO.textSecondary, fontFamily: 'monospace' }}>
                   {running ? 'Waiting for logs...' : 'No logs yet. Click "Run Tests" to start.'}
                 </Typography>
               ) : (
@@ -349,10 +349,10 @@ export function diagnosticsPage() {
                   const timestamp = log.timestamp ? new Date(log.timestamp).toLocaleTimeString() : ''
                   const level = log.level || 'INFO'
                   const levelColor =
-                    level === 'ERROR' || level === 'FATAL' ? '#ff4444' :
-                    level === 'WARN' ? '#ffaa00' :
-                    level === 'INFO' ? '#00ff00' :
-                    '#0088ff'
+                    level === 'ERROR' || level === 'FATAL' ? THEME_PRO.error :
+                    level === 'WARN' ? THEME_PRO.warning :
+                    level === 'INFO' ? THEME_PRO.success :
+                    THEME_PRO.info
 
                   return (
                     <Box key={idx} sx={{ mb: SPACING_PRO.sm, color: levelColor }}>
@@ -360,11 +360,11 @@ export function diagnosticsPage() {
                         <span>{timestamp} [{level}]</span>
                         <span style={{ opacity: 0.7 }}>{log.module}</span>
                       </Box>
-                      <Box sx={{ color: '#00ff00', ml: SPACING_PRO.sm, wordBreak: 'break-word' }}>
+                      <Box sx={{ color: THEME_PRO.success, ml: SPACING_PRO.sm, wordBreak: 'break-word' }}>
                         &gt; {log.message}
                       </Box>
                       {log.context && Object.keys(log.context).length > 0 && (
-                        <Box sx={{ color: '#888', ml: SPACING_PRO.lg, fontSize: '10px', mt: '2px' }}>
+                        <Box sx={{ color: THEME_PRO.textTertiary, ml: SPACING_PRO.lg, fontSize: '10px', mt: '2px' }}>
                           {Object.entries(log.context).map(([key, value]: any, i) => (
                             <div key={i}>
                               • {key}: {typeof value === 'object' ? JSON.stringify(value) : String(value)}

@@ -275,7 +275,7 @@ export function UsersPage() {
       'admin': THEME_PRO.primary,
       'trader': THEME_PRO.secondary,
       'analyst': THEME_PRO.warning,
-      'viewer': '#6B7280',
+      'viewer': THEME_PRO.textSecondary,
     }
     return colors[role?.toLowerCase()] || THEME_PRO.textSecondary
   }
