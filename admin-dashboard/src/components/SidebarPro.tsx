@@ -39,7 +39,6 @@ const menuSections = [
       { label: 'Accounts', path: '/accounts', icon: AccountBalance },
       { label: 'Orders', path: '/orders', icon: ShoppingCart },
       { label: 'Market', path: '/market', icon: BarChart },
-      { label: 'Trading', path: '/trading', icon: TrendingUp },
       { label: 'Autonomous Bot', path: '/trading-bot', icon: SmartToy },
       { label: 'Analytics', path: '/analytics', icon: TrendingUp },
     ],
