@@ -65,31 +65,39 @@ router.post('/', requireAdmin(), async (req: Request, res: Response) => {
  * GET /api/v1/logs
  * Retrieve logs with filtering and pagination
  * @protected Developer or Admin
- * @query userId - Filter by user ID
  * @query level - Filter by log level (DEBUG, INFO, WARN, ERROR, FATAL)
  * @query module - Filter by module
- * @query correlationId - Filter by correlation ID (trace request)
- * @query startDate - Start date (ISO 8601)
- * @query endDate - End date (ISO 8601)
  * @query search - Search in message
- * @query limit - Results per page (default 50)
- * @query offset - Pagination offset (default 0)
+ * @query limit - Results per page (default 100)
  */
 router.get('/', async (req: Request, res: Response) => {
   try {
-    const filter = {
-      userId: req.query.userId as string | undefined,
-      level: req.query.level as string | undefined,
-      module: req.query.module as string | undefined,
-      correlationId: req.query.correlationId as string | undefined,
-      startDate: req.query.startDate ? new Date(req.query.startDate as string) : undefined,
-      endDate: req.query.endDate ? new Date(req.query.endDate as string) : undefined,
-      search: req.query.search as string | undefined,
-      limit: req.query.limit ? parseInt(req.query.limit as string, 10) : 50,
-      offset: req.query.offset ? parseInt(req.query.offset as string, 10) : 0,
+    const level = req.query.level as string | undefined
+    const module = req.query.module as string | undefined
+    const search = req.query.search as string | undefined
+    const limit = req.query.limit ? parseInt(req.query.limit as string, 10) : 100
+
+    let logs = logger.getRecentLogs(limit)
+
+    // Apply filters
+    if (level) {
+      logs = logs.filter(log => log.level === level)
+    }
+    if (module) {
+      logs = logs.filter(log => log.module === module)
+    }
+    if (search) {
+      const searchLower = search.toLowerCase()
+      logs = logs.filter(log =>
+        log.message.toLowerCase().includes(searchLower) ||
+        (log.context && JSON.stringify(log.context).toLowerCase().includes(searchLower))
+      )
     }
 
-    const result = await LoggingService.getLogs(filter)
+    const result = {
+      data: logs,
+      total: logs.length,
+    }
 
     res.status(200).json({
       status: 'success',
