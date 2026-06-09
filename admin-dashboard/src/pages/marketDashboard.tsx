@@ -168,16 +168,15 @@ export function marketDashboard() {
           </Box>
         </Box>
 
-        {/* INDICES ROW - 6 CARDS */}
+        {/* INDICES ROW - 6 CARDS (COMPACT) */}
         <Box sx={{ display: 'grid', gridTemplateColumns: 'repeat(6, 1fr)', gap: '12px', mb: '24px' }}>
           {indices.map((idx, i) => (
-            <Card key={i} sx={{ p: '12px', backgroundColor: '#1a1a1a', border: '1px solid #2a2a2a', borderRadius: '6px' }}>
-              <Typography sx={{ fontSize: '10px', color: '#888', fontWeight: 600, textTransform: 'uppercase', mb: '6px' }}>{idx.name}</Typography>
-              <Typography sx={{ fontSize: '18px', fontWeight: 700, color: '#fff', mb: '4px' }}>{idx.value.toLocaleString()}</Typography>
-              <Typography sx={{ fontSize: '11px', color: idx.changePercent >= 0 ? '#4caf50' : '#f44336', fontWeight: 600, mb: '8px' }}>
-                {idx.changePercent >= 0 ? '▲' : '▼'} {Math.abs(idx.changePercent).toFixed(2)}% ({idx.change.toFixed(0)})
+            <Card key={i} sx={{ p: '10px 8px', backgroundColor: '#1a1a1a', border: '1px solid #2a2a2a', borderRadius: '6px', minHeight: 'auto' }}>
+              <Typography sx={{ fontSize: '9px', color: '#888', fontWeight: 600, textTransform: 'uppercase', mb: '3px', lineHeight: 1 }}>{idx.name}</Typography>
+              <Typography sx={{ fontSize: '14px', fontWeight: 700, color: '#fff', mb: '2px', lineHeight: 1 }}>{idx.value.toLocaleString()}</Typography>
+              <Typography sx={{ fontSize: '10px', color: idx.changePercent >= 0 ? '#4caf50' : '#f44336', fontWeight: 600, lineHeight: 1 }}>
+                {idx.changePercent >= 0 ? '▲' : '▼'} {Math.abs(idx.changePercent).toFixed(2)}%
               </Typography>
-              <Sparkline isPositive={idx.changePercent >= 0} />
             </Card>
           ))}
         </Box>
