@@ -142,18 +142,73 @@ export function UsersPage() {
     const user = users.find(u => u.id === userId)
     if (!user) return
 
+    // Generate operation ID to tie together frontend and backend logs
+    const operationId = `role-change-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`
+    const startTime = Date.now()
+
     // Don't update if role is the same
-    if (user.role === newRole) return
+    if (user.role === newRole) {
+      frontendLogger.debug('Users', 'Role change skipped - no change in role', {
+        operationId,
+        userId,
+        email: user.email,
+        currentRole: user.role,
+        requestedRole: newRole,
+      })
+      return
+    }
 
     setRoleChangeUser(user)
     setRoleLoading(true)
 
     try {
+      // Log: User initiated action
+      frontendLogger.debug('Users', 'Role change action initiated by admin', {
+        operationId,
+        userId,
+        email: user.email,
+        currentRole: user.role,
+        newRole: newRole,
+        timestamp: new Date().toISOString(),
+      })
+
+      // Log: Preparing request data
+      const requestData = { role: newRole }
+      frontendLogger.debug('Users', 'Sending role change request to API', {
+        operationId,
+        userId,
+        requestData,
+        endpoint: `/api/v1/team/members/${userId}/role`,
+        method: 'PUT',
+      })
+
+      // Call API
       const response = await usersAPI.updateRole(userId, newRole)
 
-      frontendLogger.info('Users', 'User role updated', {
-        userId: userId,
+      const duration = Date.now() - startTime
+
+      // Log: Success
+      frontendLogger.info('Users', 'Role change API response received', {
+        operationId,
+        userId,
         email: user.email,
+        previousRole: user.role,
+        newRole: newRole,
+        apiResponse: {
+          statusCode: 200,
+          data: {
+            id: response.data?.data?.id,
+            email: response.data?.data?.email,
+            role: response.data?.data?.role,
+          },
+        },
+        durationMs: duration,
+      })
+
+      // Log: Updating UI state
+      frontendLogger.debug('Users', 'Updating local UI state with new role', {
+        operationId,
+        userId,
         oldRole: user.role,
         newRole: newRole,
       })
@@ -163,18 +218,43 @@ export function UsersPage() {
         u.id === userId ? { ...u, role: newRole } : u
       ))
 
+      // Log: UI update complete
+      frontendLogger.info('Users', 'UI state updated, user role change reflected in table', {
+        operationId,
+        userId,
+        email: user.email,
+        newRole: newRole,
+      })
+
       setError('')
     } catch (err: any) {
+      const duration = Date.now() - startTime
       const errorMsg = err.response?.data?.message || 'Failed to update user role'
+
+      // Log: Error occurred
+      frontendLogger.error('Users', 'Role change operation failed', err, {
+        operationId,
+        userId,
+        email: user.email,
+        currentRole: user.role,
+        requestedRole: newRole,
+        errorMessage: errorMsg,
+        errorStatus: err.response?.status,
+        durationMs: duration,
+        endpoint: `/api/v1/team/members/${userId}/role`,
+        method: 'PUT',
+      })
+
       setError(errorMsg)
 
       // Revert the dropdown to previous role
       setUsers([...users])
 
-      frontendLogger.error('Users', 'Failed to update user role', err, {
-        userId: userId,
-        email: user.email,
-        error: errorMsg,
+      // Log: Reverted UI state
+      frontendLogger.debug('Users', 'Reverted UI state due to API error', {
+        operationId,
+        userId,
+        revertedRole: user.role,
       })
 
       alert(`Error: ${errorMsg}`)
