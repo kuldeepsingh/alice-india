@@ -310,7 +310,7 @@ export function DashboardPro() {
                 Portfolio Allocation
               </Typography>
 
-              <ResponsiveContainer width="100%" height={300}>
+              <ResponsiveContainer width="100%" height={200}>
                 <PieChart>
                   <Pie
                     data={[
@@ -323,7 +323,7 @@ export function DashboardPro() {
                     cy="50%"
                     labelLine={false}
                     label={({ name, value }) => `${name}: ${value}%`}
-                    outerRadius={80}
+                    outerRadius={50}
                     fill="#8884d8"
                     dataKey="value"
                   >
