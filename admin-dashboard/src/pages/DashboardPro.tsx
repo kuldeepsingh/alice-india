@@ -341,10 +341,9 @@ export function DashboardPro() {
                     ]}
                     cx="50%"
                     cy="50%"
-                    labelLine={false}
-                    labelLine={false} 
-                    outerRadius={40}
-                    fill="#8884d8"
+                    innerRadius={25}
+                    outerRadius={50}
+                    paddingAngle={2}
                     dataKey="value"
                   >
                     <Cell fill={THEME_PRO.primary} />
@@ -352,7 +351,7 @@ export function DashboardPro() {
                     <Cell fill={THEME_PRO.warning} />
                     <Cell fill={THEME_PRO.error} />
                   </Pie>
-                  <Tooltip contentStyle={{ backgroundColor: THEME_PRO.bgSecondary, border: `1px solid ${THEME_PRO.border}`, color: THEME_PRO.textPrimary }}  />
+                  <Tooltip content={<CustomPieTooltip />} />
                 </PieChart>
               </ResponsiveContainer>
             </Card>
@@ -471,10 +470,9 @@ export function DashboardPro() {
                     data={strategyData}
                     cx="50%"
                     cy="50%"
-                    labelLine={false}
-                    labelLine={false} 
-                    outerRadius={35}
-                    fill="#8884d8"
+                    innerRadius={20}
+                    outerRadius={45}
+                    paddingAngle={2}
                     dataKey="value"
                   >
                     {strategyData.map((entry, index) => (
