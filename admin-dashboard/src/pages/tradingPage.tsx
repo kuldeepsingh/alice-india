@@ -35,15 +35,22 @@ export function tradingPage() {
   React.useEffect(() => {
     // Load orders from localStorage
     const savedOrders = localStorage.getItem('executedOrders')
+    console.log('🔄 useEffect mounted. savedOrders from localStorage:', savedOrders)
+
     if (savedOrders) {
       try {
-        setExecutedOrders(JSON.parse(savedOrders))
+        const parsed = JSON.parse(savedOrders)
+        console.log('✅ Parsed orders:', parsed)
+        setExecutedOrders(parsed)
         frontendLogger.debug('Trading', 'Loaded orders from localStorage', {
-          count: JSON.parse(savedOrders).length
+          count: parsed.length
         })
       } catch (e) {
+        console.error('❌ Failed to parse:', e)
         frontendLogger.error('Trading', 'Failed to load orders from localStorage', e as Error)
       }
+    } else {
+      console.log('ℹ️ No saved orders in localStorage yet')
     }
 
     // Check backend health
@@ -122,6 +129,9 @@ export function tradingPage() {
     const prc = parseFloat(price)
     const total = qty * prc
 
+    console.log('🔍 handleConfirmOrder called!')
+    console.log('Symbol:', symbol, 'Type:', orderType, 'Qty:', qty, 'Price:', prc)
+
     frontendLogger.debug('Trading', 'Order confirmation started', {
       symbol,
       type: orderType,
@@ -141,11 +151,19 @@ export function tradingPage() {
       timestamp: new Date().toLocaleString(),
     }
 
+    console.log('📦 New order object:', newOrder)
+    console.log('📊 Current executedOrders:', executedOrders)
+
     const updatedOrders = [newOrder, ...executedOrders]
+    console.log('✅ Updated orders:', updatedOrders)
+
     setExecutedOrders(updatedOrders)
+    console.log('⬆️ setExecutedOrders called with', updatedOrders.length, 'orders')
 
     // Save to localStorage for persistence
     localStorage.setItem('executedOrders', JSON.stringify(updatedOrders))
+    console.log('💾 Saved to localStorage. Current value:', localStorage.getItem('executedOrders'))
+
     frontendLogger.debug('Trading', 'Order saved to localStorage', {
       orderId: newOrder.id,
       count: updatedOrders.length
