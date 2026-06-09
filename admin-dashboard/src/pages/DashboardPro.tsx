@@ -176,13 +176,13 @@ export function DashboardPro() {
     <LayoutPro>
       <Box
         sx={{
-          p: SPACING_PRO.xxxl,
+          p: SPACING_PRO.lg,
           backgroundColor: THEME_PRO.bgPrimary,
           minHeight: '100vh',
         }}
       >
         {/* Header */}
-        <Box sx={{ mb: SPACING_PRO.xxxl, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+        <Box sx={{ mb: SPACING_PRO.md, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
           <Box>
             <Typography
               variant="h4"
@@ -220,7 +220,7 @@ export function DashboardPro() {
         </Box>
 
         {/* Stats Grid */}
-        <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', sm: '1fr 1fr', md: '1fr 1fr 1fr 1fr' }, gap: 3, mb: SPACING_PRO.xxxl }}>
+        <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', sm: '1fr 1fr', md: '1fr 1fr 1fr 1fr' }, gap: 2, mb: SPACING_PRO.md }}>
           {stats.map((stat, index) => (
             <Box key={index}>
               <Card
@@ -310,7 +310,7 @@ export function DashboardPro() {
                 Portfolio Allocation
               </Typography>
 
-              <ResponsiveContainer width="100%" height={200}>
+              <ResponsiveContainer width="100%" height={150}>
                 <PieChart>
                   <Pie
                     data={[
@@ -391,18 +391,18 @@ export function DashboardPro() {
         </Box>
 
         {/* Charts Section */}
-        <Box sx={{ mt: SPACING_PRO.xxxl }}>
+        <Box sx={{ mt: SPACING_PRO.md }}>
           <Typography variant="h5" sx={{ fontSize: '22px', fontWeight: 700, color: THEME_PRO.textPrimary, mb: SPACING_PRO.lg }}>
             📊 Performance Analytics
           </Typography>
 
-          <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', md: 'repeat(4, 1fr)' }, gap: 3, mb: SPACING_PRO.xxxl }}>
+          <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', md: 'repeat(4, 1fr)' }, gap: 2, mb: SPACING_PRO.md }}>
             {/* Portfolio Value Chart */}
             <Card sx={{ backgroundColor: THEME_PRO.bgSecondary, p: SPACING_PRO.lg, borderRadius: RADIUS_PRO.lg, border: `1px solid ${THEME_PRO.border}`, boxShadow: SHADOWS_PRO.md }}>
               <Typography sx={{ fontSize: '14px', fontWeight: 700, color: THEME_PRO.textPrimary, mb: SPACING_PRO.md }}>
                 Portfolio Value Trend
               </Typography>
-              <ResponsiveContainer width="100%" height={200}>
+              <ResponsiveContainer width="100%" height={150}>
                 <AreaChart data={portfolioData}>
                   <defs>
                     <linearGradient id="colorValue" x1="0" y1="0" x2="0" y2="1">
@@ -424,7 +424,7 @@ export function DashboardPro() {
               <Typography sx={{ fontSize: '14px', fontWeight: 700, color: THEME_PRO.textPrimary, mb: SPACING_PRO.md }}>
                 Daily Returns (%)
               </Typography>
-              <ResponsiveContainer width="100%" height={200}>
+              <ResponsiveContainer width="100%" height={150}>
                 <BarChart data={dailyReturnsData}>
                   <CartesianGrid strokeDasharray="3 3" stroke={THEME_PRO.border} />
                   <XAxis dataKey="time" stroke={THEME_PRO.textSecondary} />
@@ -440,7 +440,7 @@ export function DashboardPro() {
               <Typography sx={{ fontSize: '14px', fontWeight: 700, color: THEME_PRO.textPrimary, mb: SPACING_PRO.md }}>
                 Strategy Allocation
               </Typography>
-              <ResponsiveContainer width="100%" height={200}>
+              <ResponsiveContainer width="100%" height={150}>
                 <PieChart>
                   <Pie
                     data={strategyData}
@@ -466,7 +466,7 @@ export function DashboardPro() {
               <Typography sx={{ fontSize: '14px', fontWeight: 700, color: THEME_PRO.textPrimary, mb: SPACING_PRO.md }}>
                 Weekly Win Rate
               </Typography>
-              <ResponsiveContainer width="100%" height={200}>
+              <ResponsiveContainer width="100%" height={150}>
                 <LineChart data={[
                   { week: 'Week 1', wins: 65 },
                   { week: 'Week 2', wins: 70 },
