@@ -359,7 +359,7 @@ export function DashboardPro() {
         {/* Charts Section */}
         <Box sx={{ mt: SPACING_PRO.md }}>
           {/* Top Row: 4 Charts */}
-          <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', md: 'repeat(4, 1fr)' }, gap: 2, mb: SPACING_PRO.md }}>
+          <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', md: 'repeat(3, 1fr)' }, gap: 2, mb: SPACING_PRO.md }}>
             {/* Portfolio Value Chart */}
             <Card sx={{ backgroundColor: THEME_PRO.bgSecondary, p: SPACING_PRO.xs, borderRadius: RADIUS_PRO.lg, border: `1px solid ${THEME_PRO.border}`, boxShadow: SHADOWS_PRO.md }}>
               <Typography sx={{ fontSize: '12px', fontWeight: 700, color: THEME_PRO.textPrimary, mb: SPACING_PRO.xs, textTransform: 'uppercase', letterSpacing: '0.5px' }}>
@@ -428,17 +428,19 @@ export function DashboardPro() {
                 </LineChart>
               </ResponsiveContainer>
             </Card>
+          </Box>
 
-            {/* Daily Returns Chart */}
-            <Card sx={{ backgroundColor: THEME_PRO.bgSecondary, p: SPACING_PRO.xs, borderRadius: RADIUS_PRO.lg, border: `1px solid ${THEME_PRO.border}` }}>
-              <Typography sx={{ fontSize: '10px', fontWeight: 700, color: THEME_PRO.textPrimary, mb: SPACING_PRO.xs, textTransform: 'uppercase' }}>
+          {/* Full-Width Daily Returns Chart */}
+          <Box sx={{ mb: SPACING_PRO.md }}>
+            <Card sx={{ backgroundColor: THEME_PRO.bgSecondary, p: SPACING_PRO.xs, borderRadius: RADIUS_PRO.lg, border: `1px solid ${THEME_PRO.border}`, boxShadow: SHADOWS_PRO.md }}>
+              <Typography sx={{ fontSize: '12px', fontWeight: 700, color: THEME_PRO.textPrimary, mb: SPACING_PRO.xs, textTransform: 'uppercase', letterSpacing: '0.5px' }}>
                 Daily Returns (%)
               </Typography>
-              <ResponsiveContainer width="100%" height={120}>
+              <ResponsiveContainer width="100%" height={140}>
                 <BarChart data={dailyReturnsData}>
                   <CartesianGrid strokeDasharray="3 3" stroke={THEME_PRO.border} />
-                  <XAxis tick={{ fontSize: 9 }} dataKey="date" stroke={THEME_PRO.textSecondary} />
-                  <YAxis tick={{ fontSize: 9 }} stroke={THEME_PRO.textSecondary} />
+                  <XAxis tick={{ fontSize: 10 }} dataKey="date" stroke={THEME_PRO.textSecondary} />
+                  <YAxis tick={{ fontSize: 10 }} stroke={THEME_PRO.textSecondary} />
                   <Tooltip contentStyle={{ backgroundColor: THEME_PRO.bgSecondary, border: `1px solid ${THEME_PRO.border}`, color: THEME_PRO.textPrimary }} />
                   <Bar dataKey="return" radius={[8, 8, 0, 0]}>
                     {dailyReturnsData.map((entry, index) => (
@@ -450,7 +452,7 @@ export function DashboardPro() {
             </Card>
           </Box>
 
-          {/* Bottom Row: Portfolio Allocation */}
+          {/* Portfolio Allocation */}
           <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', md: '1fr 1fr' }, gap: 2 }}>
             <Card
               sx={{
