@@ -1,10 +1,9 @@
 import React, { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { LayoutPro } from '../components/LayoutPro'
-import { Box, Card, Typography, TextField, Button, Grid, Paper, LinearProgress, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Chip, CircularProgress } from '@mui/material'
-import { TrendingUp, TrendingDown, Search, Info, Refresh } from '@mui/icons-material'
+import { Box, Card, Typography, TextField, Button, Grid, Paper, LinearProgress, Table, TableBody, TableCell, TableContainer, TableHead, TableRow } from '@mui/material'
+import { Search, Info } from '@mui/icons-material'
 import { frontendLogger } from '../services/logging-client'
-import { THEME_PRO, SPACING_PRO, RADIUS_PRO } from '../theme-pro'
 
 interface Stock {
   symbol: string
@@ -97,9 +96,7 @@ export function marketDashboard() {
     frontendLogger.info('MarketDashboard', 'Stock clicked for trading', {
       operationId,
       symbol: stock.symbol,
-      name: stock.name,
       price: stock.price,
-      change: stock.change,
       changePercent: stock.changePercent,
       timestamp: new Date().toISOString(),
     })
@@ -109,307 +106,252 @@ export function marketDashboard() {
     }, 300)
   }
 
-  const handleSearch = (term: string) => {
-    if (term.trim()) {
-      frontendLogger.debug('MarketDashboard', 'Stock search performed', {
-        searchTerm: term,
-        resultsCount: heatmapStocks.filter(s =>
-          s.symbol.includes(term.toUpperCase()) || s.name.toLowerCase().includes(term.toLowerCase())
-        ).length,
-        timestamp: new Date().toISOString(),
-      })
-    }
-    setSearchTerm(term)
-  }
-
   const filteredStocks = heatmapStocks.filter(s =>
     s.symbol.includes(searchTerm.toUpperCase()) || s.name.toLowerCase().includes(searchTerm.toLowerCase())
   )
 
   return (
     <LayoutPro>
-      <Box sx={{ p: '40px 60px', backgroundColor: '#0f0f0f', minHeight: '100vh' }}>
-        {/* Header */}
-        <Box sx={{ mb: '50px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+      <Box sx={{ p: '24px 32px', backgroundColor: '#0a0a0a', minHeight: '100vh' }}>
+
+        {/* HEADER */}
+        <Box sx={{ mb: '32px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
           <Box>
-            <Box sx={{ display: 'flex', alignItems: 'center', gap: '12px', mb: '12px' }}>
-              <Box sx={{ fontSize: '28px' }}>📊</Box>
-              <Typography sx={{ fontSize: '28px', fontWeight: 700, color: '#fff' }}>
-                Market Dashboard
-              </Typography>
-            </Box>
-            <Typography sx={{ fontSize: '14px', color: '#888' }}>Real-time market data and analysis</Typography>
+            <Typography sx={{ fontSize: '28px', fontWeight: 700, color: '#fff', mb: '4px' }}>
+              Market Dashboard
+            </Typography>
+            <Typography sx={{ fontSize: '13px', color: '#888' }}>Real-time market data and analysis</Typography>
           </Box>
-          <Box sx={{ display: 'flex', gap: '16px', alignItems: 'center' }}>
+          <Box sx={{ display: 'flex', gap: '12px' }}>
             <TextField
               placeholder="Search stocks, indices, sectors..."
               value={searchTerm}
-              onChange={(e) => handleSearch(e.target.value)}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              size="small"
               sx={{
                 width: '280px',
                 '& .MuiOutlinedInput-root': {
                   backgroundColor: '#1a1a1a',
                   color: '#fff',
                   fontSize: '13px',
+                  borderRadius: '6px',
                   '& fieldset': { borderColor: '#333' },
                   '&:hover fieldset': { borderColor: '#555' },
                 },
                 '& .MuiOutlinedInput-input::placeholder': { color: '#666', opacity: 1 },
               }}
               InputProps={{
-                startAdornment: <Search sx={{ mr: '8px', color: '#666', fontSize: '20px' }} />,
+                startAdornment: <Search sx={{ mr: '8px', color: '#666', fontSize: '18px' }} />,
               }}
             />
             <Button variant="contained" sx={{
-              backgroundColor: '#1e88e5',
+              backgroundColor: '#1976d2',
               color: '#fff',
-              fontSize: '13px',
+              fontSize: '12px',
               fontWeight: 600,
-              py: '10px',
-              px: '20px',
               borderRadius: '6px',
-              textTransform: 'uppercase',
-              letterSpacing: '0.5px',
-              '&:hover': { backgroundColor: '#1565c0' }
+              textTransform: 'none',
+              px: '16px',
             }}>
-              🔄 Live
+              ● Live
             </Button>
           </Box>
         </Box>
 
-        {/* Market Indices */}
-        <Grid container spacing={2} sx={{ mb: '50px' }}>
+        {/* INDICES ROW */}
+        <Box sx={{ display: 'grid', gridTemplateColumns: 'repeat(6, 1fr)', gap: '12px', mb: '24px' }}>
           {indices.map((idx, i) => (
-            <Grid item xs={12} sm={6} md={2} key={i}>
-              <Paper sx={{
-                p: '16px',
-                backgroundColor: '#1a1a1a',
-                border: '1px solid #2a2a2a',
-                borderRadius: '8px',
-                cursor: 'pointer',
-                transition: 'all 0.3s',
-                '&:hover': {
-                  borderColor: '#555',
-                  backgroundColor: '#222',
-                }
+            <Card key={i} sx={{
+              p: '16px',
+              backgroundColor: '#1a1a1a',
+              border: '1px solid #2a2a2a',
+              borderRadius: '8px',
+              cursor: 'pointer',
+              '&:hover': { borderColor: '#444' }
+            }}>
+              <Typography sx={{ fontSize: '11px', color: '#888', mb: '8px', fontWeight: 600, textTransform: 'uppercase' }}>
+                {idx.name}
+              </Typography>
+              <Typography sx={{ fontSize: '20px', fontWeight: 700, color: '#fff', mb: '8px' }}>
+                {idx.value.toLocaleString(undefined, { maximumFractionDigits: 0 })}
+              </Typography>
+              <Typography sx={{
+                fontSize: '12px',
+                fontWeight: 600,
+                color: idx.changePercent >= 0 ? '#4caf50' : '#f44336'
               }}>
-                <Typography sx={{ fontSize: '11px', color: '#888', mb: '8px', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
-                  {idx.name}
-                </Typography>
-                <Typography sx={{ fontSize: '22px', fontWeight: 700, color: '#fff', mb: '8px' }}>
-                  {idx.value.toLocaleString(undefined, { maximumFractionDigits: 2 })}
-                </Typography>
-                <Box sx={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                  <Box sx={{ fontSize: '12px', color: idx.changePercent >= 0 ? '#4caf50' : '#f44336' }}>
-                    {idx.changePercent >= 0 ? '▲' : '▼'}
-                  </Box>
-                  <Typography sx={{
-                    fontSize: '13px',
-                    fontWeight: 600,
-                    color: idx.changePercent >= 0 ? '#4caf50' : '#f44336'
-                  }}>
-                    {idx.changePercent >= 0 ? '+' : ''}{idx.changePercent}% ({idx.change > 0 ? '+' : ''}{idx.change.toFixed(2)})
-                  </Typography>
-                </Box>
-              </Paper>
-            </Grid>
+                {idx.changePercent >= 0 ? '▲' : '▼'} {Math.abs(idx.changePercent).toFixed(2)}% ({idx.change > 0 ? '+' : ''}{idx.change.toFixed(2)})
+              </Typography>
+            </Card>
           ))}
-        </Grid>
+        </Box>
 
-        {/* Main Content Grid */}
-        <Grid container spacing={3} sx={{ mb: '50px' }}>
-          {/* Market Heatmap */}
+        {/* MAIN GRID: Heatmap (Left) + Gainers/Losers (Right) */}
+        <Grid container spacing={2} sx={{ mb: '24px' }}>
+          {/* HEATMAP - 2/3 width */}
           <Grid item xs={12} lg={8}>
-            <Paper sx={{ p: '28px', backgroundColor: '#1a1a1a', border: '1px solid #2a2a2a', borderRadius: '12px' }}>
-              <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: '24px' }}>
-                <Typography sx={{ fontSize: '18px', fontWeight: 700, color: '#fff' }}>
+            <Card sx={{ p: '20px', backgroundColor: '#1a1a1a', border: '1px solid #2a2a2a', borderRadius: '8px', height: '100%' }}>
+              <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: '16px' }}>
+                <Typography sx={{ fontSize: '16px', fontWeight: 700, color: '#fff' }}>
                   Market Heatmap
                 </Typography>
-                <Info sx={{ color: '#666', cursor: 'help', fontSize: '20px' }} />
+                <Info sx={{ color: '#666', fontSize: '18px' }} />
               </Box>
 
               <Box sx={{
                 display: 'grid',
-                gridTemplateColumns: 'repeat(auto-fill, minmax(100px, 1fr))',
-                gap: '12px',
-                mb: '16px'
+                gridTemplateColumns: 'repeat(auto-fill, minmax(90px, 1fr))',
+                gap: '10px',
               }}>
                 {filteredStocks.map((stock, idx) => (
-                  <Paper
+                  <Box
                     key={idx}
                     onClick={() => handleStockClick(stock)}
                     sx={{
                       p: '12px',
-                      borderRadius: '8px',
-                      backgroundColor: stock.changePercent >= 0 ? '#0d3a0d' : '#3a0d0d',
-                      border: `2px solid ${stock.changePercent >= 0 ? '#4caf50' : '#f44336'}`,
+                      borderRadius: '6px',
+                      backgroundColor: stock.changePercent >= 0 ? '#0d3d0d' : '#3d0d0d',
+                      border: `1px solid ${stock.changePercent >= 0 ? '#4caf50' : '#f44336'}`,
                       cursor: 'pointer',
                       transition: 'all 0.2s',
                       textAlign: 'center',
                       '&:hover': {
-                        transform: 'translateY(-3px)',
-                        boxShadow: `0 6px 16px ${stock.changePercent >= 0 ? '#4caf5040' : '#f4433640'}`,
-                        backgroundColor: stock.changePercent >= 0 ? '#0f4a0f' : '#4a0f0f',
+                        transform: 'translateY(-2px)',
+                        boxShadow: `0 4px 12px ${stock.changePercent >= 0 ? '#4caf5030' : '#f4433630'}`,
                       }
                     }}
                   >
                     <Typography sx={{ fontSize: '12px', fontWeight: 700, color: '#fff', mb: '4px' }}>
                       {stock.symbol}
                     </Typography>
-                    <Typography sx={{ fontSize: '13px', color: '#aaa', mb: '6px' }}>
+                    <Typography sx={{ fontSize: '13px', color: '#bbb', mb: '6px' }}>
                       ₹{stock.price.toFixed(0)}
                     </Typography>
-                    <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '3px' }}>
-                      <Box sx={{
-                        fontSize: '11px',
-                        color: stock.changePercent >= 0 ? '#4caf50' : '#f44336',
-                        fontWeight: 600
-                      }}>
-                        {stock.changePercent >= 0 ? '▲' : '▼'}
-                      </Box>
-                      <Typography sx={{
-                        fontSize: '11px',
-                        fontWeight: 700,
-                        color: stock.changePercent >= 0 ? '#4caf50' : '#f44336'
-                      }}>
-                        {Math.abs(stock.changePercent).toFixed(2)}%
-                      </Typography>
-                    </Box>
-                  </Paper>
+                    <Typography sx={{
+                      fontSize: '11px',
+                      fontWeight: 700,
+                      color: stock.changePercent >= 0 ? '#4caf50' : '#f44336'
+                    }}>
+                      {stock.changePercent >= 0 ? '▲' : '▼'} {Math.abs(stock.changePercent).toFixed(2)}%
+                    </Typography>
+                  </Box>
                 ))}
               </Box>
-              <Typography sx={{ fontSize: '12px', color: '#666', textAlign: 'center' }}>
-                Showing {filteredStocks.length} of {heatmapStocks.length} stocks
-              </Typography>
-            </Paper>
+            </Card>
           </Grid>
 
-          {/* Top Gainers & Losers */}
-          <Grid item xs={12} lg={4}>
-            <Grid container spacing={3}>
-              {/* Top Gainers */}
-              <Grid item xs={12}>
-                <Paper sx={{ p: '20px', backgroundColor: '#1a1a1a', border: '1px solid #2a2a2a', borderRadius: '12px' }}>
-                  <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: '16px' }}>
-                    <Typography sx={{ fontSize: '16px', fontWeight: 700, color: '#fff' }}>
-                      Top Gainers
-                    </Typography>
-                    <Button size="small" sx={{ color: '#1e88e5', fontSize: '12px', textTransform: 'uppercase' }}>View all</Button>
-                  </Box>
-                  <TableContainer>
-                    <Table size="small">
-                      <TableHead>
-                        <TableRow>
-                          <TableCell sx={{ color: '#666', borderColor: '#333', fontSize: '11px', fontWeight: 600 }}>Stock</TableCell>
-                          <TableCell align="right" sx={{ color: '#666', borderColor: '#333', fontSize: '11px', fontWeight: 600 }}>Price</TableCell>
-                          <TableCell align="right" sx={{ color: '#666', borderColor: '#333', fontSize: '11px', fontWeight: 600 }}>Change</TableCell>
-                          <TableCell align="right" sx={{ color: '#666', borderColor: '#333', fontSize: '11px', fontWeight: 600 }}>%</TableCell>
-                        </TableRow>
-                      </TableHead>
-                      <TableBody>
-                        {topGainers.map((stock, idx) => (
-                          <TableRow
-                            key={idx}
-                            onClick={() => handleStockClick(stock)}
-                            sx={{
-                              cursor: 'pointer',
-                              backgroundColor: 'transparent',
-                              '&:hover': { backgroundColor: '#222' },
-                              borderColor: '#2a2a2a'
-                            }}
-                          >
-                            <TableCell sx={{ color: '#fff', borderColor: '#2a2a2a', fontWeight: 700, fontSize: '13px' }}>
-                              {stock.symbol}
-                            </TableCell>
-                            <TableCell align="right" sx={{ color: '#aaa', borderColor: '#2a2a2a', fontSize: '13px' }}>
-                              ₹{stock.price.toFixed(2)}
-                            </TableCell>
-                            <TableCell align="right" sx={{ color: '#4caf50', borderColor: '#2a2a2a', fontWeight: 700, fontSize: '13px' }}>
-                              +{stock.change.toFixed(2)}
-                            </TableCell>
-                            <TableCell align="right" sx={{ color: '#4caf50', borderColor: '#2a2a2a', fontWeight: 700, fontSize: '13px' }}>
-                              +{stock.changePercent.toFixed(2)}%
-                            </TableCell>
-                          </TableRow>
-                        ))}
-                      </TableBody>
-                    </Table>
-                  </TableContainer>
-                </Paper>
-              </Grid>
+          {/* GAINERS/LOSERS - 1/3 width */}
+          <Grid item xs={12} lg={4} sx={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+            {/* TOP GAINERS */}
+            <Card sx={{ p: '16px', backgroundColor: '#1a1a1a', border: '1px solid #2a2a2a', borderRadius: '8px' }}>
+              <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: '12px' }}>
+                <Typography sx={{ fontSize: '14px', fontWeight: 700, color: '#fff' }}>Top Gainers</Typography>
+                <Button size="small" sx={{ color: '#1976d2', fontSize: '11px' }}>VIEW ALL</Button>
+              </Box>
+              <TableContainer>
+                <Table size="small">
+                  <TableHead>
+                    <TableRow>
+                      <TableCell sx={{ color: '#666', borderColor: '#2a2a2a', fontSize: '11px', fontWeight: 600, padding: '8px 4px' }}>Stock</TableCell>
+                      <TableCell align="right" sx={{ color: '#666', borderColor: '#2a2a2a', fontSize: '11px', fontWeight: 600, padding: '8px 4px' }}>Price</TableCell>
+                      <TableCell align="right" sx={{ color: '#666', borderColor: '#2a2a2a', fontSize: '11px', fontWeight: 600, padding: '8px 4px' }}>Change</TableCell>
+                      <TableCell align="right" sx={{ color: '#666', borderColor: '#2a2a2a', fontSize: '11px', fontWeight: 600, padding: '8px 4px' }}>%</TableCell>
+                    </TableRow>
+                  </TableHead>
+                  <TableBody>
+                    {topGainers.map((stock, idx) => (
+                      <TableRow
+                        key={idx}
+                        onClick={() => handleStockClick(stock)}
+                        sx={{
+                          cursor: 'pointer',
+                          '&:hover': { backgroundColor: '#222' },
+                          borderColor: '#2a2a2a'
+                        }}
+                      >
+                        <TableCell sx={{ color: '#fff', borderColor: '#2a2a2a', fontWeight: 700, fontSize: '12px', padding: '8px 4px' }}>
+                          {stock.symbol}
+                        </TableCell>
+                        <TableCell align="right" sx={{ color: '#aaa', borderColor: '#2a2a2a', fontSize: '12px', padding: '8px 4px' }}>
+                          ₹{stock.price.toFixed(2)}
+                        </TableCell>
+                        <TableCell align="right" sx={{ color: '#4caf50', borderColor: '#2a2a2a', fontWeight: 700, fontSize: '12px', padding: '8px 4px' }}>
+                          +{stock.change.toFixed(2)}
+                        </TableCell>
+                        <TableCell align="right" sx={{ color: '#4caf50', borderColor: '#2a2a2a', fontWeight: 700, fontSize: '12px', padding: '8px 4px' }}>
+                          +{stock.changePercent.toFixed(2)}%
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              </TableContainer>
+            </Card>
 
-              {/* Top Losers */}
-              <Grid item xs={12}>
-                <Paper sx={{ p: '20px', backgroundColor: '#1a1a1a', border: '1px solid #2a2a2a', borderRadius: '12px' }}>
-                  <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: '16px' }}>
-                    <Typography sx={{ fontSize: '16px', fontWeight: 700, color: '#fff' }}>
-                      Top Losers
-                    </Typography>
-                    <Button size="small" sx={{ color: '#1e88e5', fontSize: '12px', textTransform: 'uppercase' }}>View all</Button>
-                  </Box>
-                  <TableContainer>
-                    <Table size="small">
-                      <TableHead>
-                        <TableRow>
-                          <TableCell sx={{ color: '#666', borderColor: '#333', fontSize: '11px', fontWeight: 600 }}>Stock</TableCell>
-                          <TableCell align="right" sx={{ color: '#666', borderColor: '#333', fontSize: '11px', fontWeight: 600 }}>Price</TableCell>
-                          <TableCell align="right" sx={{ color: '#666', borderColor: '#333', fontSize: '11px', fontWeight: 600 }}>Change</TableCell>
-                          <TableCell align="right" sx={{ color: '#666', borderColor: '#333', fontSize: '11px', fontWeight: 600 }}>%</TableCell>
-                        </TableRow>
-                      </TableHead>
-                      <TableBody>
-                        {topLosers.map((stock, idx) => (
-                          <TableRow
-                            key={idx}
-                            onClick={() => handleStockClick(stock)}
-                            sx={{
-                              cursor: 'pointer',
-                              backgroundColor: 'transparent',
-                              '&:hover': { backgroundColor: '#222' },
-                              borderColor: '#2a2a2a'
-                            }}
-                          >
-                            <TableCell sx={{ color: '#fff', borderColor: '#2a2a2a', fontWeight: 700, fontSize: '13px' }}>
-                              {stock.symbol}
-                            </TableCell>
-                            <TableCell align="right" sx={{ color: '#aaa', borderColor: '#2a2a2a', fontSize: '13px' }}>
-                              ₹{stock.price.toFixed(2)}
-                            </TableCell>
-                            <TableCell align="right" sx={{ color: '#f44336', borderColor: '#2a2a2a', fontWeight: 700, fontSize: '13px' }}>
-                              {stock.change.toFixed(2)}
-                            </TableCell>
-                            <TableCell align="right" sx={{ color: '#f44336', borderColor: '#2a2a2a', fontWeight: 700, fontSize: '13px' }}>
-                              {stock.changePercent.toFixed(2)}%
-                            </TableCell>
-                          </TableRow>
-                        ))}
-                      </TableBody>
-                    </Table>
-                  </TableContainer>
-                </Paper>
-              </Grid>
-            </Grid>
+            {/* TOP LOSERS */}
+            <Card sx={{ p: '16px', backgroundColor: '#1a1a1a', border: '1px solid #2a2a2a', borderRadius: '8px' }}>
+              <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: '12px' }}>
+                <Typography sx={{ fontSize: '14px', fontWeight: 700, color: '#fff' }}>Top Losers</Typography>
+                <Button size="small" sx={{ color: '#1976d2', fontSize: '11px' }}>VIEW ALL</Button>
+              </Box>
+              <TableContainer>
+                <Table size="small">
+                  <TableHead>
+                    <TableRow>
+                      <TableCell sx={{ color: '#666', borderColor: '#2a2a2a', fontSize: '11px', fontWeight: 600, padding: '8px 4px' }}>Stock</TableCell>
+                      <TableCell align="right" sx={{ color: '#666', borderColor: '#2a2a2a', fontSize: '11px', fontWeight: 600, padding: '8px 4px' }}>Price</TableCell>
+                      <TableCell align="right" sx={{ color: '#666', borderColor: '#2a2a2a', fontSize: '11px', fontWeight: 600, padding: '8px 4px' }}>Change</TableCell>
+                      <TableCell align="right" sx={{ color: '#666', borderColor: '#2a2a2a', fontSize: '11px', fontWeight: 600, padding: '8px 4px' }}>%</TableCell>
+                    </TableRow>
+                  </TableHead>
+                  <TableBody>
+                    {topLosers.map((stock, idx) => (
+                      <TableRow
+                        key={idx}
+                        onClick={() => handleStockClick(stock)}
+                        sx={{
+                          cursor: 'pointer',
+                          '&:hover': { backgroundColor: '#222' },
+                          borderColor: '#2a2a2a'
+                        }}
+                      >
+                        <TableCell sx={{ color: '#fff', borderColor: '#2a2a2a', fontWeight: 700, fontSize: '12px', padding: '8px 4px' }}>
+                          {stock.symbol}
+                        </TableCell>
+                        <TableCell align="right" sx={{ color: '#aaa', borderColor: '#2a2a2a', fontSize: '12px', padding: '8px 4px' }}>
+                          ₹{stock.price.toFixed(2)}
+                        </TableCell>
+                        <TableCell align="right" sx={{ color: '#f44336', borderColor: '#2a2a2a', fontWeight: 700, fontSize: '12px', padding: '8px 4px' }}>
+                          {stock.change.toFixed(2)}
+                        </TableCell>
+                        <TableCell align="right" sx={{ color: '#f44336', borderColor: '#2a2a2a', fontWeight: 700, fontSize: '12px', padding: '8px 4px' }}>
+                          {stock.changePercent.toFixed(2)}%
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              </TableContainer>
+            </Card>
           </Grid>
         </Grid>
 
-        {/* Bottom Grid */}
-        <Grid container spacing={3}>
-          {/* Sector Breadth */}
+        {/* BOTTOM GRID: Sector Breadth (Left) + News (Right) */}
+        <Grid container spacing={2}>
+          {/* SECTOR BREADTH */}
           <Grid item xs={12} md={6}>
-            <Paper sx={{ p: '28px', backgroundColor: '#1a1a1a', border: '1px solid #2a2a2a', borderRadius: '12px' }}>
-              <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: '24px' }}>
-                <Typography sx={{ fontSize: '18px', fontWeight: 700, color: '#fff' }}>
-                  Sector Breadth
-                </Typography>
-                <Button size="small" sx={{ color: '#1e88e5', fontSize: '12px', textTransform: 'uppercase' }}>View all</Button>
+            <Card sx={{ p: '20px', backgroundColor: '#1a1a1a', border: '1px solid #2a2a2a', borderRadius: '8px' }}>
+              <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: '16px' }}>
+                <Typography sx={{ fontSize: '16px', fontWeight: 700, color: '#fff' }}>Sector Breadth</Typography>
+                <Button size="small" sx={{ color: '#1976d2', fontSize: '11px' }}>VIEW ALL</Button>
               </Box>
               {sectors.map((sector, idx) => (
-                <Box key={idx} sx={{ mb: '20px' }}>
-                  <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: '8px' }}>
-                    <Typography sx={{ fontSize: '13px', color: '#fff', fontWeight: 600 }}>
+                <Box key={idx} sx={{ mb: '16px' }}>
+                  <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: '6px' }}>
+                    <Typography sx={{ fontSize: '12px', color: '#fff', fontWeight: 600 }}>
                       {sector.name}
                     </Typography>
-                    <Box sx={{ display: 'flex', gap: '12px', fontSize: '12px' }}>
+                    <Box sx={{ display: 'flex', gap: '10px', fontSize: '11px' }}>
                       <Typography sx={{ color: '#4caf50' }}>↑ {sector.advancing}</Typography>
                       <Typography sx={{ color: '#f44336' }}>↓ {sector.declining}</Typography>
                       <Typography sx={{ color: '#888' }}>→ {sector.neutral}</Typography>
@@ -424,49 +366,32 @@ export function marketDashboard() {
                       backgroundColor: '#2a2a2a',
                       '& .MuiLinearProgress-bar': {
                         backgroundColor: sector.breadth > 50 ? '#4caf50' : '#f44336',
-                        borderRadius: '3px',
                       }
                     }}
                   />
                 </Box>
               ))}
-            </Paper>
+            </Card>
           </Grid>
 
-          {/* Market News */}
+          {/* MARKET NEWS */}
           <Grid item xs={12} md={6}>
-            <Paper sx={{ p: '28px', backgroundColor: '#1a1a1a', border: '1px solid #2a2a2a', borderRadius: '12px' }}>
-              <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: '24px' }}>
-                <Typography sx={{ fontSize: '18px', fontWeight: 700, color: '#fff' }}>
-                  Market News
-                </Typography>
-                <Button size="small" sx={{ color: '#1e88e5', fontSize: '12px', textTransform: 'uppercase' }}>View all</Button>
+            <Card sx={{ p: '20px', backgroundColor: '#1a1a1a', border: '1px solid #2a2a2a', borderRadius: '8px' }}>
+              <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: '16px' }}>
+                <Typography sx={{ fontSize: '16px', fontWeight: 700, color: '#fff' }}>Market News</Typography>
+                <Button size="small" sx={{ color: '#1976d2', fontSize: '11px' }}>VIEW ALL</Button>
               </Box>
-              {newsItems.map((item) => (
-                <Box
-                  key={item.id}
-                  sx={{
-                    pb: '16px',
-                    borderBottom: '1px solid #2a2a2a',
-                    cursor: 'pointer',
-                    transition: 'all 0.2s',
-                    '&:hover': {
-                      color: '#1e88e5',
-                    },
-                    '&:last-child': {
-                      borderBottom: 'none',
-                    }
-                  }}
-                >
-                  <Typography sx={{ fontSize: '11px', color: '#666', mb: '6px', textTransform: 'uppercase' }}>
+              {newsItems.map((item, idx) => (
+                <Box key={item.id} sx={{ mb: idx < newsItems.length - 1 ? '12px' : 0, pb: idx < newsItems.length - 1 ? '12px' : 0, borderBottom: idx < newsItems.length - 1 ? '1px solid #2a2a2a' : 'none' }}>
+                  <Typography sx={{ fontSize: '11px', color: '#666', mb: '4px', fontWeight: 600, textTransform: 'uppercase' }}>
                     {item.time}
                   </Typography>
-                  <Typography sx={{ fontSize: '13px', color: '#ccc', lineHeight: 1.5 }}>
+                  <Typography sx={{ fontSize: '12px', color: '#ccc', lineHeight: 1.4 }}>
                     {item.title}
                   </Typography>
                 </Box>
               ))}
-            </Paper>
+            </Card>
           </Grid>
         </Grid>
       </Box>
