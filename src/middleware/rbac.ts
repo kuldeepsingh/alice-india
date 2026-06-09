@@ -42,6 +42,7 @@ export function requireAdmin() {
       return res.status(401).json({
         status: 'error',
         message: 'Authentication required',
+        errorMessage: 'User is not authenticated',
         reason: 'not_authenticated',
         correlationId: req.correlationId,
       })
@@ -86,6 +87,11 @@ export function requireAdmin() {
       return res.status(403).json({
         status: 'error',
         message: 'Admin access required',
+        errorMessage: `User has insufficient permissions. Required role: ${Roles.ADMIN}, actual role: ${req.user.role}`,
+        reason: 'insufficient_role',
+        requiredRole: Roles.ADMIN,
+        userRole: req.user.role,
+        userId: req.user.id,
         correlationId: req.correlationId,
       })
     }
@@ -100,15 +106,35 @@ export function requireAdmin() {
 export function requireDeveloper() {
   return (req: Request, res: Response, next: NextFunction) => {
     if (!req.user) {
+      logger.warn('RBAC', 'Developer access denied - user not authenticated', {
+        path: req.path,
+        method: req.method,
+        ip: req.ip,
+        reason: 'not_authenticated',
+        errorMessage: 'User is not authenticated',
+        requiredRoles: [Roles.ADMIN, 'senior_dev'],
+      })
       return res.status(401).json({
         status: 'error',
         message: 'Authentication required',
+        errorMessage: 'User is not authenticated',
+        reason: 'not_authenticated',
         correlationId: req.correlationId,
       })
     }
 
     const allowedRoles = [Roles.ADMIN, 'senior_dev']
     if (!allowedRoles.includes(req.user.role)) {
+      logger.warn('RBAC', `Developer access denied - user has insufficient role: ${req.user.role}`, {
+        userId: req.user.id,
+        userEmail: req.user.email,
+        userRole: req.user.role,
+        requiredRoles: allowedRoles,
+        path: req.path,
+        method: req.method,
+        ip: req.ip,
+        reason: 'insufficient_role',
+      })
       logger.warn({
         type: 'unauthorized_access',
         userId: req.user.id,
@@ -120,6 +146,11 @@ export function requireDeveloper() {
       return res.status(403).json({
         status: 'error',
         message: 'Developer access required',
+        errorMessage: `User has insufficient permissions. Required roles: ${allowedRoles.join(', ')}, actual role: ${req.user.role}`,
+        reason: 'insufficient_role',
+        requiredRoles: allowedRoles,
+        userRole: req.user.role,
+        userId: req.user.id,
         correlationId: req.correlationId,
       })
     }
