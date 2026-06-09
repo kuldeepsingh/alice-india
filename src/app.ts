@@ -51,9 +51,19 @@ export function createApp() {
   // Uncomment below if you want to use pinoHttp with a real pino logger
   // app.use(pinoHttp({ logger } as any))
 
-  // Custom HTTP request logging middleware - Log all API calls with details
+  // Custom HTTP request logging middleware - Log all API calls with comprehensive details
   app.use((req, res, next) => {
     const start = Date.now()
+    const requestId = `http-${Date.now()}`
+
+    // Capture response body if error (for logging error messages)
+    const originalJson = res.json
+    let responseBody: any = null
+
+    res.json = function (data: any) {
+      responseBody = data
+      return originalJson.call(this, data)
+    }
 
     res.on('finish', () => {
       const duration = Date.now() - start
@@ -61,16 +71,58 @@ export function createApp() {
       const isWarn = res.statusCode >= 300 && res.statusCode < 400
       const logLevel = isError ? 'error' : isWarn ? 'warn' : 'info'
 
-      // Construct the message with full details
-      const message = `${req.method} ${req.path} → ${res.statusCode} (${duration}ms)`
+      // Construct meaningful message based on status code
+      let message = `${req.method} ${req.path} → ${res.statusCode}`
+      if (isError && responseBody?.message) {
+        message += ` - ${responseBody.message}`
+      } else if (isError) {
+        message += ' - Error'
+      }
 
-      // Only include serializable context data
-      const context = {
+      // Build comprehensive context
+      const context: any = {
+        requestId,
         method: req.method,
         path: req.path,
         statusCode: res.statusCode,
-        duration: duration,
+        duration,
+        durationMs: `${duration}ms`,
         userAgent: req.get('user-agent') || 'unknown',
+        ip: req.ip,
+      }
+
+      // Add auth info if available
+      if ((req as any).user) {
+        context.userId = (req as any).user.id
+        context.userEmail = (req as any).user.email
+        context.userRole = (req as any).user.role
+      }
+
+      // Add error details if error response
+      if (isError && responseBody) {
+        context.errorMessage = responseBody.message
+        context.errorStatus = responseBody.status
+        // Add correlationId if present
+        if (responseBody.correlationId) {
+          context.correlationId = responseBody.correlationId
+        }
+      }
+
+      // Add query params if present
+      if (Object.keys(req.query).length > 0) {
+        context.query = req.query
+      }
+
+      // Add body for POST/PUT (sanitized)
+      if ((req.method === 'POST' || req.method === 'PUT') && req.body) {
+        const sanitized = { ...req.body }
+        // Remove sensitive fields
+        delete sanitized.password
+        delete sanitized.token
+        delete sanitized.secret
+        if (Object.keys(sanitized).length > 0) {
+          context.bodyParams = Object.keys(sanitized)
+        }
       }
 
       logger[logLevel as any](

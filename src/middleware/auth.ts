@@ -13,12 +13,65 @@ export interface AuthRequest extends Request {
 export function authMiddleware(req: AuthRequest, res: Response, next: NextFunction) {
   try {
     const authHeader = req.headers.authorization
-    if (!authHeader || !authHeader.startsWith('Bearer ')) {
-      return res.status(401).json({ error: 'Missing or invalid authorization header' })
+
+    // Log auth attempt
+    logger.debug('Auth', 'Auth middleware checking token', {
+      hasAuthHeader: !!authHeader,
+      ip: req.ip,
+      path: req.path,
+      method: req.method,
+    })
+
+    if (!authHeader) {
+      logger.warn('Auth', 'Auth failed - missing authorization header', {
+        ip: req.ip,
+        path: req.path,
+        method: req.method,
+        userAgent: req.get('user-agent'),
+      })
+      return res.status(401).json({
+        status: 'error',
+        error: 'Missing authorization header',
+        message: 'Authorization header is required. Format: Bearer <token>'
+      })
+    }
+
+    if (!authHeader.startsWith('Bearer ')) {
+      logger.warn('Auth', 'Auth failed - invalid authorization format', {
+        ip: req.ip,
+        path: req.path,
+        method: req.method,
+        authHeaderFormat: authHeader.substring(0, 20) + '...',
+      })
+      return res.status(401).json({
+        status: 'error',
+        error: 'Invalid authorization format',
+        message: 'Authorization header must start with "Bearer "'
+      })
     }
 
     const token = authHeader.slice(7)
+
+    logger.debug('Auth', 'Verifying JWT token', {
+      tokenLength: token.length,
+      tokenPrefix: token.substring(0, 20),
+    })
+
     const payload = jwtService.verifyToken(token)
+
+    if (!payload || !payload.userId) {
+      logger.warn('Auth', 'Auth failed - invalid token payload', {
+        ip: req.ip,
+        path: req.path,
+        hasPayload: !!payload,
+        hasUserId: payload && 'userId' in payload,
+      })
+      return res.status(401).json({
+        status: 'error',
+        error: 'Invalid token',
+        message: 'Token payload is invalid'
+      })
+    }
 
     req.user = {
       userId: payload.userId,
@@ -26,25 +79,72 @@ export function authMiddleware(req: AuthRequest, res: Response, next: NextFuncti
       role: payload.role,
     }
 
+    logger.debug('Auth', 'Token verified successfully', {
+      userId: payload.userId,
+      email: payload.email,
+      role: payload.role,
+      path: req.path,
+    })
+
     next()
   } catch (error) {
-    logger.error({
-      type: 'auth_middleware_error',
-      error: error instanceof Error ? error.message : String(error),
+    const errorMessage = error instanceof Error ? error.message : String(error)
+
+    logger.error('Auth', 'Token verification failed', error, {
+      errorMessage,
+      errorType: error?.constructor?.name,
+      ip: req.ip,
+      path: req.path,
+      method: req.method,
+      userAgent: req.get('user-agent'),
     })
-    res.status(401).json({ error: 'Invalid token' })
+
+    res.status(401).json({
+      status: 'error',
+      error: 'Invalid token',
+      message: errorMessage,
+    })
   }
 }
 
 export function requireRole(...roles: string[]) {
   return (req: AuthRequest, res: Response, next: NextFunction) => {
     if (!req.user) {
-      return res.status(401).json({ error: 'Unauthorized' })
+      logger.warn('Auth', 'Authorization failed - user not authenticated', {
+        path: req.path,
+        method: req.method,
+        ip: req.ip,
+        requiredRoles: roles,
+      })
+      return res.status(401).json({
+        status: 'error',
+        error: 'Unauthorized',
+        message: 'User is not authenticated'
+      })
     }
 
     if (!roles.includes(req.user.role)) {
-      return res.status(403).json({ error: 'Insufficient permissions' })
+      logger.warn('Auth', 'Authorization failed - insufficient role permissions', {
+        userId: req.user.userId,
+        userEmail: req.user.email,
+        userRole: req.user.role,
+        requiredRoles: roles,
+        path: req.path,
+        method: req.method,
+      })
+      return res.status(403).json({
+        status: 'error',
+        error: 'Forbidden',
+        message: `User role '${req.user.role}' is not allowed for this operation. Required roles: ${roles.join(', ')}`
+      })
     }
+
+    logger.debug('Auth', 'Authorization check passed', {
+      userId: req.user.userId,
+      userRole: req.user.role,
+      requiredRoles: roles,
+      path: req.path,
+    })
 
     next()
   }
