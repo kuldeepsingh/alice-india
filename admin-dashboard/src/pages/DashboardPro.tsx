@@ -430,30 +430,8 @@ export function DashboardPro() {
             </Card>
           </Box>
 
-          {/* Full-Width Daily Returns Chart */}
-          <Box sx={{ mb: SPACING_PRO.md }}>
-            <Card sx={{ backgroundColor: THEME_PRO.bgSecondary, p: SPACING_PRO.xs, borderRadius: RADIUS_PRO.lg, border: `1px solid ${THEME_PRO.border}`, boxShadow: SHADOWS_PRO.md }}>
-              <Typography sx={{ fontSize: '12px', fontWeight: 700, color: THEME_PRO.textPrimary, mb: SPACING_PRO.xs, textTransform: 'uppercase', letterSpacing: '0.5px' }}>
-                Daily Returns (%)
-              </Typography>
-              <ResponsiveContainer width="100%" height={140}>
-                <BarChart data={dailyReturnsData}>
-                  <CartesianGrid strokeDasharray="3 3" stroke={THEME_PRO.border} />
-                  <XAxis tick={{ fontSize: 10 }} dataKey="date" stroke={THEME_PRO.textSecondary} />
-                  <YAxis tick={{ fontSize: 10 }} stroke={THEME_PRO.textSecondary} />
-                  <Tooltip contentStyle={{ backgroundColor: THEME_PRO.bgSecondary, border: `1px solid ${THEME_PRO.border}`, color: THEME_PRO.textPrimary }} />
-                  <Bar dataKey="return" radius={[8, 8, 0, 0]}>
-                    {dailyReturnsData.map((entry, index) => (
-                      <Cell key={`cell-${index}`} fill={entry.return >= 0 ? THEME_PRO.success : THEME_PRO.error} />
-                    ))}
-                  </Bar>
-                </BarChart>
-              </ResponsiveContainer>
-            </Card>
-          </Box>
-
           {/* Portfolio Allocation */}
-          <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', md: '1fr 1fr' }, gap: 2 }}>
+          <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', md: '1fr 1fr' }, gap: 2, mb: SPACING_PRO.md }}>
             <Card
               sx={{
                 backgroundColor: THEME_PRO.bgSecondary,
@@ -493,6 +471,28 @@ export function DashboardPro() {
               </ResponsiveContainer>
             </Card>
             <Box />
+          </Box>
+
+          {/* Full-Width Daily Returns Chart */}
+          <Box>
+            <Card sx={{ backgroundColor: THEME_PRO.bgSecondary, p: SPACING_PRO.xs, borderRadius: RADIUS_PRO.lg, border: `1px solid ${THEME_PRO.border}`, boxShadow: SHADOWS_PRO.md }}>
+              <Typography sx={{ fontSize: '12px', fontWeight: 700, color: THEME_PRO.textPrimary, mb: SPACING_PRO.xs, textTransform: 'uppercase', letterSpacing: '0.5px' }}>
+                Daily Returns (%)
+              </Typography>
+              <ResponsiveContainer width="100%" height={140}>
+                <BarChart data={dailyReturnsData}>
+                  <CartesianGrid strokeDasharray="3 3" stroke={THEME_PRO.border} />
+                  <XAxis tick={{ fontSize: 10 }} dataKey="date" stroke={THEME_PRO.textSecondary} />
+                  <YAxis tick={{ fontSize: 10 }} stroke={THEME_PRO.textSecondary} />
+                  <Tooltip contentStyle={{ backgroundColor: THEME_PRO.bgSecondary, border: `1px solid ${THEME_PRO.border}`, color: THEME_PRO.textPrimary }} />
+                  <Bar dataKey="return" radius={[8, 8, 0, 0]}>
+                    {dailyReturnsData.map((entry, index) => (
+                      <Cell key={`cell-${index}`} fill={entry.return >= 0 ? THEME_PRO.success : THEME_PRO.error} />
+                    ))}
+                  </Bar>
+                </BarChart>
+              </ResponsiveContainer>
+            </Card>
           </Box>
         </Box>
       </Box>
