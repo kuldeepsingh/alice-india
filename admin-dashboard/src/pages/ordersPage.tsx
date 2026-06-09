@@ -9,14 +9,45 @@ export function ordersPage() {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
 
-  // Fetch orders from backend on mount
+  // Fetch orders from backend and localStorage on mount
   useEffect(() => {
     const fetchOrders = async () => {
       try {
         setLoading(true)
         setError('')
-        const data = await ordersAPI.getAll()
-        setOrders(data)
+
+        // Fetch from backend API
+        let backendOrders = []
+        try {
+          backendOrders = await ordersAPI.getAll()
+          console.log('Backend orders:', backendOrders)
+        } catch (apiErr) {
+          console.log('Backend orders unavailable:', apiErr)
+          backendOrders = []
+        }
+
+        // Also load from localStorage (from Trading page)
+        const savedOrders = localStorage.getItem('executedOrders')
+        let localOrders = []
+        if (savedOrders) {
+          try {
+            localOrders = JSON.parse(savedOrders)
+            console.log('localStorage orders:', localOrders)
+          } catch (parseErr) {
+            console.error('Failed to parse localStorage:', parseErr)
+            localOrders = []
+          }
+        }
+
+        // Combine both sources (localStorage first, then backend)
+        const allOrders = [...localOrders, ...backendOrders]
+        console.log('Combined orders:', allOrders)
+
+        setOrders(allOrders)
+
+        if (allOrders.length === 0) {
+          setError('No orders found. Place orders from Trading page.')
+        }
       } catch (err) {
         setError('Failed to load orders. Please try again.')
         console.error('Error fetching orders:', err)
