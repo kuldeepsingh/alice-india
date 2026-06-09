@@ -212,11 +212,31 @@ router.delete('/members/:id', requireAdmin(), async (req: AuthRequest, res: Resp
  * Auth: Admin only
  */
 router.put('/members/:id/role', requireAdmin(), async (req: AuthRequest, res: Response) => {
+  const requestId = `role-change-${Date.now()}`
+  const startTime = Date.now()
+
   try {
     const { id } = req.params
     const { role } = req.body
+    const adminId = (req as any).user?.id
+    const adminEmail = (req as any).user?.email
 
+    logger.debug('TeamAPI', 'Role change request received', {
+      requestId,
+      targetUserId: id,
+      newRole: role,
+      adminId,
+      adminEmail,
+      correlationId: (req as any).correlationId,
+    })
+
+    // Validation: User ID
     if (!id) {
+      logger.warn('TeamAPI', 'Role change validation failed - missing user ID', {
+        requestId,
+        adminId,
+        correlationId: (req as any).correlationId,
+      })
       return res.status(400).json({
         status: 'error',
         message: 'User ID is required',
@@ -224,7 +244,14 @@ router.put('/members/:id/role', requireAdmin(), async (req: AuthRequest, res: Re
       })
     }
 
+    // Validation: Role parameter
     if (!role) {
+      logger.warn('TeamAPI', 'Role change validation failed - missing role parameter', {
+        requestId,
+        targetUserId: id,
+        adminId,
+        correlationId: (req as any).correlationId,
+      })
       return res.status(400).json({
         status: 'error',
         message: 'Role is required',
@@ -232,9 +259,17 @@ router.put('/members/:id/role', requireAdmin(), async (req: AuthRequest, res: Re
       })
     }
 
-    // Valid roles
+    // Validation: Valid role
     const validRoles = ['trader', 'admin', 'analyst', 'viewer']
     if (!validRoles.includes(role)) {
+      logger.warn('TeamAPI', 'Role change validation failed - invalid role value', {
+        requestId,
+        targetUserId: id,
+        providedRole: role,
+        validRoles,
+        adminId,
+        correlationId: (req as any).correlationId,
+      })
       return res.status(400).json({
         status: 'error',
         message: `Invalid role. Must be one of: ${validRoles.join(', ')}`,
@@ -242,21 +277,37 @@ router.put('/members/:id/role', requireAdmin(), async (req: AuthRequest, res: Re
       })
     }
 
-    // Get current user info first (for logging)
+    logger.debug('TeamAPI', 'Role change validation passed', {
+      requestId,
+      targetUserId: id,
+      newRole: role,
+      adminId,
+    })
+
+    // Fetch current user info
+    logger.debug('TeamAPI', 'Fetching current user info from database', {
+      requestId,
+      targetUserId: id,
+    })
+    const fetchStart = Date.now()
     const currentUserResult = await query(
-      'SELECT role FROM users WHERE id = $1',
+      'SELECT id, email, role FROM users WHERE id = $1',
       [id]
     )
+    const fetchDuration = Date.now() - fetchStart
+    logger.debug('TeamAPI', 'User info fetched', {
+      requestId,
+      durationMs: fetchDuration,
+      userFound: currentUserResult.rows.length > 0,
+    })
 
-    const previousRole = currentUserResult.rows[0]?.role || 'unknown'
-
-    // Update user role in database
-    const result = await query(
-      'UPDATE users SET role = $1 WHERE id = $2 RETURNING id, email, role, created_at',
-      [role, id]
-    )
-
-    if (result.rows.length === 0) {
+    if (currentUserResult.rows.length === 0) {
+      logger.warn('TeamAPI', 'Role change failed - target user not found', {
+        requestId,
+        targetUserId: id,
+        adminId,
+        correlationId: (req as any).correlationId,
+      })
       return res.status(404).json({
         status: 'error',
         message: 'User not found',
@@ -264,14 +315,72 @@ router.put('/members/:id/role', requireAdmin(), async (req: AuthRequest, res: Re
       })
     }
 
-    // 📝 LOG: User role change
-    const updatedUser = result.rows[0]
-    logger.info('TeamAPI', 'User role changed', {
-      userId: id,
-      email: updatedUser.email,
-      previousRole: previousRole,
+    const previousRole = currentUserResult.rows[0].role
+    const targetUserEmail = currentUserResult.rows[0].email
+
+    // Check if role is already the same
+    if (previousRole === role) {
+      logger.debug('TeamAPI', 'No-op role change - user already has requested role', {
+        requestId,
+        targetUserId: id,
+        currentRole: previousRole,
+        requestedRole: role,
+        adminId,
+      })
+    }
+
+    // Update user role
+    logger.debug('TeamAPI', 'Updating user role in database', {
+      requestId,
+      targetUserId: id,
+      currentRole: previousRole,
       newRole: role,
-      changedBy: (req as any).user?.id,
+      targetUserEmail,
+      adminId,
+    })
+
+    const updateStart = Date.now()
+    const result = await query(
+      'UPDATE users SET role = $1, updated_at = NOW() WHERE id = $2 RETURNING id, email, role, created_at, updated_at',
+      [role, id]
+    )
+    const updateDuration = Date.now() - updateStart
+
+    logger.debug('TeamAPI', 'Role update query completed', {
+      requestId,
+      durationMs: updateDuration,
+      rowsAffected: result.rowCount,
+    })
+
+    if (result.rows.length === 0) {
+      logger.error('TeamAPI', 'Role change failed - update returned no rows', new Error('Database update failed'), {
+        requestId,
+        targetUserId: id,
+        adminId,
+        durationMs: updateDuration,
+        correlationId: (req as any).correlationId,
+      })
+      return res.status(500).json({
+        status: 'error',
+        message: 'Failed to update user role',
+        correlationId: (req as any).correlationId,
+      })
+    }
+
+    // Log successful role change - this is a critical audit event
+    const totalDuration = Date.now() - startTime
+    const updatedUser = result.rows[0]
+    logger.info('TeamAPI', 'User role updated successfully', {
+      requestId,
+      targetUserId: id,
+      targetUserEmail,
+      previousRole,
+      newRole: role,
+      changedByAdminId: adminId,
+      changedByAdminEmail: adminEmail,
+      fetchDurationMs: fetchDuration,
+      updateDurationMs: updateDuration,
+      totalDurationMs: totalDuration,
       timestamp: new Date().toISOString(),
       correlationId: (req as any).correlationId,
     })
@@ -279,14 +388,32 @@ router.put('/members/:id/role', requireAdmin(), async (req: AuthRequest, res: Re
     res.status(200).json({
       status: 'success',
       message: 'User role updated successfully',
-      data: result.rows[0],
+      data: updatedUser,
       correlationId: (req as any).correlationId,
     })
+
   } catch (error: any) {
-    console.error('Error updating user role:', error)
+    const duration = Date.now() - startTime
+    const errorMessage = error instanceof Error ? error.message : String(error)
+    const errorStack = error instanceof Error ? error.stack : undefined
+
+    // This is an error log for a critical operation
+    logger.error('TeamAPI', 'Role change operation failed with exception', error, {
+      requestId,
+      targetUserId: req.params.id,
+      newRole: req.body.role,
+      adminId: (req as any).user?.id,
+      adminEmail: (req as any).user?.email,
+      durationMs: duration,
+      errorType: error?.constructor?.name,
+      errorMessage,
+      stack: errorStack,
+      correlationId: (req as any).correlationId,
+    })
+
     res.status(500).json({
       status: 'error',
-      message: error.message || 'Failed to update user role',
+      message: errorMessage || 'Failed to update user role',
       correlationId: (req as any).correlationId,
     })
   }
