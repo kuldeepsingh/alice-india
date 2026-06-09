@@ -1,4 +1,5 @@
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
+import { useLocation } from 'react-router-dom'
 import { LayoutPro } from '../components/LayoutPro'
 import { Box, Card, Typography, TextField, Button, Chip, Alert, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Dialog, DialogTitle, DialogContent, DialogActions } from '@mui/material'
 import { SendToMobile, CheckCircle } from '@mui/icons-material'
@@ -17,6 +18,7 @@ interface ExecutedOrder {
 }
 
 export function tradingPage() {
+  const location = useLocation()
   const [orderType, setOrderType] = useState<'Buy' | 'Sell'>('Buy')
   const [symbol, setSymbol] = useState('INFY')
   const [quantity, setQuantity] = useState('100')
@@ -24,6 +26,24 @@ export function tradingPage() {
   const [executedOrders, setExecutedOrders] = useState<ExecutedOrder[]>([])
   const [orderMessage, setOrderMessage] = useState('')
   const [confirmDialogOpen, setConfirmDialogOpen] = useState(false)
+
+  // Load selected stock from market dashboard
+  useEffect(() => {
+    const state = location.state as { symbol?: string; price?: number } | null
+    if (state?.symbol) {
+      const operationId = `trading-load-${Date.now()}`
+      frontendLogger.info('Trading', 'Stock selected from market dashboard', {
+        operationId,
+        symbol: state.symbol,
+        price: state.price,
+        timestamp: new Date().toISOString(),
+      })
+      setSymbol(state.symbol.toUpperCase())
+      if (state.price) {
+        setPrice(state.price.toString())
+      }
+    }
+  }, [location.state])
 
   const handlePlaceOrder = () => {
     frontendLogger.debug('Trading', 'Order placement started', {

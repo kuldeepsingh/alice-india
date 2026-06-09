@@ -135,12 +135,21 @@ export function marketDashboard() {
 
   const handleStockClick = (stock: Stock) => {
     const operationId = `stock-click-${Date.now()}`
-    frontendLogger.info('MarketDashboard', 'Stock clicked', {
+    frontendLogger.info('MarketDashboard', 'Stock clicked - navigating to trading', {
       operationId,
       symbol: stock.symbol,
+      price: stock.price,
       changePercent: stock.changePercent,
+      timestamp: new Date().toISOString(),
     })
-    setTimeout(() => navigate('/trading', { state: { symbol: stock.symbol } }), 300)
+    setTimeout(() => {
+      navigate('/trading', {
+        state: {
+          symbol: stock.symbol,
+          price: stock.price,
+        }
+      })
+    }, 300)
   }
 
   return (
