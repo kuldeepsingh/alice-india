@@ -81,8 +81,8 @@ export function SidebarPro() {
       sx={{
         width: '280px',
         height: '100vh',
-        backgroundColor: THEME_PRO.bgSecondary,
-        borderRight: `1px solid ${THEME_PRO.border}`,
+        backgroundColor: '#1a1a1a',
+        borderRight: `1px solid #2a2a2a`,
         overflow: 'auto',
         display: 'flex',
         flexDirection: 'column',
@@ -98,7 +98,7 @@ export function SidebarPro() {
                 py: SPACING_PRO.lg,
                 fontSize: '11px',
                 fontWeight: 700,
-                color: THEME_PRO.textTertiary,
+                color: '#888',
                 textTransform: 'uppercase',
                 letterSpacing: '0.5px',
               }}
@@ -120,16 +120,16 @@ export function SidebarPro() {
                       py: SPACING_PRO.md,
                       mb: SPACING_PRO.xs,
                       borderRadius: RADIUS_PRO.md,
-                      color: active ? THEME_PRO.primary : THEME_PRO.textSecondary,
-                      backgroundColor: active ? THEME_PRO.primaryLight : 'transparent',
-                      border: active ? `1px solid ${THEME_PRO.primary}` : 'none',
+                      color: active ? '#1976d2' : '#888',
+                      backgroundColor: active ? '#0d3a5f' : 'transparent',
+                      border: active ? `1px solid #1976d2` : 'none',
                       fontWeight: active ? 600 : 500,
-                      transition: TRANSITIONS_PRO.normal,
+                      transition: 'all 0.2s ease-in-out',
                       cursor: 'pointer',
                       textDecoration: 'none',
                       '&:hover': {
-                        backgroundColor: active ? THEME_PRO.primaryLight : THEME_PRO.bgTertiary,
-                        color: THEME_PRO.primary,
+                        backgroundColor: '#2a2a2a',
+                        color: '#1976d2',
                       },
                     }}
                   >
@@ -147,6 +147,7 @@ export function SidebarPro() {
                         sx: {
                           fontSize: '14px',
                           fontWeight: 'inherit',
+                          color: 'inherit',
                         },
                       }}
                     />
@@ -155,7 +156,7 @@ export function SidebarPro() {
               )
             })}
 
-            <Divider sx={{ my: SPACING_PRO.lg, borderColor: THEME_PRO.border }} />
+            <Divider sx={{ my: SPACING_PRO.lg, borderColor: '#2a2a2a' }} />
           </Box>
         ))}
       </List>
@@ -164,14 +165,14 @@ export function SidebarPro() {
       <Box
         sx={{
           p: SPACING_PRO.md,
-          borderTop: `1px solid ${THEME_PRO.border}`,
+          borderTop: `1px solid #2a2a2a`,
           textAlign: 'center',
           fontSize: '12px',
-          color: THEME_PRO.textTertiary,
+          color: '#666',
         }}
       >
         <div>v1.0.0</div>
-        <div sx={{ mt: SPACING_PRO.xs }}>Professional Trading Platform</div>
+        <div style={{ marginTop: SPACING_PRO.xs }}>Professional Trading Platform</div>
       </Box>
     </Box>
   )

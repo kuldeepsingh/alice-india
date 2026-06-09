@@ -46,52 +46,52 @@ const LIGHT_THEME = {
 }
 
 const DARK_THEME = {
-  // Primary colors - Professional Blue (brighter for dark mode)
-  primary: '#0066FF', // Professional Blue
-  primaryDark: '#0052CC',
-  primaryLight: '#1E40AF',
+  // Primary colors - EquiLytics Professional Blue
+  primary: '#1976d2', // Professional Blue (EquiLytics style)
+  primaryDark: '#1565c0',
+  primaryLight: '#1e88e5',
 
-  // Secondary - Teal accent
-  secondary: '#00D9FF',
+  // Secondary - Blue accent
+  secondary: '#1976d2',
 
-  // Background colors
-  bgPrimary: '#0F172A', // Very dark navy
-  bgSecondary: '#1E293B', // Dark blue-gray
-  bgTertiary: '#334155', // Medium dark gray
+  // Background colors - EquiLytics dark theme
+  bgPrimary: '#0a0a0a', // Very dark (almost black) - main background
+  bgSecondary: '#1a1a1a', // Dark gray - cards and containers
+  bgTertiary: '#2a2a2a', // Medium dark - subtle backgrounds
 
-  // Text colors
-  textPrimary: '#F1F5F9', // Very light gray (almost white)
-  textSecondary: '#CBD5E1', // Light gray
-  textTertiary: '#94A3B8', // Medium gray
-  textInverse: '#0F172A', // Dark text on light backgrounds
+  // Text colors - EquiLytics styling
+  textPrimary: '#ffffff', // Pure white
+  textSecondary: '#888888', // Medium gray
+  textTertiary: '#666666', // Lighter gray
+  textInverse: '#ffffff', // White on dark backgrounds
 
-  // Status colors (adjusted for dark mode visibility)
-  success: '#10B981', // Green
-  successLight: '#064E3B',
-  warning: '#F59E0B', // Amber
-  warningLight: '#78350F',
-  error: '#EF4444', // Red
-  errorLight: '#7F1D1D',
-  info: '#0066FF', // Blue
-  infoLight: '#1E3A8A',
+  // Status colors - EquiLytics market colors
+  success: '#4caf50', // Green for gains/positive
+  successLight: '#0d3a0d', // Dark green background for tiles
+  warning: '#ffa500', // Orange for warnings
+  warningLight: '#3a2a0d', // Dark orange background
+  error: '#f44336', // Red for losses/negative
+  errorLight: '#3a0d0d', // Dark red background for tiles
+  info: '#1976d2', // Blue for info
+  infoLight: '#1e3a5f', // Dark blue background
 
-  // Neutral
-  border: '#475569', // Dark border
-  divider: '#334155',
-  shadow: 'rgba(0, 0, 0, 0.3)',
+  // Neutral - EquiLytics subtle styling
+  border: '#2a2a2a', // Subtle gray borders
+  divider: '#2a2a2a', // Same as border
+  shadow: 'rgba(0, 0, 0, 0.5)',
 
-  // Gradients (darker versions)
-  gradientPrimary: 'linear-gradient(135deg, #0066FF 0%, #0084FF 100%)',
-  gradientSuccess: 'linear-gradient(135deg, #10B981 0%, #059669 100%)',
-  gradientWarning: 'linear-gradient(135deg, #F59E0B 0%, #D97706 100%)',
-  gradientError: 'linear-gradient(135deg, #EF4444 0%, #DC2626 100%)',
+  // Gradients (EquiLytics style)
+  gradientPrimary: 'linear-gradient(135deg, #1976d2 0%, #1e88e5 100%)',
+  gradientSuccess: 'linear-gradient(135deg, #4caf50 0%, #45a049 100%)',
+  gradientWarning: 'linear-gradient(135deg, #ffa500 0%, #ff8c00 100%)',
+  gradientError: 'linear-gradient(135deg, #f44336 0%, #e53935 100%)',
 }
 
-export const getTheme = (darkMode: boolean = false) => {
+export const getTheme = (darkMode: boolean = true) => {
   return darkMode ? DARK_THEME : LIGHT_THEME
 }
 
-export const THEME_PRO = LIGHT_THEME // Default to light theme
+export const THEME_PRO = DARK_THEME // Default to EquiLytics dark theme
 
 export const SPACING_PRO = {
   xs: '4px',
