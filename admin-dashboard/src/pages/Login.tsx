@@ -22,34 +22,123 @@ export function Login() {
     setError('')
     setSuccess('')
 
-    frontendLogger.debug('Auth', 'Login attempt started', { email })
+    // Generate operation ID for complete request tracing
+    const operationId = `login-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`
+    const startTime = Date.now()
+
+    // LOG: Entry point - user clicked login
+    frontendLogger.debug('Auth', 'Login form submitted by user', {
+      operationId,
+      email,
+      timestamp: new Date().toISOString(),
+    })
 
     try {
-      frontendLogger.debug('Auth', 'Sending login request', { email })
+      // LOG: Input validation
+      frontendLogger.debug('Auth', 'Validating login form inputs', {
+        operationId,
+        emailProvided: !!email,
+        passwordProvided: !!password,
+        emailFormat: email?.includes('@') ? 'valid' : 'invalid',
+      })
+
+      if (!email || !password) {
+        frontendLogger.warn('Auth', 'Login validation failed - missing credentials', {
+          operationId,
+          emailMissing: !email,
+          passwordMissing: !password,
+        })
+        setError('Email and password are required')
+        setLoading(false)
+        return
+      }
+
+      // LOG: Sending request to API
+      frontendLogger.debug('Auth', 'Sending login request to API', {
+        operationId,
+        email,
+        endpoint: '/api/v1/auth/login',
+        method: 'POST',
+        requestTime: new Date().toISOString(),
+      })
+
+      // Make API call
+      const apiCallStart = Date.now()
       const response = await authAPI.login(email, password)
+      const apiDuration = Date.now() - apiCallStart
       const { token, user } = response.data
 
-      frontendLogger.info('Auth', 'Login successful', {
+      // LOG: Response received from API
+      frontendLogger.debug('Auth', 'Login API response received', {
+        operationId,
+        statusCode: 200,
+        userReceived: !!user,
+        tokenReceived: !!token,
+        apiDurationMs: apiDuration,
+        userDetails: {
+          userId: user.id,
+          email: user.email,
+          role: user.role,
+        },
+      })
+
+      // LOG: Storing auth state
+      frontendLogger.debug('Auth', 'Storing authentication state in memory and localStorage', {
+        operationId,
         userId: user.id,
         email: user.email,
         role: user.role,
+        tokenLength: token.length,
       })
 
+      // Store token and user info
       setToken(token)
       setUser(user)
+
+      // LOG: Auth state stored successfully
+      frontendLogger.debug('Auth', 'Authentication state stored', {
+        operationId,
+        authStateReady: true,
+      })
+
+      // LOG: Navigating to dashboard
+      frontendLogger.debug('Auth', 'Redirecting to dashboard', {
+        operationId,
+        redirectTo: '/',
+      })
+
+      // Navigate to dashboard
       navigate('/')
+
+      // LOG: Success - complete login flow
+      const totalDuration = Date.now() - startTime
+      frontendLogger.info('Auth', 'Login completed successfully', {
+        operationId,
+        userId: user.id,
+        email: user.email,
+        role: user.role,
+        apiDurationMs: apiDuration,
+        totalDurationMs: totalDuration,
+        timestamp: new Date().toISOString(),
+      })
+
     } catch (err: any) {
-      const errorMessage = err.response?.data?.error || 'Login failed'
-      frontendLogger.error(
-        'Auth',
-        'Login failed',
-        new Error(errorMessage),
-        {
-          email,
-          status: err.response?.status,
-          error: errorMessage,
-        }
-      )
+      const duration = Date.now() - startTime
+      const errorMessage = err.response?.data?.error || err.message || 'Login failed'
+      const statusCode = err.response?.status || 'unknown'
+
+      // LOG: Error occurred during login
+      frontendLogger.error('Auth', `Login failed: ${errorMessage}`, err, {
+        operationId,
+        email,
+        statusCode,
+        errorMessage,
+        errorType: err.response?.data?.errorType || 'api_error',
+        durationMs: duration,
+        apiResponse: err.response?.data,
+        timestamp: new Date().toISOString(),
+      })
+
       setError(errorMessage)
     } finally {
       setLoading(false)
@@ -62,57 +151,143 @@ export function Login() {
     setError('')
     setSuccess('')
 
-    // Validation
+    // Generate operation ID for complete request tracing
+    const operationId = `register-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`
+    const startTime = Date.now()
+
+    // LOG: Entry point - user submitted registration form
+    frontendLogger.debug('Auth', 'Registration form submitted by user', {
+      operationId,
+      email,
+      timestamp: new Date().toISOString(),
+    })
+
+    // LOG: Form field validation
+    frontendLogger.debug('Auth', 'Validating registration form fields', {
+      operationId,
+      emailProvided: !!email,
+      passwordProvided: !!password,
+      confirmPasswordProvided: !!confirmPassword,
+      emailFormat: email?.includes('@') ? 'valid' : 'invalid',
+    })
+
+    // Validation step 1: All fields provided
     if (!email || !password || !confirmPassword) {
+      frontendLogger.warn('Auth', 'Registration validation failed - missing fields', {
+        operationId,
+        emailMissing: !email,
+        passwordMissing: !password,
+        confirmPasswordMissing: !confirmPassword,
+      })
       setError('All fields are required')
       setLoading(false)
       return
     }
 
+    // Validation step 2: Passwords match
     if (password !== confirmPassword) {
+      frontendLogger.warn('Auth', 'Registration validation failed - passwords do not match', {
+        operationId,
+        email,
+        passwordsMatch: false,
+      })
       setError('Passwords do not match')
       setLoading(false)
       return
     }
 
+    // Validation step 3: Password meets minimum requirements
     if (password.length < 6) {
+      frontendLogger.warn('Auth', 'Registration validation failed - password too short', {
+        operationId,
+        email,
+        passwordLength: password.length,
+        minimumRequired: 6,
+      })
       setError('Password must be at least 6 characters')
       setLoading(false)
       return
     }
 
-    frontendLogger.debug('Auth', 'Registration attempt started', { email })
+    frontendLogger.debug('Auth', 'Registration form validation passed', {
+      operationId,
+      email,
+      validationChecks: ['fields_provided', 'passwords_match', 'password_length'],
+    })
 
     try {
-      frontendLogger.debug('Auth', 'Sending registration request', { email })
+      // LOG: Sending registration request to API
+      frontendLogger.debug('Auth', 'Sending registration request to API', {
+        operationId,
+        email,
+        endpoint: '/api/v1/auth/register',
+        method: 'POST',
+        requestTime: new Date().toISOString(),
+      })
+
+      // Make API call
+      const apiCallStart = Date.now()
       const response = await authAPI.register(email, password)
+      const apiDuration = Date.now() - apiCallStart
       const { user } = response.data
 
-      frontendLogger.info('Auth', 'Registration successful', {
+      // LOG: Response received from API
+      frontendLogger.debug('Auth', 'Registration API response received', {
+        operationId,
+        statusCode: 201,
+        userCreated: !!user,
+        apiDurationMs: apiDuration,
+        userDetails: {
+          userId: user.id,
+          email: user.email,
+          role: user.role,
+        },
+      })
+
+      // LOG: Success - registration complete
+      const totalDuration = Date.now() - startTime
+      frontendLogger.info('Auth', 'Registration completed successfully', {
+        operationId,
         userId: user.id,
         email: user.email,
         role: user.role,
+        apiDurationMs: apiDuration,
+        totalDurationMs: totalDuration,
+        timestamp: new Date().toISOString(),
       })
 
       setSuccess('Registration successful! Redirecting to login...')
+
+      // LOG: Resetting form for login
+      frontendLogger.debug('Auth', 'Resetting registration form for login', {
+        operationId,
+        redirecting: true,
+      })
+
       setTimeout(() => {
         setIsRegister(false)
         setPassword('')
         setConfirmPassword('')
         setEmail('')
       }, 2000)
+
     } catch (err: any) {
-      const errorMessage = err.response?.data?.error || 'Registration failed'
-      frontendLogger.error(
-        'Auth',
-        'Registration failed',
-        new Error(errorMessage),
-        {
-          email,
-          status: err.response?.status,
-          error: errorMessage,
-        }
-      )
+      const duration = Date.now() - startTime
+      const errorMessage = err.response?.data?.error || err.message || 'Registration failed'
+      const statusCode = err.response?.status || 'unknown'
+
+      // LOG: Error occurred during registration
+      frontendLogger.error('Auth', `Registration failed: ${errorMessage}`, err, {
+        operationId,
+        email,
+        statusCode,
+        errorMessage,
+        errorType: err.response?.data?.errorType || 'api_error',
+        durationMs: duration,
+        apiResponse: err.response?.data,
+        timestamp: new Date().toISOString(),
+      })
+
       setError(errorMessage)
     } finally {
       setLoading(false)

@@ -205,97 +205,154 @@ router.post('/register', async (req: Request, res: Response) => {
  *   - Refresh token is long-lived but can be revoked
  */
 router.post('/login', async (req: Request, res: Response) => {
+  // Generate operation ID for complete request tracing
+  const requestId = `login-${Date.now()}`
+  const startTime = Date.now()
+
   try {
     const { email, password } = req.body
+    const ipAddress = req.ip
 
-    // DEBUG: Log login attempt received
-    logger.debug({
-      type: 'login_request_received',
+    // LOG: Entry point - API received login request
+    logger.debug('Auth', 'Login request received from client', {
+      requestId,
       email,
-      ip: req.ip,
+      ipAddress,
+      timestamp: new Date().toISOString(),
     })
 
     // ===== INPUT VALIDATION =====
+    // LOG: Validating input parameters
+    logger.debug('Auth', 'Validating login input parameters', {
+      requestId,
+      emailProvided: !!email,
+      passwordProvided: !!password,
+      emailFormat: email?.includes('@') ? 'valid' : 'invalid',
+    })
+
     // Check if email and password are both provided
     if (!email || !password) {
-      // ERROR: Missing credentials
-      logger.error({
-        type: 'login_validation_failed',
-        reason: 'missing_credentials',
-        email,
-        ip: req.ip,
+      const duration = Date.now() - startTime
+      logger.warn('Auth', 'Login validation failed - missing credentials', {
+        requestId,
+        email: email || 'missing',
+        passwordMissing: !password,
+        ipAddress,
+        durationMs: duration,
       })
-      return res.status(400).json({ error: 'Email and password required' })
+      return res.status(400).json({
+        error: 'Email and password required',
+        reason: 'missing_credentials',
+      })
     }
 
     // ===== CREDENTIAL VERIFICATION =====
-    // DEBUG: Starting credential verification
-    logger.debug({
-      type: 'login_verifying_credentials',
+    // LOG: Starting credential verification
+    logger.debug('Auth', 'Starting credential verification against database', {
+      requestId,
       email,
     })
 
     // Call user service to verify email and password
     // This function:
-    // 1. Finds user by email
-    // 2. Compares provided password with stored hash
+    // 1. Queries database for user by email
+    // 2. Compares provided password with stored hash using crypto.timingSafeEqual()
     // 3. Returns user if valid, null if invalid
+    const verifyStart = Date.now()
     const user = await userService.verifyPassword(email, password)
+    const verifyDuration = Date.now() - verifyStart
+
+    // LOG: Credential verification completed
+    logger.debug('Auth', 'Credential verification query completed', {
+      requestId,
+      email,
+      userFound: !!user,
+      durationMs: verifyDuration,
+    })
 
     if (!user) {
+      const duration = Date.now() - startTime
       // ERROR: Credentials don't match
-      // Intentionally vague error message for security
-      // (prevent user enumeration attacks)
-      logger.error({
-        type: 'login_failed',
-        reason: 'invalid_credentials',
+      // Intentionally vague error message for security (prevent user enumeration attacks)
+      logger.warn('Auth', 'Login failed - invalid credentials provided', {
+        requestId,
         email,
-        ip: req.ip,
+        reason: 'invalid_credentials',
+        verifyDurationMs: verifyDuration,
+        ipAddress,
+        durationMs: duration,
         timestamp: new Date().toISOString(),
       })
-      return res.status(401).json({ error: 'Invalid email or password' })
+      return res.status(401).json({
+        error: 'Invalid email or password',
+        reason: 'invalid_credentials',
+      })
     }
 
-    // DEBUG: Credentials verified successfully
-    logger.debug({
-      type: 'login_credentials_verified',
+    // LOG: Credentials verified successfully, user found
+    logger.debug('Auth', 'User credentials verified successfully', {
+      requestId,
       userId: user.id,
       email: user.email,
+      role: user.role,
+      verifyDurationMs: verifyDuration,
     })
 
     // ===== TOKEN GENERATION =====
-    // DEBUG: Starting token generation
-    logger.debug({
-      type: 'login_generating_tokens',
+    // LOG: Starting token generation
+    logger.debug('Auth', 'Generating JWT tokens for authenticated user', {
+      requestId,
       userId: user.id,
+      email: user.email,
+      role: user.role,
     })
 
-    // Generate JWT access token (short-lived)
+    // Generate JWT access token (short-lived, ~15 minutes)
     // Payload: { userId, email, role }
-    // Expiration: configured in jwtService (typically 15 minutes)
+    // Signed with private key
+    const tokenStart = Date.now()
     const token = jwtService.generateToken({
       userId: user.id,
       email: user.email,
       role: user.role,
     })
+    const tokenDuration = Date.now() - tokenStart
 
-    // Generate JWT refresh token (long-lived)
+    // Generate JWT refresh token (long-lived, ~7 days)
     // Payload: { userId, email, role }
-    // Expiration: configured in jwtService (typically 7 days)
+    // Can be revoked if needed
+    const refreshTokenStart = Date.now()
     const refreshToken = jwtService.generateRefreshToken({
       userId: user.id,
       email: user.email,
       role: user.role,
     })
+    const refreshTokenDuration = Date.now() - refreshTokenStart
 
-    // INFO: Login successful - log with full context for audit trail
-    logger.info({
-      type: 'user_login_successful',
+    // LOG: Tokens generated successfully
+    logger.debug('Auth', 'JWT tokens generated successfully', {
+      requestId,
+      userId: user.id,
+      accessTokenLength: token.length,
+      accessTokenDurationMs: tokenDuration,
+      refreshTokenLength: refreshToken.length,
+      refreshTokenDurationMs: refreshTokenDuration,
+    })
+
+    // ===== RESPONSE PREPARATION =====
+    const totalDuration = Date.now() - startTime
+
+    // LOG: Login successful - complete audit trail
+    logger.info('Auth', 'User login completed successfully', {
+      requestId,
       userId: user.id,
       email: user.email,
       role: user.role,
+      ipAddress,
+      verifyDurationMs: verifyDuration,
+      tokenGenerationDurationMs: tokenDuration + refreshTokenDuration,
+      totalDurationMs: totalDuration,
       timestamp: new Date().toISOString(),
-      ip: req.ip,
     })
 
     // Return tokens and user info
