@@ -308,7 +308,8 @@ class Logger {
    */
   info(moduleOrObj: string | Record<string, any>, message?: string, context?: Record<string, any>): void {
     const { module, msg, ctx } = this.normalizeArgs(moduleOrObj, message, context)
-    this.log('INFO', module, msg, ctx)
+    // log is async but we don't await because logging shouldn't block
+    this.log('INFO', module, msg, ctx).catch(err => console.error('Log error:', err))
   }
 
   /**

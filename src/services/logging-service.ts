@@ -1,7 +1,9 @@
 import fs from 'fs'
 import path from 'path'
+import os from 'os'
 
-const LOG_DIR = path.join(process.cwd(), 'logs')
+// Match the log directory used by the main Logger service
+const LOG_DIR = process.env.LOG_DIR || path.join(os.tmpdir(), 'bot-trade-logs')
 const MAX_LOG_SIZE = 10 * 1024 * 1024 // 10MB per file
 const MAX_FILES = 10
 
@@ -131,8 +133,15 @@ class LoggingService {
       const { limit = 100, offset = 0, level, service, search } = options
       let logs: LogEntry[] = []
 
+      // Get all log files
       const files = fs.readdirSync(LOG_DIR).filter((f) => f.endsWith('.log')).sort().reverse()
 
+      if (files.length === 0) {
+        console.log('[LoggingService] No log files found in', LOG_DIR)
+        return { logs: [], total: 0 }
+      }
+
+      // Read all log files
       for (const file of files) {
         const filePath = path.join(LOG_DIR, file)
         const content = fs.readFileSync(filePath, 'utf-8')
@@ -140,7 +149,10 @@ class LoggingService {
 
         for (const line of lines.reverse()) {
           const logEntry = this.parseLogLine(line)
-          if (!logEntry) continue
+          if (!logEntry) {
+            // Silently skip unparseable lines
+            continue
+          }
 
           if (level && logEntry.level !== level) continue
           if (service && !logEntry.service.includes(service)) continue
@@ -159,26 +171,35 @@ class LoggingService {
         total: logs.length,
       }
     } catch (e) {
+      console.error('[LoggingService] Error reading logs:', e)
       return { logs: [], total: 0 }
     }
   }
 
   private parseLogLine(line: string): LogEntry | null {
     try {
-      const match = line.match(
-        /\[(.+?)\] \[(.+?)\] \[(.+?)\] (.+?)(?:\s\|\s(.+))?$/
-      )
-      if (!match) return null
+      // Try to parse as JSON (current format)
+      const json = JSON.parse(line)
 
-      const [, timestamp, level, service, message] = match
+      // Ensure module/service is a string, not an object
+      let module = json.module
+      if (typeof module === 'object' && module !== null) {
+        // If module is an object, try to extract the type or service field
+        module = module.type || module.service || 'Unknown'
+      }
+      if (!module) {
+        module = json.service || 'Unknown'
+      }
 
       return {
-        timestamp,
-        level: level as LogLevel,
-        service,
-        message,
+        timestamp: json.timestamp,
+        level: json.level as LogLevel,
+        service: String(module),
+        message: json.message,
+        data: json.context,
       }
     } catch (e) {
+      // If JSON parsing fails, it's not a valid log line
       return null
     }
   }
