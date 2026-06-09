@@ -98,9 +98,6 @@ export function AdminLogsPage() {
           <Typography variant="h4" sx={{ fontSize: '32px', fontWeight: 700, color: THEME_PRO.textPrimary, mb: SPACING_PRO.md }}>
             📋 System Logs
           </Typography>
-          <Typography sx={{ color: THEME_PRO.textSecondary }}>
-            Real-time backend and frontend logs in raw JSON format
-          </Typography>
         </Box>
 
         {loading && (
