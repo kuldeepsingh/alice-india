@@ -8,6 +8,7 @@ import accountsRouter from './routes/accounts.ts'
 import ordersRouter from './routes/orders.ts'
 import marketDataRouter from './routes/market-data.ts'
 import logsRouter from './routes/logs.ts'
+import zerodhaRouter from './routes/zerodha.ts'
 // import errorsRouter from './routes/errors.ts'  // TODO: Fix ErrorService import
 // import auditRouter from './routes/audit.ts'  // TODO: Fix AuditService import
 // import debugRouter from './routes/debug.ts'  // TODO: Fix DebugService import
@@ -189,6 +190,9 @@ export function createApp() {
 
   // Account routes (protected)
   v1.use('/accounts', accountsRouter)
+
+  // Zerodha integration routes (protected)
+  v1.use('/zerodha', authMiddleware, zerodhaRouter)
 
   // Order routes (protected)
   v1.use('/orders', ordersRouter)
