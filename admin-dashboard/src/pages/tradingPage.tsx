@@ -28,6 +28,20 @@ export function tradingPage() {
   const [executedOrders, setExecutedOrders] = useState<ExecutedOrder[]>([])
   const [orderMessage, setOrderMessage] = useState('')
   const [confirmDialogOpen, setConfirmDialogOpen] = useState(false)
+  const [backendConnected, setBackendConnected] = useState(false)
+
+  // Check backend health
+  React.useEffect(() => {
+    const checkBackend = async () => {
+      try {
+        const response = await fetch('http://localhost:3000/health/live')
+        setBackendConnected(response.ok)
+      } catch {
+        setBackendConnected(false)
+      }
+    }
+    checkBackend()
+  }, [])
 
   // Load selected stock from market dashboard
   useEffect(() => {
@@ -136,11 +150,49 @@ export function tradingPage() {
   return (
     <LayoutPro>
       <Box sx={{ p: SPACING_PRO.xxxl, backgroundColor: THEME_PRO.bgPrimary, minHeight: '100vh' }}>
-        <Box sx={{ mb: SPACING_PRO.xxxl }}>
-          <Typography variant="h4" sx={{ fontSize: '32px', fontWeight: 700, color: THEME_PRO.textPrimary, mb: SPACING_PRO.md }}>
-            📈 Trading
-          </Typography>
-          <Typography sx={{ color: THEME_PRO.textSecondary }}>Place and manage your trades</Typography>
+        {/* Header with Backend Status */}
+        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: SPACING_PRO.xxxl }}>
+          <Box>
+            <Typography variant="h4" sx={{ fontSize: '32px', fontWeight: 700, color: THEME_PRO.textPrimary, mb: SPACING_PRO.md }}>
+              📈 Trading
+            </Typography>
+            <Typography sx={{ color: THEME_PRO.textSecondary }}>Place and manage your trades</Typography>
+          </Box>
+
+          {/* Inline Backend Status Badge */}
+          <Box sx={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: SPACING_PRO.md,
+            px: SPACING_PRO.lg,
+            py: SPACING_PRO.md,
+            borderRadius: RADIUS_PRO.md,
+            backgroundColor: backendConnected ? THEME_PRO.successLight : THEME_PRO.errorLight,
+            border: `1px solid ${backendConnected ? THEME_PRO.success : THEME_PRO.error}`,
+          }}>
+            <Box sx={{
+              width: '10px',
+              height: '10px',
+              borderRadius: '50%',
+              backgroundColor: backendConnected ? THEME_PRO.success : THEME_PRO.error,
+              animation: backendConnected ? 'pulse 2s ease-in-out infinite' : 'none',
+              '@keyframes pulse': {
+                '0%, 100%': { opacity: 1 },
+                '50%': { opacity: 0.5 }
+              }
+            }} />
+            <Box>
+              <Typography sx={{
+                fontSize: '12px',
+                fontWeight: 700,
+                color: backendConnected ? THEME_PRO.success : THEME_PRO.error,
+                textTransform: 'uppercase',
+                letterSpacing: '0.5px'
+              }}>
+                {backendConnected ? 'Backend Ready' : 'Backend Offline'}
+              </Typography>
+            </Box>
+          </Box>
         </Box>
 
         {/* THREE COLUMN LAYOUT: Order Form (1/3) + Bot (2/3) */}
