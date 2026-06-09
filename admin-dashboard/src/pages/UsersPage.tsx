@@ -316,7 +316,7 @@ export function UsersPage() {
 
 
         {/* Search Bar */}
-        <Card sx={{ backgroundColor: THEME_PRO.bgSecondary, p: SPACING_PRO.lg, mb: SPACING_PRO.lg, borderRadius: RADIUS_PRO.lg, border: `1px solid ${THEME_PRO.border}` }}>
+        <Card sx={{ backgroundColor: THEME_PRO.bgSecondary, p: SPACING_PRO.lg, mb: SPACING_PRO.lg, borderRadius: RADIUS_PRO.lg, border: `1px solid ${THEME_PRO.border}`, boxShadow: SHADOWS_PRO.md }}>
           <TextField
             fullWidth
             placeholder="Search users by name or email..."
@@ -325,11 +325,21 @@ export function UsersPage() {
             sx={{
               '& .MuiOutlinedInput-root': {
                 backgroundColor: THEME_PRO.bgTertiary,
+                color: THEME_PRO.textPrimary,
                 '& fieldset': { borderColor: THEME_PRO.border },
+                '&:hover fieldset': { borderColor: THEME_PRO.primary },
+                '&.Mui-focused fieldset': { borderColor: THEME_PRO.primary },
+              },
+              '& .MuiOutlinedInput-input': {
+                color: THEME_PRO.textPrimary,
+                '&::placeholder': {
+                  color: THEME_PRO.textSecondary,
+                  opacity: 1,
+                },
               },
             }}
             InputProps={{
-              startAdornment: <Search sx={{ mr: SPACING_PRO.sm, color: THEME_PRO.textSecondary }} />,
+              startAdornment: <Search sx={{ mr: SPACING_PRO.sm, color: THEME_PRO.primary }} />,
             }}
           />
         </Card>
