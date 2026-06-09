@@ -226,7 +226,7 @@ export function DashboardPro() {
               <Card
                 sx={{
                   backgroundColor: THEME_PRO.bgSecondary,
-                  p: SPACING_PRO.xxl,
+                  p: SPACING_PRO.lg,
                   borderRadius: RADIUS_PRO.lg,
                   border: `1px solid ${THEME_PRO.border}`,
                   transition: TRANSITIONS_PRO.normal,
