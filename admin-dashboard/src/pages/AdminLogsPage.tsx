@@ -7,14 +7,24 @@ import {
   Button,
   Stack,
   CircularProgress,
+  Select,
+  MenuItem,
+  FormControl,
+  InputLabel,
 } from '@mui/material'
 import { Refresh } from '@mui/icons-material'
 import { THEME_PRO, SPACING_PRO, RADIUS_PRO } from '../theme-pro'
+
+type LogLevel = 'ALL' | 'DEBUG' | 'INFO' | 'WARN' | 'ERROR'
 
 export function AdminLogsPage() {
   const [backendLogs, setBackendLogs] = useState<string>('')
   const [frontendLogs, setFrontendLogs] = useState<string>('')
   const [loading, setLoading] = useState(false)
+  const [backendRawLogs, setBackendRawLogs] = useState<any[]>([])
+  const [frontendRawLogs, setFrontendRawLogs] = useState<any[]>([])
+  const [backendFilter, setBackendFilter] = useState<LogLevel>('ALL')
+  const [frontendFilter, setFrontendFilter] = useState<LogLevel>('ALL')
 
   useEffect(() => {
     fetchLogs()
@@ -23,6 +33,24 @@ export function AdminLogsPage() {
     return () => clearInterval(interval)
   }, [])
 
+  // Filter logs by level
+  const filterLogsByLevel = (logs: any[], level: LogLevel): string => {
+    let filtered = logs
+    if (level !== 'ALL') {
+      filtered = logs.filter((log: any) => log.level === level)
+    }
+    return filtered.map((log: any) => JSON.stringify(log)).join('\n') || 'No logs found'
+  }
+
+  // Update displayed logs when filter changes
+  useEffect(() => {
+    setBackendLogs(filterLogsByLevel(backendRawLogs, backendFilter))
+  }, [backendFilter, backendRawLogs])
+
+  useEffect(() => {
+    setFrontendLogs(filterLogsByLevel(frontendRawLogs, frontendFilter))
+  }, [frontendFilter, frontendRawLogs])
+
   const fetchLogs = async () => {
     setLoading(true)
     try {
@@ -30,26 +58,20 @@ export function AdminLogsPage() {
       const response = await fetch('/api/v1/logs?limit=500')
       const data = await response.json()
 
-      // Convert logs array to formatted JSON text
-      const logsText = data.data
-        .map((log: any) => JSON.stringify(log))
-        .join('\n')
-
-      setBackendLogs(logsText)
+      // Store raw logs
+      setBackendRawLogs(data.data || [])
 
       // Frontend logs from localStorage
       const storedLogs = localStorage.getItem('app_logs')
       if (storedLogs) {
         try {
           const frontendLogsArray = JSON.parse(storedLogs)
-          const frontendText = frontendLogsArray
-            .map((log: any) => JSON.stringify(log))
-            .join('\n')
-          setFrontendLogs(frontendText)
+          setFrontendRawLogs(frontendLogsArray)
         } catch (e) {
-          setFrontendLogs(storedLogs)
+          setFrontendLogs('Error parsing frontend logs')
         }
       } else {
+        setFrontendRawLogs([])
         setFrontendLogs('No frontend logs yet. Check console for activity.')
       }
     } catch (error) {
@@ -111,9 +133,30 @@ export function AdminLogsPage() {
             {/* Frontend Logs */}
             <Card sx={{ p: SPACING_PRO.xxl, borderRadius: RADIUS_PRO.lg, border: `1px solid ${THEME_PRO.border}` }}>
               <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: SPACING_PRO.lg }}>
-                <Typography sx={{ fontSize: '18px', fontWeight: 700, color: THEME_PRO.textPrimary }}>
-                  🌐 Frontend Logs
-                </Typography>
+                <Box sx={{ display: 'flex', alignItems: 'center', gap: SPACING_PRO.lg }}>
+                  <Typography sx={{ fontSize: '18px', fontWeight: 700, color: THEME_PRO.textPrimary }}>
+                    🌐 Frontend Logs
+                  </Typography>
+                  <FormControl sx={{ minWidth: 140 }}>
+                    <InputLabel sx={{ fontSize: '14px' }}>Filter Level</InputLabel>
+                    <Select
+                      value={frontendFilter}
+                      label="Filter Level"
+                      onChange={(e) => setFrontendFilter(e.target.value as LogLevel)}
+                      sx={{
+                        backgroundColor: THEME_PRO.bgTertiary,
+                        fontSize: '14px',
+                        '& .MuiOutlinedInput-notchedOutline': { borderColor: THEME_PRO.border },
+                      }}
+                    >
+                      <MenuItem value="ALL">All Levels</MenuItem>
+                      <MenuItem value="DEBUG">DEBUG</MenuItem>
+                      <MenuItem value="INFO">INFO</MenuItem>
+                      <MenuItem value="WARN">WARN</MenuItem>
+                      <MenuItem value="ERROR">ERROR</MenuItem>
+                    </Select>
+                  </FormControl>
+                </Box>
                 <Stack direction="row" spacing={SPACING_PRO.sm}>
                   <Button
                     size="small"
@@ -150,6 +193,7 @@ export function AdminLogsPage() {
                     Download
                   </Button>
                 </Stack>
+                </Box>
               </Box>
 
               <Box
@@ -174,9 +218,30 @@ export function AdminLogsPage() {
             {/* Backend Logs */}
             <Card sx={{ p: SPACING_PRO.xxl, borderRadius: RADIUS_PRO.lg, border: `1px solid ${THEME_PRO.border}` }}>
               <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: SPACING_PRO.lg }}>
-                <Typography sx={{ fontSize: '18px', fontWeight: 700, color: THEME_PRO.textPrimary }}>
-                  🖥️ Backend Logs
-                </Typography>
+                <Box sx={{ display: 'flex', alignItems: 'center', gap: SPACING_PRO.lg }}>
+                  <Typography sx={{ fontSize: '18px', fontWeight: 700, color: THEME_PRO.textPrimary }}>
+                    🖥️ Backend Logs
+                  </Typography>
+                  <FormControl sx={{ minWidth: 140 }}>
+                    <InputLabel sx={{ fontSize: '14px' }}>Filter Level</InputLabel>
+                    <Select
+                      value={backendFilter}
+                      label="Filter Level"
+                      onChange={(e) => setBackendFilter(e.target.value as LogLevel)}
+                      sx={{
+                        backgroundColor: THEME_PRO.bgTertiary,
+                        fontSize: '14px',
+                        '& .MuiOutlinedInput-notchedOutline': { borderColor: THEME_PRO.border },
+                      }}
+                    >
+                      <MenuItem value="ALL">All Levels</MenuItem>
+                      <MenuItem value="DEBUG">DEBUG</MenuItem>
+                      <MenuItem value="INFO">INFO</MenuItem>
+                      <MenuItem value="WARN">WARN</MenuItem>
+                      <MenuItem value="ERROR">ERROR</MenuItem>
+                    </Select>
+                  </FormControl>
+                </Box>
                 <Stack direction="row" spacing={SPACING_PRO.sm}>
                   <Button
                     size="small"
@@ -213,6 +278,7 @@ export function AdminLogsPage() {
                     Download
                   </Button>
                 </Stack>
+                </Box>
               </Box>
 
               <Box
