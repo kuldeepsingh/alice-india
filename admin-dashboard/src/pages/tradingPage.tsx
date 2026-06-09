@@ -3,6 +3,7 @@ import { useLocation } from 'react-router-dom'
 import { LayoutPro } from '../components/LayoutPro'
 import { Box, Card, Typography, TextField, Button, Chip, Alert, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Dialog, DialogTitle, DialogContent, DialogActions } from '@mui/material'
 import { SendToMobile, CheckCircle } from '@mui/icons-material'
+import { TradingBot } from '../components/TradingBot'
 import { frontendLogger } from '../services/logging-client'
 import { THEME_PRO, SPACING_PRO, RADIUS_PRO, SHADOWS_PRO } from '../theme-pro'
 
@@ -140,7 +141,7 @@ export function tradingPage() {
           <Typography sx={{ color: THEME_PRO.textSecondary }}>Place and manage your trades</Typography>
         </Box>
 
-        <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', md: '1fr 1fr' }, gap: 3 }}>
+        <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', md: '1fr' }, gap: 3 }}>
           {/* Order Form */}
           <Box>
             <Card sx={{ p: SPACING_PRO.xxl, borderRadius: RADIUS_PRO.lg, border: `1px solid ${THEME_PRO.border}`, boxShadow: SHADOWS_PRO.md, backgroundColor: THEME_PRO.bgSecondary }}>
@@ -276,28 +277,17 @@ export function tradingPage() {
             </Card>
           </Box>
 
-          {/* Market Watch */}
-          <Box>
-            <Card sx={{ p: SPACING_PRO.xxl, borderRadius: RADIUS_PRO.lg, border: `1px solid ${THEME_PRO.border}`, boxShadow: SHADOWS_PRO.md, backgroundColor: THEME_PRO.bgSecondary }}>
-              <Typography sx={{ fontSize: '18px', fontWeight: 700, color: THEME_PRO.textPrimary, mb: SPACING_PRO.lg }}>
-                Market Watch
-              </Typography>
+        </Box>
 
-              {[
-                { symbol: 'INFY', price: '1,850', change: '+2.5%', trend: '📈' },
-                { symbol: 'TCS', price: '3,450', change: '-1.2%', trend: '📉' },
-                { symbol: 'RELIANCE', price: '2,890', change: '+3.1%', trend: '📈' },
-              ].map((stock) => (
-                <Box key={stock.symbol} sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', p: SPACING_PRO.md, backgroundColor: THEME_PRO.bgTertiary, borderRadius: RADIUS_PRO.md, mb: SPACING_PRO.sm }}>
-                  <Box>
-                    <Typography sx={{ fontWeight: 700, color: THEME_PRO.textPrimary }}>{stock.symbol}</Typography>
-                    <Typography sx={{ fontSize: '12px', color: THEME_PRO.textSecondary }}>₹{stock.price}</Typography>
-                  </Box>
-                  <Chip label={`${stock.trend} ${stock.change}`} sx={{ backgroundColor: stock.change.includes('+') ? THEME_PRO.successLight : THEME_PRO.errorLight, color: stock.change.includes('+') ? THEME_PRO.success : THEME_PRO.error }} />
-                </Box>
-              ))}
-            </Card>
+        {/* Autonomous Trading Bot Section */}
+        <Box sx={{ mt: SPACING_PRO.xxxl }}>
+          <Box sx={{ mb: SPACING_PRO.lg }}>
+            <Typography variant="h5" sx={{ fontSize: '24px', fontWeight: 700, color: THEME_PRO.textPrimary, mb: SPACING_PRO.md }}>
+              🤖 Autonomous Trading Bot
+            </Typography>
+            <Typography sx={{ color: THEME_PRO.textSecondary }}>Create automated orders and analyze market sentiment with Claude AI</Typography>
           </Box>
+          <TradingBot />
         </Box>
 
         {/* Order History */}
