@@ -4,6 +4,7 @@ import { Box, Card, Typography, Button, Chip, LinearProgress, Alert, Paper } fro
 import { PlayArrow, CheckCircle, ErrorOutlined, Schedule, Stop, Code } from '@mui/icons-material'
 import { THEME_PRO, SPACING_PRO, RADIUS_PRO } from '../theme-pro'
 import { frontendLogger } from '../services/logging-client'
+import { logsAPI, diagnosticsAPI } from '../services/api-services'
 
 const tests = [
   { name: 'Backend API Health', status: 'passed', duration: '125ms' },
@@ -28,15 +29,12 @@ export function diagnosticsPage() {
     }
   }, [logs])
 
-  // Fetch logs from API
+  // Fetch logs from backend API
   const fetchLogs = async () => {
     try {
-      const response = await fetch('/api/v1/logs?limit=100&level=DEBUG')
-      if (response.ok) {
-        const data = await response.json()
-        const recentLogs = data.data?.slice(0, 20).reverse() || []
-        setLogs(recentLogs)
-      }
+      const logs = await logsAPI.getAll(50, 'DEBUG')
+      const recentLogs = logs.slice(0, 20).reverse()
+      setLogs(recentLogs)
     } catch (error) {
       console.error('Failed to fetch logs:', error)
     }
