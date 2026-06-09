@@ -359,7 +359,47 @@ export function DashboardPro() {
         {/* Charts Section */}
         <Box sx={{ mt: SPACING_PRO.md }}>
           {/* Top Row: 4 Charts */}
-          <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', md: 'repeat(3, 1fr)' }, gap: 2, mb: SPACING_PRO.md }}>
+          <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', md: 'repeat(4, 1fr)' }, gap: 2, mb: SPACING_PRO.md }}>
+            {/* Portfolio Allocation */}
+            <Card
+              sx={{
+                backgroundColor: THEME_PRO.bgSecondary,
+                p: SPACING_PRO.xs,
+                borderRadius: RADIUS_PRO.lg,
+                border: `1px solid ${THEME_PRO.border}`,
+                boxShadow: SHADOWS_PRO.md,
+              }}
+            >
+              <Typography sx={{ fontSize: '11px', fontWeight: 700, color: THEME_PRO.textPrimary, mb: SPACING_PRO.xs, textTransform: 'uppercase', letterSpacing: '0.5px' }}>
+                Portfolio Allocation
+              </Typography>
+
+              <ResponsiveContainer width="100%" height={120}>
+                <PieChart>
+                  <Pie
+                    data={[
+                      { name: 'Stocks', value: 45 },
+                      { name: 'Crypto', value: 37 },
+                      { name: 'Commodities', value: 29 },
+                      { name: 'Forex', value: 21 },
+                    ]}
+                    cx="50%"
+                    cy="50%"
+                    innerRadius={25}
+                    outerRadius={50}
+                    paddingAngle={2}
+                    dataKey="value"
+                  >
+                    <Cell fill={THEME_PRO.primary} />
+                    <Cell fill={THEME_PRO.success} />
+                    <Cell fill={THEME_PRO.warning} />
+                    <Cell fill={THEME_PRO.error} />
+                  </Pie>
+                  <Tooltip content={<CustomPieTooltip />} />
+                </PieChart>
+              </ResponsiveContainer>
+            </Card>
+
             {/* Portfolio Value Chart */}
             <Card sx={{ backgroundColor: THEME_PRO.bgSecondary, p: SPACING_PRO.xs, borderRadius: RADIUS_PRO.lg, border: `1px solid ${THEME_PRO.border}`, boxShadow: SHADOWS_PRO.md }}>
               <Typography sx={{ fontSize: '12px', fontWeight: 700, color: THEME_PRO.textPrimary, mb: SPACING_PRO.xs, textTransform: 'uppercase', letterSpacing: '0.5px' }}>
@@ -428,49 +468,6 @@ export function DashboardPro() {
                 </LineChart>
               </ResponsiveContainer>
             </Card>
-          </Box>
-
-          {/* Portfolio Allocation */}
-          <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', md: '1fr 1fr' }, gap: 2, mb: SPACING_PRO.md }}>
-            <Card
-              sx={{
-                backgroundColor: THEME_PRO.bgSecondary,
-                p: SPACING_PRO.xs,
-                borderRadius: RADIUS_PRO.lg,
-                border: `1px solid ${THEME_PRO.border}`,
-                boxShadow: SHADOWS_PRO.md,
-              }}
-            >
-              <Typography sx={{ fontSize: '11px', fontWeight: 700, color: THEME_PRO.textPrimary, mb: SPACING_PRO.xs, textTransform: 'uppercase', letterSpacing: '0.5px' }}>
-                Portfolio Allocation
-              </Typography>
-
-              <ResponsiveContainer width="100%" height={130}>
-                <PieChart>
-                  <Pie
-                    data={[
-                      { name: 'Stocks', value: 45 },
-                      { name: 'Crypto', value: 37 },
-                      { name: 'Commodities', value: 29 },
-                      { name: 'Forex', value: 21 },
-                    ]}
-                    cx="50%"
-                    cy="50%"
-                    innerRadius={25}
-                    outerRadius={50}
-                    paddingAngle={2}
-                    dataKey="value"
-                  >
-                    <Cell fill={THEME_PRO.primary} />
-                    <Cell fill={THEME_PRO.success} />
-                    <Cell fill={THEME_PRO.warning} />
-                    <Cell fill={THEME_PRO.error} />
-                  </Pie>
-                  <Tooltip content={<CustomPieTooltip />} />
-                </PieChart>
-              </ResponsiveContainer>
-            </Card>
-            <Box />
           </Box>
 
           {/* Full-Width Daily Returns Chart */}
