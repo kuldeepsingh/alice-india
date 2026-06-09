@@ -191,7 +191,7 @@ export function createApp() {
   v1.use('/market', marketDataRouter)
 
   // Debugging & Monitoring routes (protected)
-  v1.use('/logs', logsRouter)  // Logs API - displays all application logs
+  v1.use('/logs', authMiddleware, logsRouter)  // Logs API - displays all application logs (requires auth)
   // v1.use('/errors', errorsRouter)  // TODO: Fix imports
   // v1.use('/audit', auditRouter)  // TODO: Fix imports
   // v1.use('/debug', debugRouter)  // TODO: Fix imports

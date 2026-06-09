@@ -14,6 +14,9 @@ export function authMiddleware(req: AuthRequest, res: Response, next: NextFuncti
   try {
     const authHeader = req.headers.authorization
 
+    // DEBUG: Direct console log
+    console.log(`[AUTH] Auth middleware hit - path: ${req.path}, hasHeader: ${!!authHeader}`)
+
     // Log auth attempt
     logger.debug('Auth', 'Auth middleware checking token', {
       hasAuthHeader: !!authHeader,
@@ -24,6 +27,7 @@ export function authMiddleware(req: AuthRequest, res: Response, next: NextFuncti
 
     if (!authHeader) {
       const errorMsg = 'Missing authorization header'
+      console.log(`[AUTH] Missing header, logging warning...`)
       logger.warn('Auth', `Auth failed - ${errorMsg}`, {
         ip: req.ip,
         path: req.path,
