@@ -90,6 +90,38 @@ const generateDummyBalance = (): ZerodhaBalance => {
   }
 }
 
+// ZerodhaService class for placing orders with API credentials
+export class ZerodhaService {
+  private apiKey: string
+  private apiSecret: string
+
+  constructor(apiKey: string, apiSecret: string) {
+    this.apiKey = apiKey
+    this.apiSecret = apiSecret
+  }
+
+  async placeOrder(orderRequest: any) {
+    logger.debug({ type: 'zerodha_place_order', symbol: orderRequest.symbol })
+    
+    // Mock order response
+    return {
+      orderId: `ORD${Date.now()}`,
+      tradingSymbol: orderRequest.symbol,
+      quantity: orderRequest.quantity,
+      price: orderRequest.price,
+      orderType: 'REGULAR',
+      transactionType: orderRequest.side || 'BUY',
+      status: 'PENDING'
+    }
+  }
+
+  async getOrderStatus(orderId: string) {
+    logger.debug({ type: 'zerodha_get_order_status', orderId })
+    return { orderId, status: 'COMPLETE' }
+  }
+}
+
+// Singleton service for account integration
 export const zerodhaService = {
   async linkAccount(accountId: string, zerodhaUserId: string, accessToken: string): Promise<boolean> {
     try {
