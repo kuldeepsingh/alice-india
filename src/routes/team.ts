@@ -52,6 +52,153 @@ router.get('/members', requireAdmin(), async (req: AuthRequest, res: Response) =
 })
 
 /**
+ * GET /api/v1/team/search
+ * Search team members by name, email, or role
+ * Auth: Developer+
+ * Query params: q (search term), role (filter by role)
+ */
+router.get('/search', requireDeveloper(), async (req: AuthRequest, res: Response) => {
+  const requestId = `team-search-${Date.now()}`
+  const startTime = Date.now()
+
+  try {
+    const { q, role } = req.query
+    const userId = req.user?.userId
+    const ipAddress = req.ip
+
+    // LOG: Entry point
+    logger.debug('Team', 'Team member search request received', {
+      requestId,
+      userId,
+      searchTerm: q,
+      roleFilter: role,
+      ipAddress,
+      timestamp: new Date().toISOString(),
+    })
+
+    // Input validation
+    logger.debug('Team', 'Validating search parameters', {
+      requestId,
+      userId,
+      hasSearchTerm: !!q,
+      hasRoleFilter: !!role,
+      searchTermLength: (q as string)?.length || 0,
+    })
+
+    if (!q || typeof q !== 'string' || q.trim().length === 0) {
+      const duration = Date.now() - startTime
+      logger.warn('Team', 'Team search validation failed - empty search term', {
+        requestId,
+        userId,
+        durationMs: duration,
+      })
+      return res.status(400).json({
+        status: 'error',
+        message: 'Search term is required',
+        reason: 'missing_search_term',
+      })
+    }
+
+    const searchTerm = `%${(q as string).toLowerCase()}%`
+    let sql = `
+      SELECT
+        id,
+        email,
+        role,
+        created_at
+      FROM users
+      WHERE (LOWER(email) LIKE $1 OR LOWER(email) LIKE $1)
+    `
+
+    const params: any[] = [searchTerm]
+
+    if (role && ['admin', 'trader', 'analyst', 'viewer'].includes(role as string)) {
+      logger.debug('Team', 'Adding role filter to search', {
+        requestId,
+        userId,
+        roleFilter: role,
+      })
+      sql += ' AND role = $2'
+      params.push(role)
+    } else if (role) {
+      const duration = Date.now() - startTime
+      logger.warn('Team', 'Team search validation failed - invalid role', {
+        requestId,
+        userId,
+        providedRole: role,
+        allowedRoles: ['admin', 'trader', 'analyst', 'viewer'],
+        durationMs: duration,
+      })
+      return res.status(400).json({
+        status: 'error',
+        message: 'Invalid role filter',
+        reason: 'invalid_role',
+      })
+    }
+
+    sql += ' ORDER BY email ASC LIMIT 100'
+
+    // LOG: Executing search query
+    logger.debug('Team', 'Executing team member search query', {
+      requestId,
+      userId,
+      searchTerm: q,
+      roleFilter: role || 'none',
+      sqlParams: params.length,
+    })
+
+    const queryStart = Date.now()
+    const result = await query(sql, params)
+    const queryDuration = Date.now() - queryStart
+
+    const totalDuration = Date.now() - startTime
+
+    // LOG: Success
+    logger.info('Team', 'Team member search completed successfully', {
+      requestId,
+      userId,
+      searchTerm: q,
+      roleFilter: role || 'none',
+      resultsCount: result.rows.length,
+      queryDurationMs: queryDuration,
+      totalDurationMs: totalDuration,
+      ipAddress,
+      timestamp: new Date().toISOString(),
+    })
+
+    res.status(200).json({
+      status: 'success',
+      data: result.rows,
+      count: result.rows.length,
+      searchTerm: q,
+      roleFilter: role || null,
+      requestId,
+    })
+  } catch (error: any) {
+    const duration = Date.now() - startTime
+    const errorMessage = error instanceof Error ? error.message : String(error)
+
+    logger.error('Team', `Team member search failed: ${errorMessage}`, error, {
+      requestId,
+      userId: req.user?.userId,
+      searchTerm: req.query.q,
+      roleFilter: req.query.role,
+      errorMessage,
+      durationMs: duration,
+      ipAddress: req.ip,
+      timestamp: new Date().toISOString(),
+    })
+
+    res.status(500).json({
+      status: 'error',
+      message: 'Failed to search team members',
+      reason: 'server_error',
+      requestId,
+    })
+  }
+})
+
+/**
  * GET /api/v1/team/on-call
  * Get on-call schedule
  * Auth: Developer+

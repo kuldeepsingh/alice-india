@@ -70,49 +70,160 @@ router.use(authMiddleware)
  * }
  */
 router.post('/strategy-review', optionalClaude, async (req: AuthRequest, res) => {
+  const requestId = `analytics-review-${Date.now()}`
+  const startTime = Date.now()
+
   try {
     const userId = req.user?.userId
+    const ipAddress = (req as any).ip
+
+    // LOG: Entry point
+    logger.debug('Analytics', 'Strategy review request received', {
+      requestId,
+      userId,
+      ipAddress,
+      timestamp: new Date().toISOString(),
+    })
 
     if (!userId) {
-      return res.status(401).json({ error: 'Unauthorized' })
+      const duration = Date.now() - startTime
+      logger.warn('Analytics', 'Strategy review failed - user not authenticated', {
+        requestId,
+        reason: 'not_authenticated',
+        durationMs: duration,
+      })
+      return res.status(401).json({
+        error: 'Unauthorized',
+        reason: 'not_authenticated',
+      })
     }
 
     const performance: StrategyPerformance = req.body
 
+    // LOG: Input validation
+    logger.debug('Analytics', 'Validating strategy performance data', {
+      requestId,
+      userId,
+      hasStrategyId: !!performance.strategyId,
+      hasName: !!performance.name,
+      hasTotalTrades: performance.totalTrades !== undefined,
+    })
+
     if (!performance.strategyId || !performance.name || performance.totalTrades === undefined) {
-      logger.warn({
-        type: 'strategy_review_validation_failed',
+      const duration = Date.now() - startTime
+      logger.warn('Analytics', 'Strategy review validation failed - missing fields', {
+        requestId,
         userId,
+        missingFields: {
+          strategyId: !performance.strategyId,
+          name: !performance.name,
+          totalTrades: performance.totalTrades === undefined,
+        },
+        durationMs: duration,
       })
       return res.status(400).json({
         error: 'Missing required fields: strategyId, name, totalTrades',
+        reason: 'missing_fields',
       })
     }
 
-    logger.debug({
-      type: 'strategy_review_starting',
+    logger.debug('Analytics', 'Strategy data validated, starting review analysis', {
+      requestId,
       userId,
       strategyId: performance.strategyId,
+      strategyName: performance.name,
+      metrics: {
+        totalTrades: performance.totalTrades,
+        winningTrades: performance.winningTrades,
+        losingTrades: performance.losingTrades,
+        profitFactor: performance.profitFactor,
+        sharpeRatio: performance.sharpeRatio,
+        maxDrawdown: performance.maxDrawdown,
+      },
+      periodStart: performance.periodStart,
+      periodEnd: performance.periodEnd,
     })
 
     const canUseClaude = (req as any).claudeAvailable === true
     let review = null
+    let reviewDuration = 0
 
     if (canUseClaude) {
+      logger.debug('Analytics', 'Sending strategy for AI review analysis', {
+        requestId,
+        userId,
+        strategyId: performance.strategyId,
+        aiProvider: 'claude',
+      })
+
       try {
+        const reviewStart = Date.now()
         review = await strategyReviewService.reviewStrategy(userId, performance)
-      } catch (error: any) {
-        logger.error({
-          type: 'strategy_review_error',
+        reviewDuration = Date.now() - reviewStart
+
+        logger.debug('Analytics', 'AI strategy review completed', {
+          requestId,
           userId,
-          error: error.message,
+          strategyId: performance.strategyId,
+          reviewDurationMs: reviewDuration,
+          hasReview: !!review,
+        })
+      } catch (error: any) {
+        reviewDuration = Date.now() - startTime
+        logger.warn('Analytics', `Strategy review analysis failed: ${error.message}`, {
+          requestId,
+          userId,
+          strategyId: performance.strategyId,
+          errorMessage: error.message,
+          durationMs: reviewDuration,
         })
       }
+    } else {
+      logger.debug('Analytics', 'Claude not available, basic review only', {
+        requestId,
+        userId,
+        strategyId: performance.strategyId,
+      })
+    }
+
+    const totalDuration = Date.now() - startTime
+
+    // LOG: Success
+    if (review) {
+      logger.info('Analytics', 'Strategy review completed successfully', {
+        requestId,
+        userId,
+        strategyId: performance.strategyId,
+        strategyName: performance.name,
+        totalTrades: performance.totalTrades,
+        profitFactor: performance.profitFactor,
+        reviewAvailable: true,
+        strengths: review.strengths?.length || 0,
+        weaknesses: review.weaknesses?.length || 0,
+        improvements: review.improvements?.length || 0,
+        overallAssessment: review.overallAssessment,
+        reviewDurationMs: reviewDuration,
+        totalDurationMs: totalDuration,
+        ipAddress,
+        timestamp: new Date().toISOString(),
+      })
+    } else {
+      logger.info('Analytics', 'Strategy review request processed (no AI analysis)', {
+        requestId,
+        userId,
+        strategyId: performance.strategyId,
+        strategyName: performance.name,
+        reason: canUseClaude ? 'ai_error' : 'not_premium',
+        totalDurationMs: totalDuration,
+        ipAddress,
+        timestamp: new Date().toISOString(),
+      })
     }
 
     const response: any = {
       status: 'success',
       review,
+      requestId,
     }
 
     if (review) {
@@ -125,12 +236,24 @@ router.post('/strategy-review', optionalClaude, async (req: AuthRequest, res) =>
 
     res.json(response)
   } catch (error: any) {
-    logger.error({
-      type: 'strategy_review_endpoint_error',
-      userId: (req as any).user?.userId,
-      error: error.message,
+    const duration = Date.now() - startTime
+    const errorMessage = error instanceof Error ? error.message : String(error)
+
+    logger.error('Analytics', `Strategy review endpoint error: ${errorMessage}`, error, {
+      requestId,
+      userId: req.user?.userId,
+      strategyId: req.body?.strategyId,
+      errorMessage,
+      durationMs: duration,
+      ipAddress: (req as any).ip,
+      timestamp: new Date().toISOString(),
     })
-    res.status(500).json({ error: 'Failed to review strategy' })
+
+    res.status(500).json({
+      error: 'Failed to review strategy',
+      reason: 'server_error',
+      requestId,
+    })
   }
 })
 
@@ -355,22 +478,83 @@ router.post('/recommendations', optionalClaude, async (req: AuthRequest, res) =>
  * }
  */
 router.post('/optimization-score', async (req: AuthRequest, res) => {
+  const requestId = `analytics-score-${Date.now()}`
+  const startTime = Date.now()
+
   try {
     const userId = req.user?.userId
+    const ipAddress = (req as any).ip
+
+    // LOG: Entry point
+    logger.debug('Analytics', 'Optimization score calculation request received', {
+      requestId,
+      userId,
+      ipAddress,
+      timestamp: new Date().toISOString(),
+    })
 
     if (!userId) {
-      return res.status(401).json({ error: 'Unauthorized' })
+      const duration = Date.now() - startTime
+      logger.warn('Analytics', 'Optimization score failed - user not authenticated', {
+        requestId,
+        reason: 'not_authenticated',
+        durationMs: duration,
+      })
+      return res.status(401).json({
+        error: 'Unauthorized',
+        reason: 'not_authenticated',
+      })
     }
 
     const context: OptimizationContext = req.body
 
+    // LOG: Input validation
+    logger.debug('Analytics', 'Validating optimization context', {
+      requestId,
+      userId,
+      hasCurrentMetrics: !!context.currentMetrics,
+      hasPortfolio: !!context.portfolio,
+      strategyName: context.strategyName,
+    })
+
     if (!context.currentMetrics || !context.portfolio) {
+      const duration = Date.now() - startTime
+      logger.warn('Analytics', 'Optimization score validation failed - missing fields', {
+        requestId,
+        userId,
+        missingFields: {
+          currentMetrics: !context.currentMetrics,
+          portfolio: !context.portfolio,
+        },
+        durationMs: duration,
+      })
       return res.status(400).json({
         error: 'Missing required fields: currentMetrics, portfolio',
+        reason: 'missing_fields',
       })
     }
 
+    // LOG: Calculation starting
+    logger.debug('Analytics', 'Starting optimization score calculation', {
+      requestId,
+      userId,
+      metrics: {
+        winRate: context.currentMetrics.winRate,
+        profitFactor: context.currentMetrics.profitFactor,
+        sharpeRatio: context.currentMetrics.sharpeRatio,
+        maxDrawdown: context.currentMetrics.maxDrawdown,
+      },
+      portfolio: {
+        totalValue: context.portfolio.totalValue,
+        cashPercent: context.portfolio.cashPercent,
+        concentrationPercent: context.portfolio.concentrationPercent,
+      },
+    })
+
+    // Calculate score
+    const calcStart = Date.now()
     const score = optimizationService.calculateOptimizationScore(context)
+    const calcDuration = Date.now() - calcStart
 
     const interpretation =
       score >= 80
@@ -381,18 +565,49 @@ router.post('/optimization-score', async (req: AuthRequest, res) => {
             ? 'Fair - Several areas need improvement'
             : 'Needs improvement - Major optimization required'
 
+    const totalDuration = Date.now() - startTime
+
+    // LOG: Success
+    logger.info('Analytics', 'Optimization score calculated successfully', {
+      requestId,
+      userId,
+      strategyName: context.strategyName,
+      optimizationScore: score,
+      scoreInterpretation: interpretation,
+      winRate: context.currentMetrics.winRate,
+      profitFactor: context.currentMetrics.profitFactor,
+      sharpeRatio: context.currentMetrics.sharpeRatio,
+      portfolioValue: context.portfolio.totalValue,
+      calcDurationMs: calcDuration,
+      totalDurationMs: totalDuration,
+      ipAddress,
+      timestamp: new Date().toISOString(),
+    })
+
     res.json({
       status: 'success',
       optimizationScore: score,
       interpretation,
+      requestId,
     })
   } catch (error: any) {
-    logger.error({
-      type: 'optimization_score_error',
-      userId: (req as any).user?.userId,
-      error: error.message,
+    const duration = Date.now() - startTime
+    const errorMessage = error instanceof Error ? error.message : String(error)
+
+    logger.error('Analytics', `Optimization score calculation failed: ${errorMessage}`, error, {
+      requestId,
+      userId: req.user?.userId,
+      errorMessage,
+      durationMs: duration,
+      ipAddress: (req as any).ip,
+      timestamp: new Date().toISOString(),
     })
-    res.status(500).json({ error: 'Failed to calculate optimization score' })
+
+    res.status(500).json({
+      error: 'Failed to calculate optimization score',
+      reason: 'server_error',
+      requestId,
+    })
   }
 })
 
