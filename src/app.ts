@@ -2,7 +2,7 @@ import express from 'express'
 import helmet from 'helmet'
 import cors from 'cors'
 import pinoHttp from 'pino-http'
-import logger from './services/logger.ts'
+import { logger } from './services/logger.ts'  // Use named import for actual Logger instance
 import authRouter from './routes/auth.ts'
 import accountsRouter from './routes/accounts.ts'
 import ordersRouter from './routes/orders.ts'
@@ -51,22 +51,32 @@ export function createApp() {
   // Uncomment below if you want to use pinoHttp with a real pino logger
   // app.use(pinoHttp({ logger } as any))
 
-  // Custom HTTP request logging middleware
+  // Custom HTTP request logging middleware - Log all API calls with details
   app.use((req, res, next) => {
     const start = Date.now()
+
     res.on('finish', () => {
       const duration = Date.now() - start
       const isError = res.statusCode >= 400
-      const logFn = isError ? 'warn' : 'info'
-      logger[logFn as 'warn' | 'info'](
-        'HTTP',
-        `${req.method} ${req.path}`,
-        {
-          status: res.statusCode,
-          duration: `${duration}ms`,
-          ip: req.ip,
-          userAgent: req.get('user-agent'),
-        }
+      const isWarn = res.statusCode >= 300 && res.statusCode < 400
+      const logLevel = isError ? 'error' : isWarn ? 'warn' : 'info'
+
+      // Construct the message with full details
+      const message = `${req.method} ${req.path} → ${res.statusCode} (${duration}ms)`
+
+      // Only include serializable context data
+      const context = {
+        method: req.method,
+        path: req.path,
+        statusCode: res.statusCode,
+        duration: duration,
+        userAgent: req.get('user-agent') || 'unknown',
+      }
+
+      logger[logLevel as any](
+        'HTTPServer',
+        message,
+        context
       )
     })
     next()
