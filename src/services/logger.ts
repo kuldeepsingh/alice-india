@@ -321,7 +321,8 @@ class Logger {
    */
   warn(moduleOrObj: string | Record<string, any>, message?: string, context?: Record<string, any>): void {
     const { module, msg, ctx } = this.normalizeArgs(moduleOrObj, message, context)
-    this.log('WARN', module, msg, ctx)
+    // log is async but we don't await because logging shouldn't block
+    this.log('WARN', module, msg, ctx).catch(err => console.error('Log error:', err))
   }
 
   /**
@@ -343,7 +344,8 @@ class Logger {
         errorName: actualError.name,
       } : {}),
     }
-    this.log('ERROR', module, msg, fullContext, stackTrace)
+    // log is async but we don't await because logging shouldn't block
+    this.log('ERROR', module, msg, fullContext, stackTrace).catch(err => console.error('Log error:', err))
   }
 
   /**
@@ -365,7 +367,8 @@ class Logger {
         errorName: actualError.name,
       } : {}),
     }
-    this.log('FATAL', module, msg, fullContext, stackTrace)
+    // log is async but we don't await because logging shouldn't block
+    this.log('FATAL', module, msg, fullContext, stackTrace).catch(err => console.error('Log error:', err))
   }
 
   /**
