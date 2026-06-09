@@ -145,13 +145,47 @@ export function DashboardPro() {
   ]
 
   const dailyReturnsData = [
-    { date: 'Mon', return: 0.8 },
-    { date: 'Tue', return: -0.3 },
-    { date: 'Wed', return: 1.2 },
-    { date: 'Thu', return: -0.5 },
-    { date: 'Fri', return: 0.6 },
-    { date: 'Sat', return: -0.2 },
-    { date: 'Sun', return: 0.9 },
+    { date: 'May 1', return: 0.8 },
+    { date: 'May 2', return: -0.3 },
+    { date: 'May 3', return: 1.2 },
+    { date: 'May 4', return: -0.5 },
+    { date: 'May 5', return: 0.6 },
+    { date: 'May 6', return: -0.2 },
+    { date: 'May 7', return: 0.9 },
+    { date: 'May 8', return: 0.4 },
+    { date: 'May 9', return: 1.1 },
+    { date: 'May 10', return: -0.8 },
+    { date: 'May 11', return: 0.7 },
+    { date: 'May 12', return: 0.3 },
+    { date: 'May 13', return: -0.4 },
+    { date: 'May 14', return: 0.9 },
+    { date: 'May 15', return: 1.3 },
+    { date: 'May 16', return: -0.1 },
+    { date: 'May 17', return: 0.8 },
+    { date: 'May 18', return: 0.5 },
+    { date: 'May 19', return: -0.6 },
+    { date: 'May 20', return: 1.0 },
+    { date: 'May 21', return: 0.2 },
+    { date: 'May 22', return: -0.3 },
+    { date: 'May 23', return: 0.7 },
+    { date: 'May 24', return: 1.1 },
+    { date: 'May 25', return: -0.2 },
+    { date: 'May 26', return: 0.9 },
+    { date: 'May 27', return: 0.4 },
+    { date: 'May 28', return: -0.5 },
+    { date: 'May 29', return: 0.8 },
+    { date: 'May 30', return: 1.2 },
+    { date: 'May 31', return: 0.6 },
+    { date: 'Jun 1', return: -0.3 },
+    { date: 'Jun 2', return: 0.9 },
+    { date: 'Jun 3', return: 0.3 },
+    { date: 'Jun 4', return: -0.7 },
+    { date: 'Jun 5', return: 1.0 },
+    { date: 'Jun 6', return: 0.5 },
+    { date: 'Jun 7', return: -0.4 },
+    { date: 'Jun 8', return: 0.8 },
+    { date: 'Jun 9', return: 1.1 },
+    { date: 'Jun 10', return: 0.2 },
   ]
 
   const strategyData = [
@@ -476,10 +510,10 @@ export function DashboardPro() {
               <Typography sx={{ fontSize: '12px', fontWeight: 700, color: THEME_PRO.textPrimary, mb: SPACING_PRO.xs, textTransform: 'uppercase', letterSpacing: '0.5px' }}>
                 Daily Returns (%)
               </Typography>
-              <ResponsiveContainer width="100%" height={140}>
+              <ResponsiveContainer width="100%" height={280}>
                 <BarChart data={dailyReturnsData}>
                   <CartesianGrid strokeDasharray="3 3" stroke={THEME_PRO.border} />
-                  <XAxis tick={{ fontSize: 10 }} dataKey="date" stroke={THEME_PRO.textSecondary} />
+                  <XAxis tick={{ fontSize: 10 }} dataKey="date" stroke={THEME_PRO.textSecondary} interval={4} />
                   <YAxis tick={{ fontSize: 10 }} stroke={THEME_PRO.textSecondary} />
                   <Tooltip contentStyle={{ backgroundColor: THEME_PRO.bgSecondary, border: `1px solid ${THEME_PRO.border}`, color: THEME_PRO.textPrimary }} />
                   <Bar dataKey="return" radius={[8, 8, 0, 0]}>
