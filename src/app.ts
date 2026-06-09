@@ -55,14 +55,26 @@ export function createApp() {
   app.use((req, res, next) => {
     const start = Date.now()
     const requestId = `http-${Date.now()}`
-
-    // Capture response body if error (for logging error messages)
-    const originalJson = res.json
     let responseBody: any = null
 
+    // Intercept res.json to capture response body
+    const originalJson = res.json.bind(res)
     res.json = function (data: any) {
       responseBody = data
-      return originalJson.call(this, data)
+      return originalJson(data)
+    }
+
+    // Also intercept res.send for edge cases
+    const originalSend = res.send.bind(res)
+    res.send = function (data: any) {
+      if (typeof data === 'string') {
+        try {
+          responseBody = JSON.parse(data)
+        } catch (e) {
+          responseBody = { message: data }
+        }
+      }
+      return originalSend(data)
     }
 
     res.on('finish', () => {
@@ -70,14 +82,6 @@ export function createApp() {
       const isError = res.statusCode >= 400
       const isWarn = res.statusCode >= 300 && res.statusCode < 400
       const logLevel = isError ? 'error' : isWarn ? 'warn' : 'info'
-
-      // Construct meaningful message based on status code
-      let message = `${req.method} ${req.path} → ${res.statusCode}`
-      if (isError && responseBody?.message) {
-        message += ` - ${responseBody.message}`
-      } else if (isError) {
-        message += ' - Error'
-      }
 
       // Build comprehensive context
       const context: any = {
@@ -100,9 +104,9 @@ export function createApp() {
 
       // Add error details if error response
       if (isError && responseBody) {
-        context.errorMessage = responseBody.message
+        context.errorMessage = responseBody.message || responseBody.error
+        context.reason = responseBody.reason
         context.errorStatus = responseBody.status
-        // Add correlationId if present
         if (responseBody.correlationId) {
           context.correlationId = responseBody.correlationId
         }
@@ -116,13 +120,18 @@ export function createApp() {
       // Add body for POST/PUT (sanitized)
       if ((req.method === 'POST' || req.method === 'PUT') && req.body) {
         const sanitized = { ...req.body }
-        // Remove sensitive fields
         delete sanitized.password
         delete sanitized.token
         delete sanitized.secret
         if (Object.keys(sanitized).length > 0) {
           context.bodyParams = Object.keys(sanitized)
         }
+      }
+
+      // Construct meaningful message
+      let message = `${req.method} ${req.path} → ${res.statusCode}`
+      if (context.errorMessage) {
+        message += ` - ${context.errorMessage}`
       }
 
       logger[logLevel as any](
