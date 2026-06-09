@@ -108,69 +108,6 @@ export function AdminLogsPage() {
 
         {!loading && (
           <Stack spacing={SPACING_PRO.lg}>
-            {/* Backend Logs */}
-            <Card sx={{ p: SPACING_PRO.xxl, borderRadius: RADIUS_PRO.lg, border: `1px solid ${THEME_PRO.border}` }}>
-              <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: SPACING_PRO.lg }}>
-                <Typography sx={{ fontSize: '18px', fontWeight: 700, color: THEME_PRO.textPrimary }}>
-                  🖥️ Backend Logs
-                </Typography>
-                <Stack direction="row" spacing={SPACING_PRO.sm}>
-                  <Button
-                    size="small"
-                    startIcon={<Refresh />}
-                    onClick={fetchLogs}
-                    sx={{
-                      textTransform: 'none',
-                      color: THEME_PRO.primary,
-                      border: `1px solid ${THEME_PRO.border}`,
-                    }}
-                  >
-                    Refresh
-                  </Button>
-                  <Button
-                    size="small"
-                    onClick={handleCopyBackend}
-                    sx={{
-                      textTransform: 'none',
-                      color: THEME_PRO.primary,
-                      border: `1px solid ${THEME_PRO.border}`,
-                    }}
-                  >
-                    Copy
-                  </Button>
-                  <Button
-                    size="small"
-                    onClick={handleDownloadBackend}
-                    sx={{
-                      textTransform: 'none',
-                      color: THEME_PRO.primary,
-                      border: `1px solid ${THEME_PRO.border}`,
-                    }}
-                  >
-                    Download
-                  </Button>
-                </Stack>
-              </Box>
-
-              <Box
-                component="pre"
-                sx={{
-                  backgroundColor: THEME_PRO.bgTertiary,
-                  color: THEME_PRO.textSecondary,
-                  p: SPACING_PRO.lg,
-                  borderRadius: RADIUS_PRO.md,
-                  border: `1px solid ${THEME_PRO.border}`,
-                  maxHeight: '600px',
-                  overflow: 'auto',
-                  fontFamily: 'monospace',
-                  fontSize: '12px',
-                  lineHeight: 1.5,
-                }}
-              >
-                {backendLogs || 'No logs yet...'}
-              </Box>
-            </Card>
-
             {/* Frontend Logs */}
             <Card sx={{ p: SPACING_PRO.xxl, borderRadius: RADIUS_PRO.lg, border: `1px solid ${THEME_PRO.border}` }}>
               <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: SPACING_PRO.lg }}>
@@ -231,6 +168,69 @@ export function AdminLogsPage() {
                 }}
               >
                 {frontendLogs || 'No frontend logs yet...'}
+              </Box>
+            </Card>
+
+            {/* Backend Logs */}
+            <Card sx={{ p: SPACING_PRO.xxl, borderRadius: RADIUS_PRO.lg, border: `1px solid ${THEME_PRO.border}` }}>
+              <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: SPACING_PRO.lg }}>
+                <Typography sx={{ fontSize: '18px', fontWeight: 700, color: THEME_PRO.textPrimary }}>
+                  🖥️ Backend Logs
+                </Typography>
+                <Stack direction="row" spacing={SPACING_PRO.sm}>
+                  <Button
+                    size="small"
+                    startIcon={<Refresh />}
+                    onClick={fetchLogs}
+                    sx={{
+                      textTransform: 'none',
+                      color: THEME_PRO.primary,
+                      border: `1px solid ${THEME_PRO.border}`,
+                    }}
+                  >
+                    Refresh
+                  </Button>
+                  <Button
+                    size="small"
+                    onClick={handleCopyBackend}
+                    sx={{
+                      textTransform: 'none',
+                      color: THEME_PRO.primary,
+                      border: `1px solid ${THEME_PRO.border}`,
+                    }}
+                  >
+                    Copy
+                  </Button>
+                  <Button
+                    size="small"
+                    onClick={handleDownloadBackend}
+                    sx={{
+                      textTransform: 'none',
+                      color: THEME_PRO.primary,
+                      border: `1px solid ${THEME_PRO.border}`,
+                    }}
+                  >
+                    Download
+                  </Button>
+                </Stack>
+              </Box>
+
+              <Box
+                component="pre"
+                sx={{
+                  backgroundColor: THEME_PRO.bgTertiary,
+                  color: THEME_PRO.textSecondary,
+                  p: SPACING_PRO.lg,
+                  borderRadius: RADIUS_PRO.md,
+                  border: `1px solid ${THEME_PRO.border}`,
+                  maxHeight: '600px',
+                  overflow: 'auto',
+                  fontFamily: 'monospace',
+                  fontSize: '12px',
+                  lineHeight: 1.5,
+                }}
+              >
+                {backendLogs || 'No logs yet...'}
               </Box>
             </Card>
           </Stack>
