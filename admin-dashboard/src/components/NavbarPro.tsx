@@ -1,10 +1,10 @@
 import React, { useState } from 'react'
 import { useNavigate, useLocation } from 'react-router-dom'
-import { Box, Button, AppBar, Toolbar, Avatar, IconButton } from '@mui/material'
-import { ArrowBack, Home, Logout, HelpOutlined, Brightness4, Brightness7 } from '@mui/icons-material'
+import { Box, Button, AppBar, Toolbar, Avatar, IconButton, TextField, InputAdornment } from '@mui/material'
+import { ArrowBack, Home, Logout, HelpOutlined, Brightness4, Brightness7, Search, Close } from '@mui/icons-material'
 import { useAuthStore } from '../state/store'
 import { HelpModal } from './HelpModal'
-import { THEME_PRO, SPACING_PRO, RADIUS_PRO, TRANSITIONS_PRO } from '../theme-pro'
+import { THEME_PRO, SPACING_PRO, RADIUS_PRO, TRANSITIONS_PRO, SHADOWS_PRO } from '../theme-pro'
 
 export function NavbarPro() {
   const navigate = useNavigate()
@@ -12,6 +12,8 @@ export function NavbarPro() {
   const isHome = location.pathname === '/'
   const { logout, darkMode, toggleDarkMode } = useAuthStore()
   const [helpOpen, setHelpOpen] = useState(false)
+  const [searchOpen, setSearchOpen] = useState(false)
+  const [searchValue, setSearchValue] = useState('')
 
   const handleLogout = () => {
     logout()
@@ -127,6 +129,79 @@ export function NavbarPro() {
 
         {/* Right - User Actions */}
         <Box sx={{ display: 'flex', gap: SPACING_PRO.lg, alignItems: 'center' }}>
+          {/* Search Bar - Expandable */}
+          {searchOpen ? (
+            <TextField
+              autoFocus
+              placeholder="Search..."
+              value={searchValue}
+              onChange={(e) => setSearchValue(e.target.value)}
+              size="small"
+              sx={{
+                width: '250px',
+                transition: TRANSITIONS_PRO.normal,
+                '& .MuiOutlinedInput-root': {
+                  backgroundColor: THEME_PRO.bgTertiary,
+                  color: THEME_PRO.textPrimary,
+                  height: '40px',
+                  '& fieldset': { borderColor: THEME_PRO.primary },
+                  '&:hover fieldset': { borderColor: THEME_PRO.primary },
+                  '&.Mui-focused fieldset': { borderColor: THEME_PRO.primary },
+                },
+                '& .MuiOutlinedInput-input': {
+                  color: THEME_PRO.textPrimary,
+                  '&::placeholder': {
+                    color: THEME_PRO.textSecondary,
+                    opacity: 1,
+                  },
+                },
+              }}
+              InputProps={{
+                startAdornment: (
+                  <InputAdornment position="start">
+                    <Search sx={{ fontSize: '18px', color: THEME_PRO.primary, mr: SPACING_PRO.sm }} />
+                  </InputAdornment>
+                ),
+                endAdornment: (
+                  <InputAdornment position="end">
+                    <IconButton
+                      size="small"
+                      onClick={() => {
+                        setSearchOpen(false)
+                        setSearchValue('')
+                      }}
+                      sx={{ color: THEME_PRO.textSecondary }}
+                    >
+                      <Close sx={{ fontSize: '18px' }} />
+                    </IconButton>
+                  </InputAdornment>
+                ),
+              }}
+            />
+          ) : (
+            <IconButton
+              onClick={() => setSearchOpen(true)}
+              title="Search"
+              sx={{
+                color: THEME_PRO.primary,
+                width: 40,
+                height: 40,
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                borderRadius: RADIUS_PRO.md,
+                border: `1px solid ${THEME_PRO.border}`,
+                transition: TRANSITIONS_PRO.normal,
+                '&:hover': {
+                  backgroundColor: THEME_PRO.primaryLight,
+                  borderColor: THEME_PRO.primary,
+                },
+              }}
+            >
+              <Search sx={{ fontSize: '20px' }} />
+            </IconButton>
+          )}
+
           {/* Dark Mode Toggle */}
           <IconButton
             onClick={toggleDarkMode}
