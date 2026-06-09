@@ -300,17 +300,17 @@ export function DashboardPro() {
             <Card
               sx={{
                 backgroundColor: THEME_PRO.bgSecondary,
-                p: SPACING_PRO.xxl,
+                p: SPACING_PRO.xs,
                 borderRadius: RADIUS_PRO.lg,
                 border: `1px solid ${THEME_PRO.border}`,
                 boxShadow: SHADOWS_PRO.md,
               }}
             >
-              <Typography sx={{ fontSize: '18px', fontWeight: 700, color: THEME_PRO.textPrimary, mb: SPACING_PRO.lg }}>
+              <Typography sx={{ fontSize: '11px', fontWeight: 700, color: THEME_PRO.textPrimary, mb: SPACING_PRO.xs, textTransform: 'uppercase', letterSpacing: '0.5px' }}>
                 Portfolio Allocation
               </Typography>
 
-              <ResponsiveContainer width="100%" height={150}>
+              <ResponsiveContainer width="100%" height={130}>
                 <PieChart>
                   <Pie
                     data={[
