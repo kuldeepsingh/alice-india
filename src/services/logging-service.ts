@@ -288,6 +288,41 @@ class LoggingService {
   }): Promise<void> {
     return loggingService.storeLog(logData)
   }
+
+  /**
+   * Get logs with filtering (static method for API)
+   */
+  static getLogs(filter: any = {}) {
+    const result = loggingService.readLogs({
+      limit: filter.limit || 100,
+      offset: filter.offset || 0,
+      level: filter.level,
+      service: filter.module, // 'service' field in LogEntry, 'module' in filter
+      search: filter.search,
+    })
+
+    return {
+      data: result.logs,
+      total: result.total,
+      page: Math.floor((filter.offset || 0) / (filter.limit || 100)) + 1,
+      pageSize: filter.limit || 100,
+    }
+  }
+
+  /**
+   * Get logs by correlation ID (for request tracing)
+   */
+  static getLogsByCorrelationId(correlationId: string) {
+    const result = loggingService.readLogs({
+      limit: 10000,
+      search: correlationId,
+    })
+
+    return result.logs.filter(log =>
+      log.data && typeof log.data === 'object' && 'correlationId' in log.data &&
+      log.data.correlationId === correlationId
+    )
+  }
 }
 
 export { LoggingService }; export const loggingService = new LoggingService()

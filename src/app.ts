@@ -7,7 +7,7 @@ import authRouter from './routes/auth.ts'
 import accountsRouter from './routes/accounts.ts'
 import ordersRouter from './routes/orders.ts'
 import marketDataRouter from './routes/market-data.ts'
-// import logsRouter from './routes/logs.ts'  // TODO: Fix LoggingService import
+import logsRouter from './routes/logs.ts'
 // import errorsRouter from './routes/errors.ts'  // TODO: Fix ErrorService import
 // import auditRouter from './routes/audit.ts'  // TODO: Fix AuditService import
 // import debugRouter from './routes/debug.ts'  // TODO: Fix DebugService import
@@ -120,7 +120,7 @@ export function createApp() {
   v1.use('/market', marketDataRouter)
 
   // Debugging & Monitoring routes (protected)
-  // v1.use('/logs', logsRouter)  // TODO: Fix imports
+  v1.use('/logs', logsRouter)  // Logs API - displays all application logs
   // v1.use('/errors', errorsRouter)  // TODO: Fix imports
   // v1.use('/audit', auditRouter)  // TODO: Fix imports
   // v1.use('/debug', debugRouter)  // TODO: Fix imports
