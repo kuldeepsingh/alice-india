@@ -322,7 +322,7 @@ export function DashboardPro() {
                     cx="50%"
                     cy="50%"
                     labelLine={false}
-                    label={({ name, value }) => `${name}: ${value}%`} labelLine={false} 
+                    labelLine={false} 
                     outerRadius={40}
                     fill="#8884d8"
                     dataKey="value"
@@ -447,7 +447,7 @@ export function DashboardPro() {
                     cx="50%"
                     cy="50%"
                     labelLine={false}
-                    label={({ name, value }) => `${name}: ${value}%`} labelLine={false} 
+                    labelLine={false} 
                     outerRadius={35}
                     fill="#8884d8"
                     dataKey="value"
