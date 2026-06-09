@@ -291,57 +291,115 @@ class Logger {
    * DEBUG: Detailed diagnostic information
    * Use for: variable dumps, function entry/exit, detailed execution flow
    * Example: logger.debug('CacheService', 'Cache miss', { key: 'user:123' })
+   *
+   * COMPATIBILITY: Also accepts old pino format: logger.debug({ type: 'message' })
    */
-  debug(module: string, message: string, context?: Record<string, any>): void {
-    this.log('DEBUG', module, message, context)
+  debug(moduleOrObj: string | Record<string, any>, message?: string, context?: Record<string, any>): void {
+    const { module, msg, ctx } = this.normalizeArgs(moduleOrObj, message, context)
+    this.log('DEBUG', module, msg, ctx)
   }
 
   /**
    * INFO: General informational messages
    * Use for: operations started, state changes, important events
    * Example: logger.info('AuthService', 'User logged in', { userId: 123 })
+   *
+   * COMPATIBILITY: Also accepts old pino format: logger.info({ type: 'message' })
    */
-  info(module: string, message: string, context?: Record<string, any>): void {
-    this.log('INFO', module, message, context)
+  info(moduleOrObj: string | Record<string, any>, message?: string, context?: Record<string, any>): void {
+    const { module, msg, ctx } = this.normalizeArgs(moduleOrObj, message, context)
+    this.log('INFO', module, msg, ctx)
   }
 
   /**
    * WARN: Warning messages for potentially problematic situations
    * Use for: deprecated APIs, unusual conditions, recoverable issues
    * Example: logger.warn('RateLimiter', 'Rate limit approaching', { userId: 123 })
+   *
+   * COMPATIBILITY: Also accepts old pino format: logger.warn({ type: 'message' })
    */
-  warn(module: string, message: string, context?: Record<string, any>): void {
-    this.log('WARN', module, message, context)
+  warn(moduleOrObj: string | Record<string, any>, message?: string, context?: Record<string, any>): void {
+    const { module, msg, ctx } = this.normalizeArgs(moduleOrObj, message, context)
+    this.log('WARN', module, msg, ctx)
   }
 
   /**
    * ERROR: Error messages for failures that don't stop the application
    * Use for: API errors, validation failures, handled exceptions
    * Example: logger.error('Database', 'Query failed', error, { query: '...' })
+   *
+   * COMPATIBILITY: Also accepts old pino format: logger.error({ type: 'message', error })
    */
-  error(module: string, message: string, error?: Error, context?: Record<string, any>): void {
-    const stackTrace = error?.stack
+  error(moduleOrObj: string | Record<string, any>, message?: string | Error, error?: Error, context?: Record<string, any>): void {
+    const { module, msg, ctx } = this.normalizeArgs(moduleOrObj, typeof message === 'string' ? message : undefined, context)
+    const actualError = typeof message === 'object' ? message : error
+
+    const stackTrace = actualError?.stack
     const fullContext = {
-      ...(context || {}),
-      errorMessage: error?.message,
-      errorName: error?.name,
+      ...ctx,
+      ...(actualError ? {
+        errorMessage: actualError.message,
+        errorName: actualError.name,
+      } : {}),
     }
-    this.log('ERROR', module, message, fullContext, stackTrace)
+    this.log('ERROR', module, msg, fullContext, stackTrace)
   }
 
   /**
    * FATAL: Critical errors that may stop the application
    * Use for: uncaught exceptions, critical failures
    * Example: logger.fatal('Database', 'Connection lost', error)
+   *
+   * COMPATIBILITY: Also accepts old pino format: logger.fatal({ type: 'message', error })
    */
-  fatal(module: string, message: string, error?: Error, context?: Record<string, any>): void {
-    const stackTrace = error?.stack
+  fatal(moduleOrObj: string | Record<string, any>, message?: string | Error, error?: Error, context?: Record<string, any>): void {
+    const { module, msg, ctx } = this.normalizeArgs(moduleOrObj, typeof message === 'string' ? message : undefined, context)
+    const actualError = typeof message === 'object' ? message : error
+
+    const stackTrace = actualError?.stack
     const fullContext = {
-      ...(context || {}),
-      errorMessage: error?.message,
-      errorName: error?.name,
+      ...ctx,
+      ...(actualError ? {
+        errorMessage: actualError.message,
+        errorName: actualError.name,
+      } : {}),
     }
-    this.log('FATAL', module, message, fullContext, stackTrace)
+    this.log('FATAL', module, msg, fullContext, stackTrace)
+  }
+
+  /**
+   * COMPATIBILITY: Normalize arguments to handle both old pino format and new format
+   * Old format: logger.info({ type: 'message', userId: 123 })
+   * New format: logger.info('Module', 'message', { userId: 123 })
+   */
+  private normalizeArgs(
+    moduleOrObj: string | Record<string, any>,
+    message?: string,
+    context?: Record<string, any>
+  ): { module: string; msg: string; ctx: Record<string, any> } {
+    // If first arg is string, it's the new format
+    if (typeof moduleOrObj === 'string') {
+      return {
+        module: moduleOrObj,
+        msg: message || 'Operation',
+        ctx: context || {},
+      }
+    }
+
+    // Otherwise it's the old pino format - extract type/message and other fields
+    const obj = moduleOrObj as Record<string, any>
+    const msg = obj.type || obj.message || obj.msg || 'Operation'
+    const module = obj.module || obj.service || 'App'
+
+    // Remove type/message/module from context
+    const ctx = { ...obj }
+    delete ctx.type
+    delete ctx.message
+    delete ctx.msg
+    delete ctx.module
+    delete ctx.service
+
+    return { module, msg, ctx }
   }
 
   // ========================================================================
