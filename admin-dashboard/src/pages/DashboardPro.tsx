@@ -145,11 +145,13 @@ export function DashboardPro() {
   ]
 
   const dailyReturnsData = [
-    { time: '09:00', return: 0.2 },
-    { time: '11:00', return: 0.5 },
-    { time: '13:00', return: 0.8 },
-    { time: '15:00', return: 0.3 },
-    { time: '16:00', return: 1.2 },
+    { date: 'Mon', return: 0.8 },
+    { date: 'Tue', return: -0.3 },
+    { date: 'Wed', return: 1.2 },
+    { date: 'Thu', return: -0.5 },
+    { date: 'Fri', return: 0.6 },
+    { date: 'Sat', return: -0.2 },
+    { date: 'Sun', return: 0.9 },
   ]
 
   const strategyData = [
@@ -420,7 +422,8 @@ export function DashboardPro() {
             📊 Performance Analytics
           </Typography>
 
-          <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', md: 'repeat(4, 1fr)' }, gap: 2, mb: SPACING_PRO.md }}>
+          {/* Top Row: 3 Charts */}
+          <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', md: 'repeat(3, 1fr)' }, gap: 2, mb: SPACING_PRO.md }}>
             {/* Portfolio Value Chart */}
             <Card sx={{ backgroundColor: THEME_PRO.bgSecondary, p: SPACING_PRO.xs, borderRadius: RADIUS_PRO.lg, border: `1px solid ${THEME_PRO.border}`, boxShadow: SHADOWS_PRO.md }}>
               <Typography sx={{ fontSize: '12px', fontWeight: 700, color: THEME_PRO.textPrimary, mb: SPACING_PRO.xs, textTransform: 'uppercase', letterSpacing: '0.5px' }}>
@@ -440,22 +443,6 @@ export function DashboardPro() {
                   <Tooltip contentStyle={{ backgroundColor: THEME_PRO.bgSecondary, border: `1px solid ${THEME_PRO.border}`, color: THEME_PRO.textPrimary }}  />
                   <Area type="monotone" dataKey="value" stroke={THEME_PRO.primary} fillOpacity={1} fill="url(#colorValue)" />
                 </AreaChart>
-              </ResponsiveContainer>
-            </Card>
-
-            {/* Daily Returns Chart */}
-            <Card sx={{ backgroundColor: THEME_PRO.bgSecondary, p: SPACING_PRO.xs, borderRadius: RADIUS_PRO.lg, border: `1px solid ${THEME_PRO.border}` }}>
-              <Typography sx={{ fontSize: '10px', fontWeight: 700, color: THEME_PRO.textPrimary, mb: SPACING_PRO.xs, textTransform: 'uppercase' }}>
-                Daily Returns (%)
-              </Typography>
-              <ResponsiveContainer width="100%" height={120}>
-                <BarChart data={dailyReturnsData}>
-                  <CartesianGrid strokeDasharray="3 3" stroke={THEME_PRO.border} />
-                  <XAxis tick={{ fontSize: 9 }} dataKey="time" stroke={THEME_PRO.textSecondary} />
-                  <YAxis tick={{ fontSize: 9 }} stroke={THEME_PRO.textSecondary} />
-                  <Tooltip contentStyle={{ backgroundColor: THEME_PRO.bgSecondary, border: `1px solid ${THEME_PRO.border}`, color: THEME_PRO.textPrimary }}  />
-                  <Bar dataKey="return" fill={THEME_PRO.success} radius={[8, 8, 0, 0]} />
-                </BarChart>
               </ResponsiveContainer>
             </Card>
 
@@ -503,6 +490,28 @@ export function DashboardPro() {
                   <Tooltip contentStyle={{ backgroundColor: THEME_PRO.bgSecondary, border: `1px solid ${THEME_PRO.border}`, color: THEME_PRO.textPrimary }}  />
                   <Line type="monotone" dataKey="wins" stroke={THEME_PRO.primary} strokeWidth={2} dot={{ fill: THEME_PRO.primary, r: 5 }} />
                 </LineChart>
+              </ResponsiveContainer>
+            </Card>
+          </Box>
+
+          {/* Bottom Row: Daily Returns Full Width */}
+          <Box>
+            <Card sx={{ backgroundColor: THEME_PRO.bgSecondary, p: SPACING_PRO.xs, borderRadius: RADIUS_PRO.lg, border: `1px solid ${THEME_PRO.border}`, boxShadow: SHADOWS_PRO.md }}>
+              <Typography sx={{ fontSize: '12px', fontWeight: 700, color: THEME_PRO.textPrimary, mb: SPACING_PRO.xs, textTransform: 'uppercase', letterSpacing: '0.5px' }}>
+                Daily Returns (%)
+              </Typography>
+              <ResponsiveContainer width="100%" height={150}>
+                <BarChart data={dailyReturnsData}>
+                  <CartesianGrid strokeDasharray="3 3" stroke={THEME_PRO.border} />
+                  <XAxis tick={{ fontSize: 10 }} dataKey="date" stroke={THEME_PRO.textSecondary} />
+                  <YAxis tick={{ fontSize: 10 }} stroke={THEME_PRO.textSecondary} />
+                  <Tooltip contentStyle={{ backgroundColor: THEME_PRO.bgSecondary, border: `1px solid ${THEME_PRO.border}`, color: THEME_PRO.textPrimary }} />
+                  <Bar dataKey="return" radius={[8, 8, 0, 0]}>
+                    {dailyReturnsData.map((entry, index) => (
+                      <Cell key={`cell-${index}`} fill={entry.return >= 0 ? THEME_PRO.success : THEME_PRO.error} />
+                    ))}
+                  </Bar>
+                </BarChart>
               </ResponsiveContainer>
             </Card>
           </Box>
