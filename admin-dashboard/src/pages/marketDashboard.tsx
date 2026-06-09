@@ -5,6 +5,7 @@ import { Box, Card, Table, TableBody, TableCell, TableContainer, TableHead, Tabl
 import { Search, Info } from '@mui/icons-material'
 import { frontendLogger } from '../services/logging-client'
 import { marketAPI } from '../services/api-services'
+import { THEME_PRO, SPACING_PRO, RADIUS_PRO, SHADOWS_PRO, TRANSITIONS_PRO } from '../theme-pro'
 
 interface Stock {
   symbol: string
