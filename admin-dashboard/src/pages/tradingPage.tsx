@@ -30,8 +30,22 @@ export function tradingPage() {
   const [confirmDialogOpen, setConfirmDialogOpen] = useState(false)
   const [backendConnected, setBackendConnected] = useState(false)
 
-  // Check backend health
+  // Load orders from localStorage and check backend health
   React.useEffect(() => {
+    // Load orders from localStorage
+    const savedOrders = localStorage.getItem('executedOrders')
+    if (savedOrders) {
+      try {
+        setExecutedOrders(JSON.parse(savedOrders))
+        frontendLogger.debug('Trading', 'Loaded orders from localStorage', {
+          count: JSON.parse(savedOrders).length
+        })
+      } catch (e) {
+        frontendLogger.error('Trading', 'Failed to load orders from localStorage', e as Error)
+      }
+    }
+
+    // Check backend health
     const checkBackend = async () => {
       try {
         const response = await fetch('http://localhost:3000/health/live')
@@ -123,10 +137,18 @@ export function tradingPage() {
       price: prc,
       total: total,
       status: 'Filled',
-      timestamp: new Date().toLocaleTimeString(),
+      timestamp: new Date().toLocaleString(),
     }
 
-    setExecutedOrders([newOrder, ...executedOrders])
+    const updatedOrders = [newOrder, ...executedOrders]
+    setExecutedOrders(updatedOrders)
+
+    // Save to localStorage for persistence
+    localStorage.setItem('executedOrders', JSON.stringify(updatedOrders))
+    frontendLogger.debug('Trading', 'Order saved to localStorage', {
+      orderId: newOrder.id,
+      count: updatedOrders.length
+    })
 
     frontendLogger.info('Trading', 'Order executed successfully', {
       orderId: newOrder.id,
