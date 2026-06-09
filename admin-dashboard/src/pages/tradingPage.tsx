@@ -143,7 +143,7 @@ export function tradingPage() {
         <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', md: '1fr 1fr' }, gap: 3 }}>
           {/* Order Form */}
           <Box>
-            <Card sx={{ p: SPACING_PRO.xxl, borderRadius: RADIUS_PRO.lg, border: `1px solid ${THEME_PRO.border}`, boxShadow: SHADOWS_PRO.md }}>
+            <Card sx={{ p: SPACING_PRO.xxl, borderRadius: RADIUS_PRO.lg, border: `1px solid ${THEME_PRO.border}`, boxShadow: SHADOWS_PRO.md, backgroundColor: THEME_PRO.bgSecondary }}>
               <Typography sx={{ fontSize: '18px', fontWeight: 700, color: THEME_PRO.textPrimary, mb: SPACING_PRO.lg }}>
                 Place New Order
               </Typography>
@@ -192,9 +192,59 @@ export function tradingPage() {
                 </Button>
               </Box>
 
-              <TextField fullWidth label="Symbol" value={symbol} onChange={(e) => setSymbol(e.target.value)} margin="normal" sx={{ '& .MuiOutlinedInput-root': { backgroundColor: THEME_PRO.bgTertiary } }} />
-              <TextField fullWidth label="Quantity" value={quantity} onChange={(e) => setQuantity(e.target.value)} margin="normal" type="number" sx={{ '& .MuiOutlinedInput-root': { backgroundColor: THEME_PRO.bgTertiary } }} />
-              <TextField fullWidth label="Price" value={price} onChange={(e) => setPrice(e.target.value)} margin="normal" type="number" sx={{ '& .MuiOutlinedInput-root': { backgroundColor: THEME_PRO.bgTertiary } }} />
+              <TextField
+                fullWidth
+                label="Symbol"
+                value={symbol}
+                onChange={(e) => setSymbol(e.target.value)}
+                margin="normal"
+                sx={{
+                  '& .MuiOutlinedInput-root': {
+                    backgroundColor: THEME_PRO.bgTertiary,
+                    color: THEME_PRO.textPrimary,
+                    '& fieldset': { borderColor: THEME_PRO.border },
+                    '&:hover fieldset': { borderColor: THEME_PRO.primary },
+                  },
+                  '& .MuiInputBase-input': { color: THEME_PRO.textPrimary },
+                  '& .MuiFormLabel-root': { color: THEME_PRO.textSecondary },
+                }}
+              />
+              <TextField
+                fullWidth
+                label="Quantity"
+                value={quantity}
+                onChange={(e) => setQuantity(e.target.value)}
+                margin="normal"
+                type="number"
+                sx={{
+                  '& .MuiOutlinedInput-root': {
+                    backgroundColor: THEME_PRO.bgTertiary,
+                    color: THEME_PRO.textPrimary,
+                    '& fieldset': { borderColor: THEME_PRO.border },
+                    '&:hover fieldset': { borderColor: THEME_PRO.primary },
+                  },
+                  '& .MuiInputBase-input': { color: THEME_PRO.textPrimary },
+                  '& .MuiFormLabel-root': { color: THEME_PRO.textSecondary },
+                }}
+              />
+              <TextField
+                fullWidth
+                label="Price"
+                value={price}
+                onChange={(e) => setPrice(e.target.value)}
+                margin="normal"
+                type="number"
+                sx={{
+                  '& .MuiOutlinedInput-root': {
+                    backgroundColor: THEME_PRO.bgTertiary,
+                    color: THEME_PRO.textPrimary,
+                    '& fieldset': { borderColor: THEME_PRO.border },
+                    '&:hover fieldset': { borderColor: THEME_PRO.primary },
+                  },
+                  '& .MuiInputBase-input': { color: THEME_PRO.textPrimary },
+                  '& .MuiFormLabel-root': { color: THEME_PRO.textSecondary },
+                }}
+              />
 
               <Box sx={{ mt: SPACING_PRO.lg, p: SPACING_PRO.lg, backgroundColor: THEME_PRO.bgTertiary, borderRadius: RADIUS_PRO.md }}>
                 <Typography sx={{ fontSize: '12px', color: THEME_PRO.textSecondary, mb: SPACING_PRO.sm }}>
@@ -228,7 +278,7 @@ export function tradingPage() {
 
           {/* Market Watch */}
           <Box>
-            <Card sx={{ p: SPACING_PRO.xxl, borderRadius: RADIUS_PRO.lg, border: `1px solid ${THEME_PRO.border}`, boxShadow: SHADOWS_PRO.md }}>
+            <Card sx={{ p: SPACING_PRO.xxl, borderRadius: RADIUS_PRO.lg, border: `1px solid ${THEME_PRO.border}`, boxShadow: SHADOWS_PRO.md, backgroundColor: THEME_PRO.bgSecondary }}>
               <Typography sx={{ fontSize: '18px', fontWeight: 700, color: THEME_PRO.textPrimary, mb: SPACING_PRO.lg }}>
                 Market Watch
               </Typography>
@@ -256,8 +306,8 @@ export function tradingPage() {
             <Typography sx={{ fontSize: '20px', fontWeight: 700, color: THEME_PRO.textPrimary, mb: SPACING_PRO.lg }}>
               📋 Recent Orders
             </Typography>
-            <Card sx={{ borderRadius: RADIUS_PRO.lg, border: `1px solid ${THEME_PRO.border}`, overflow: 'hidden' }}>
-              <TableContainer>
+            <Card sx={{ borderRadius: RADIUS_PRO.lg, border: `1px solid ${THEME_PRO.border}`, overflow: 'hidden', backgroundColor: THEME_PRO.bgSecondary }}>
+              <TableContainer sx={{ backgroundColor: THEME_PRO.bgSecondary }}>
                 <Table>
                   <TableHead sx={{ backgroundColor: THEME_PRO.bgTertiary }}>
                     <TableRow>
