@@ -36,9 +36,15 @@ async function main() {
       process.exit(0)
     })
   } catch (error) {
+    // Log full error with stack trace for debugging
+    console.error('❌ STARTUP FAILED - Full Error Details:')
+    console.error(error)
+    console.error('')
+
     logger.error({
       type: 'startup_failed',
       error: error instanceof Error ? error.message : String(error),
+      stack: error instanceof Error ? error.stack : undefined,
     })
     process.exit(1)
   }

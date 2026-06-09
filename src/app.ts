@@ -44,8 +44,33 @@ export function createApp() {
     allowedHeaders: ['Content-Type', 'Authorization', 'X-User-ID'],
   }))
 
-  // Logging - Use compatible logger for pinoHttp middleware
-  app.use(pinoHttp({ logger } as any))
+  // Logging middleware
+  // Note: pinoHttp requires strict pino logger interface
+  // Since we have our own comprehensive logging (src/services/logger.ts),
+  // we use custom HTTP request logging instead
+  // Uncomment below if you want to use pinoHttp with a real pino logger
+  // app.use(pinoHttp({ logger } as any))
+
+  // Custom HTTP request logging middleware
+  app.use((req, res, next) => {
+    const start = Date.now()
+    res.on('finish', () => {
+      const duration = Date.now() - start
+      const isError = res.statusCode >= 400
+      const logFn = isError ? 'warn' : 'info'
+      logger[logFn as 'warn' | 'info'](
+        'HTTP',
+        `${req.method} ${req.path}`,
+        {
+          status: res.statusCode,
+          duration: `${duration}ms`,
+          ip: req.ip,
+          userAgent: req.get('user-agent'),
+        }
+      )
+    })
+    next()
+  })
 
   // Body parsing
   app.use(express.json())
