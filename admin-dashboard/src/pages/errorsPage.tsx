@@ -18,7 +18,7 @@ import {
   CircularProgress,
 } from '@mui/material'
 import { ExpandMore, Close } from '@mui/icons-material'
-import { THEME_PRO, SPACING_PRO, RADIUS_PRO } from '../theme-pro'
+import { THEME_PRO, SPACING_PRO, RADIUS_PRO, SHADOWS_PRO, TRANSITIONS_PRO } from '../theme-pro'
 
 interface ErrorLog {
   timestamp: string

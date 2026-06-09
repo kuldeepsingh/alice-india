@@ -1,7 +1,7 @@
 import React from 'react'
 import { LayoutPro } from '../components/LayoutPro'
 import { Box, Card, Typography, Chip } from '@mui/material'
-import { THEME_PRO, SPACING_PRO, RADIUS_PRO } from '../theme-pro'
+import { THEME_PRO, SPACING_PRO, RADIUS_PRO, SHADOWS_PRO, TRANSITIONS_PRO } from '../theme-pro'
 
 const sessions = [
   { id: 'DBG001', timestamp: '2024-06-08 14:30', endpoint: '/api/orders', status: 'success', responseTime: '145ms' },

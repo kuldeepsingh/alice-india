@@ -13,7 +13,7 @@ import {
   InputLabel,
 } from '@mui/material'
 import { Refresh } from '@mui/icons-material'
-import { THEME_PRO, SPACING_PRO, RADIUS_PRO } from '../theme-pro'
+import { THEME_PRO, SPACING_PRO, RADIUS_PRO, SHADOWS_PRO, TRANSITIONS_PRO } from '../theme-pro'
 
 type LogLevel = 'ALL' | 'DEBUG' | 'INFO' | 'WARN' | 'ERROR'
 

@@ -19,7 +19,7 @@ import {
   Alert,
 } from "@mui/material";
 import { CloudDone, CloudOff, Link as LinkIcon } from "@mui/icons-material";
-import { THEME_PRO, SPACING_PRO, RADIUS_PRO } from "../theme-pro";
+import { THEME_PRO, SPACING_PRO, RADIUS_PRO, SHADOWS_PRO, TRANSITIONS_PRO } from "../theme-pro";
 import { accountsAPI, zerodhaAPI } from "../services/api-services";
 
 export function AccountsPage() {

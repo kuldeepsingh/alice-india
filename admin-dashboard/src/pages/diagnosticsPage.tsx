@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef } from 'react'
 import { LayoutPro } from '../components/LayoutPro'
 import { Box, Card, Typography, Button, Chip, LinearProgress, Alert, Paper } from '@mui/material'
 import { PlayArrow, CheckCircle, ErrorOutlined, Schedule, Stop, Code } from '@mui/icons-material'
-import { THEME_PRO, SPACING_PRO, RADIUS_PRO } from '../theme-pro'
+import { THEME_PRO, SPACING_PRO, RADIUS_PRO, SHADOWS_PRO, TRANSITIONS_PRO } from '../theme-pro'
 import { frontendLogger } from '../services/logging-client'
 import { logsAPI, diagnosticsAPI } from '../services/api-services'
 

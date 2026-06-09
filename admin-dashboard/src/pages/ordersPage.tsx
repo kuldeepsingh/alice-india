@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react'
 import { LayoutPro } from '../components/LayoutPro'
 import { Box, Card, Typography, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Chip, CircularProgress, Alert } from '@mui/material'
-import { THEME_PRO, SPACING_PRO, RADIUS_PRO } from '../theme-pro'
+import { THEME_PRO, SPACING_PRO, RADIUS_PRO, SHADOWS_PRO, TRANSITIONS_PRO } from '../theme-pro'
 import { ordersAPI } from '../services/api-services'
 
 export function ordersPage() {
@@ -67,7 +67,7 @@ export function ordersPage() {
 
   return (
     <LayoutPro>
-      <Box sx={{ backgroundColor: THEME_PRO.bgSecondary, p: SPACING_PRO.xxxl, backgroundColor: THEME_PRO.bgPrimary, minHeight: '100vh' }}>
+      <Box sx={{ p: SPACING_PRO.xxxl, backgroundColor: THEME_PRO.bgPrimary, minHeight: '100vh' }}>
         <Box sx={{ mb: SPACING_PRO.xxxl }}>
           <Typography variant="h4" sx={{ fontSize: '32px', fontWeight: 700, color: THEME_PRO.textPrimary, mb: SPACING_PRO.md }}>
             📊 Orders
@@ -82,33 +82,33 @@ export function ordersPage() {
         )}
 
         {loading ? (
-          <Box sx={{ backgroundColor: THEME_PRO.bgSecondary, display: 'flex', justifyContent: 'center', p: SPACING_PRO.xxxl }}>
+          <Box sx={{ display: 'flex', justifyContent: 'center', p: SPACING_PRO.xxxl }}>
             <CircularProgress sx={{ color: THEME_PRO.primary }} />
           </Box>
         ) : orders.length === 0 ? (
-          <Card sx={{ backgroundColor: THEME_PRO.bgSecondary, p: SPACING_PRO.xxxl, borderRadius: RADIUS_PRO.lg, backgroundColor: THEME_PRO.bgSecondary, border: `1px solid ${THEME_PRO.border}` }}>
+          <Card sx={{ backgroundColor: THEME_PRO.bgSecondary, p: SPACING_PRO.xxxl, borderRadius: RADIUS_PRO.lg, border: `1px solid ${THEME_PRO.border}`, boxShadow: SHADOWS_PRO.md }}>
             <Box sx={{ textAlign: 'center' }}>
               <Typography sx={{ color: THEME_PRO.textSecondary }}>No orders found</Typography>
             </Box>
           </Card>
         ) : (
-          <Card sx={{ backgroundColor: THEME_PRO.bgSecondary, borderRadius: RADIUS_PRO.lg, border: `1px solid ${THEME_PRO.border}`, overflow: 'hidden', backgroundColor: THEME_PRO.bgSecondary }}>
+          <Card sx={{ backgroundColor: THEME_PRO.bgSecondary, borderRadius: RADIUS_PRO.lg, border: `1px solid ${THEME_PRO.border}`, overflow: 'hidden', boxShadow: SHADOWS_PRO.md, transition: TRANSITIONS_PRO.normal, '&:hover': { boxShadow: SHADOWS_PRO.lg } }}>
             <TableContainer sx={{ backgroundColor: THEME_PRO.bgSecondary }}>
               <Table>
-                <TableHead sx={{ backgroundColor: THEME_PRO.bgTertiary }}>
+                <TableHead sx={{ backgroundColor: THEME_PRO.bgTertiary, height: '48px' }}>
                   <TableRow>
-                    <TableCell sx={{ fontWeight: 700, color: THEME_PRO.textPrimary }}>Order ID</TableCell>
-                    <TableCell sx={{ fontWeight: 700, color: THEME_PRO.textPrimary }}>Symbol</TableCell>
-                    <TableCell sx={{ fontWeight: 700, color: THEME_PRO.textPrimary }}>Qty</TableCell>
-                    <TableCell sx={{ fontWeight: 700, color: THEME_PRO.textPrimary }}>Price</TableCell>
-                    <TableCell sx={{ fontWeight: 700, color: THEME_PRO.textPrimary }}>Type</TableCell>
-                    <TableCell sx={{ fontWeight: 700, color: THEME_PRO.textPrimary }}>Status</TableCell>
-                    <TableCell sx={{ fontWeight: 700, color: THEME_PRO.textPrimary }}>Date & Time</TableCell>
+                    <TableCell sx={{ fontWeight: 700, color: THEME_PRO.textPrimary, fontSize: '13px', textTransform: 'uppercase', letterSpacing: '0.5px' }}>Order ID</TableCell>
+                    <TableCell sx={{ fontWeight: 700, color: THEME_PRO.textPrimary, fontSize: '13px', textTransform: 'uppercase', letterSpacing: '0.5px' }}>Symbol</TableCell>
+                    <TableCell sx={{ fontWeight: 700, color: THEME_PRO.textPrimary, fontSize: '13px', textTransform: 'uppercase', letterSpacing: '0.5px' }}>Qty</TableCell>
+                    <TableCell sx={{ fontWeight: 700, color: THEME_PRO.textPrimary, fontSize: '13px', textTransform: 'uppercase', letterSpacing: '0.5px' }}>Price</TableCell>
+                    <TableCell sx={{ fontWeight: 700, color: THEME_PRO.textPrimary, fontSize: '13px', textTransform: 'uppercase', letterSpacing: '0.5px' }}>Type</TableCell>
+                    <TableCell sx={{ fontWeight: 700, color: THEME_PRO.textPrimary, fontSize: '13px', textTransform: 'uppercase', letterSpacing: '0.5px' }}>Status</TableCell>
+                    <TableCell sx={{ fontWeight: 700, color: THEME_PRO.textPrimary, fontSize: '13px', textTransform: 'uppercase', letterSpacing: '0.5px' }}>Date & Time</TableCell>
                   </TableRow>
                 </TableHead>
                 <TableBody>
                   {orders.map((order) => (
-                    <TableRow key={order.id} sx={{ borderBottom: `1px solid ${THEME_PRO.border}`, backgroundColor: THEME_PRO.bgSecondary }}>
+                    <TableRow key={order.id} sx={{ borderBottom: `1px solid ${THEME_PRO.border}`, backgroundColor: THEME_PRO.bgSecondary, '&:hover': { backgroundColor: THEME_PRO.bgTertiary }, height: '56px' }}>
                       <TableCell sx={{ color: THEME_PRO.primary, fontWeight: 700 }}>{order.id}</TableCell>
                       <TableCell sx={{ color: THEME_PRO.textPrimary, fontWeight: 700 }}>{order.symbol}</TableCell>
                       <TableCell sx={{ color: THEME_PRO.textSecondary }}>{order.quantity}</TableCell>
