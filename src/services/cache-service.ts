@@ -187,6 +187,25 @@ class CacheService {
   static async invalidatePattern(pattern: string): Promise<void> {
     return cacheService.invalidatePattern(pattern)
   }
+
+  /**
+   * Static wrappers for invalidation methods
+   */
+  static async invalidateIncidents(): Promise<void> {
+    return cacheService.invalidateIncidents()
+  }
+
+  static async invalidateNotifications(userId: string): Promise<void> {
+    return cacheService.invalidateNotifications(userId)
+  }
+
+  static async invalidateTeamSchedule(): Promise<void> {
+    return cacheService.invalidateTeamSchedule()
+  }
+
+  static async invalidateStats(): Promise<void> {
+    return cacheService.invalidateStats()
+  }
 }
 
 export { CacheService }; export const cacheService = new CacheService()

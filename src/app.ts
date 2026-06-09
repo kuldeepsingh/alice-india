@@ -2,7 +2,7 @@ import express from 'express'
 import helmet from 'helmet'
 import cors from 'cors'
 import pinoHttp from 'pino-http'
-import { logger } from './services/logger.ts'
+import logger from './services/logger.ts'
 import authRouter from './routes/auth.ts'
 import accountsRouter from './routes/accounts.ts'
 import ordersRouter from './routes/orders.ts'
@@ -44,8 +44,8 @@ export function createApp() {
     allowedHeaders: ['Content-Type', 'Authorization', 'X-User-ID'],
   }))
 
-  // Logging
-  app.use(pinoHttp({ logger }))
+  // Logging - Use compatible logger for pinoHttp middleware
+  app.use(pinoHttp({ logger } as any))
 
   // Body parsing
   app.use(express.json())
