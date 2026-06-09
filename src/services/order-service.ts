@@ -307,4 +307,32 @@ export class OrderService {
       // Don't fail the order if notification fails
     }
   }
+
+  /**
+   * Get user orders from database
+   */
+  async getUserOrders(userId: string, filters?: any): Promise<any[]> {
+    try {
+      let sql = 'SELECT * FROM trading_orders WHERE user_id = $1'
+      const params: any[] = [userId]
+
+      // Add optional filters
+      if (filters?.status) {
+        sql += ` AND status = $${params.length + 1}`
+        params.push(filters.status)
+      }
+
+      sql += ' ORDER BY created_at DESC LIMIT 100'
+
+      const result = await query(sql, params)
+      return result.rows || []
+    } catch (error) {
+      logger.error({
+        type: 'get_user_orders_error',
+        userId,
+        error: error instanceof Error ? error.message : String(error),
+      })
+      throw error
+    }
+  }
 }

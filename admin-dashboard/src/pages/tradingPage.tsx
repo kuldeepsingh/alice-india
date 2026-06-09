@@ -5,6 +5,7 @@ import { Box, Card, Typography, TextField, Button, Chip, Alert, Table, TableBody
 import { SendToMobile, CheckCircle } from '@mui/icons-material'
 import { TradingBot } from '../components/TradingBot'
 import { frontendLogger } from '../services/logging-client'
+import { ordersAPI } from '../services/api-services'
 import { THEME_PRO, SPACING_PRO, RADIUS_PRO, SHADOWS_PRO } from '../theme-pro'
 
 interface ExecutedOrder {
@@ -116,7 +117,7 @@ export function tradingPage() {
     setConfirmDialogOpen(true)
   }
 
-  const handleConfirmOrder = () => {
+  const handleConfirmOrder = async () => {
     const qty = parseFloat(quantity)
     const prc = parseFloat(price)
     const total = qty * prc
@@ -149,6 +150,28 @@ export function tradingPage() {
       orderId: newOrder.id,
       count: updatedOrders.length
     })
+
+    // Also save to backend so it appears in Orders page
+    try {
+      await ordersAPI.create({
+        symbol: newOrder.symbol,
+        side: newOrder.type,
+        quantity: newOrder.quantity,
+        price: newOrder.price,
+        orderType: 'MARKET',
+        status: newOrder.status,
+      })
+      frontendLogger.info('Trading', 'Order saved to backend', {
+        orderId: newOrder.id,
+        symbol: newOrder.symbol,
+      })
+    } catch (err) {
+      frontendLogger.warn('Trading', 'Failed to save order to backend', {
+        orderId: newOrder.id,
+        error: err instanceof Error ? err.message : String(err),
+      })
+      // Continue anyway - order is saved locally
+    }
 
     frontendLogger.info('Trading', 'Order executed successfully', {
       orderId: newOrder.id,

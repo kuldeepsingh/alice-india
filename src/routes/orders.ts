@@ -367,7 +367,7 @@ router.get('/', async (req: AuthRequest, res) => {
       userId: req.user?.userId,
       errorMessage,
       durationMs: duration,
-      ipAddress,
+      ipAddress: req.ip,
       timestamp: new Date().toISOString(),
     })
 

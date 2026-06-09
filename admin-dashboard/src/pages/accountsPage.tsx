@@ -18,7 +18,7 @@ import {
   DialogContent,
   Alert,
 } from "@mui/material";
-import { CloudDone, CloudOff, LinkIcon } from "@mui/icons-material";
+import { CloudDone, CloudOff, Link as LinkIcon } from "@mui/icons-material";
 import { THEME_PRO, SPACING_PRO, RADIUS_PRO } from "../theme-pro";
 import { accountsAPI, zerodhaAPI } from "../services/api-services";
 
