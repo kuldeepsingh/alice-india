@@ -515,7 +515,15 @@ export function DashboardPro() {
                   <CartesianGrid strokeDasharray="3 3" stroke={THEME_PRO.border} />
                   <XAxis tick={{ fontSize: 10 }} dataKey="date" stroke={THEME_PRO.textSecondary} interval={4} />
                   <YAxis tick={{ fontSize: 10 }} stroke={THEME_PRO.textSecondary} />
-                  <Tooltip contentStyle={{ backgroundColor: THEME_PRO.bgSecondary, border: `1px solid ${THEME_PRO.border}`, color: THEME_PRO.textPrimary }} />
+                  <Tooltip
+                    contentStyle={{
+                      backgroundColor: THEME_PRO.bgSecondary,
+                      border: `2px solid ${THEME_PRO.primary}`,
+                      color: '#ffffff',
+                      fontSize: '12px',
+                      fontWeight: 'bold'
+                    }}
+                  />
                   <Bar dataKey="return" radius={[8, 8, 0, 0]}>
                     {dailyReturnsData.map((entry, index) => (
                       <Cell key={`cell-${index}`} fill={entry.return >= 0 ? THEME_PRO.success : THEME_PRO.error} />
