@@ -362,20 +362,25 @@ export function DashboardPro() {
             <Card
               sx={{
                 backgroundColor: THEME_PRO.bgSecondary,
-                p: SPACING_PRO.xxl,
+                p: SPACING_PRO.xs,
                 borderRadius: RADIUS_PRO.lg,
                 border: `1px solid ${THEME_PRO.border}`,
                 boxShadow: SHADOWS_PRO.md,
+                display: 'flex',
+                flexDirection: 'column',
+                justifyContent: 'space-between'
               }}
             >
-              <Typography
-                sx={{ fontSize: '14px', fontWeight: 600, color: THEME_PRO.primary, opacity: 0.9, mb: SPACING_PRO.xs, textTransform: 'uppercase', letterSpacing: '0.5px' }}
-              >
-                Account Balance
-              </Typography>
-              <Typography sx={{ fontSize: '32px', fontWeight: 700, color: THEME_PRO.textPrimary, mb: SPACING_PRO.lg }}>
-                {showValues ? formatCurrency(accountBalance, currency) : '••••••'}
-              </Typography>
+              <Box>
+                <Typography
+                  sx={{ fontSize: '10px', fontWeight: 600, color: THEME_PRO.primary, opacity: 0.9, mb: SPACING_PRO.xs, textTransform: 'uppercase', letterSpacing: '0.5px' }}
+                >
+                  Account Balance
+                </Typography>
+                <Typography sx={{ fontSize: '18px', fontWeight: 700, color: THEME_PRO.textPrimary, mb: SPACING_PRO.xs }}>
+                  {showValues ? formatCurrency(accountBalance, currency) : '••••••'}
+                </Typography>
+              </Box>
               <Box sx={{ display: 'flex', gap: SPACING_PRO.sm }}>
                 <Button
                   onClick={() => setDepositOpen(true)}
