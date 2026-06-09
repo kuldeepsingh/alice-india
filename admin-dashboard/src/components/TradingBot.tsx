@@ -167,35 +167,6 @@ export const TradingBot = () => {
 
   return (
     <Box sx={{ display: 'flex', flexDirection: 'column', gap: SPACING_PRO.lg }}>
-      {/* Status Bar */}
-      <Card
-        sx={{
-          p: SPACING_PRO.lg,
-          borderRadius: RADIUS_PRO.lg,
-          border: `1px solid ${THEME_PRO.border}`,
-          boxShadow: SHADOWS_PRO.sm,
-          backgroundColor: backendConnected ? THEME_PRO.successLight : THEME_PRO.errorLight,
-        }}
-      >
-        <Box sx={{ display: 'flex', alignItems: 'center', gap: SPACING_PRO.md }}>
-          {backendConnected ? (
-            <CheckCircle sx={{ color: THEME_PRO.success, fontSize: '20px' }} />
-          ) : (
-            <HighlightOff sx={{ color: THEME_PRO.error, fontSize: '20px' }} />
-          )}
-          <Box>
-            <Typography sx={{ fontWeight: 600, color: backendConnected ? THEME_PRO.success : THEME_PRO.error }}>
-              Backend Status: {backendStatus}
-            </Typography>
-            <Typography sx={{ fontSize: '12px', color: backendConnected ? THEME_PRO.success : THEME_PRO.error }}>
-              {backendConnected
-                ? 'All systems connected and ready'
-                : 'Unable to connect to backend. Make sure the backend server is running on port 3000.'}
-            </Typography>
-          </Box>
-        </Box>
-      </Card>
-
       {/* Trading Interface */}
       <Box
         sx={{
@@ -370,6 +341,9 @@ export const TradingBot = () => {
                 textTransform: 'none',
                 fontWeight: 600,
                 py: SPACING_PRO.md,
+                '&:hover': {
+                  backgroundColor: keyStatus.claude ? THEME_PRO.primaryDark : THEME_PRO.textTertiary,
+                }
               }}
             >
               {loading ? 'Analyzing...' : 'Analyze with Claude'}
